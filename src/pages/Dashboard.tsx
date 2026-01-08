@@ -5,24 +5,27 @@ import { FlightCard } from '@/components/flights/FlightCard';
 import { QuotationStatusBadge } from '@/components/quotations/QuotationStatusBadge';
 import { ResourceTimeline } from '@/components/dashboard/ResourceTimeline';
 import { useFlights } from '@/contexts/FlightsContext';
-import { mockQuotations, getClientById } from '@/data/mockData';
+import { useClients } from '@/contexts/ClientsContext';
+import { useQuotations } from '@/contexts/QuotationsContext';
 import { Plane, PlaneLanding, FileText, Users, ArrowRight, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
 export default function Dashboard() {
   const { flights } = useFlights();
+  const { clients, getClientById } = useClients();
+  const { quotations } = useQuotations();
   
   // Get today's date in YYYY-MM-DD format
   const today = new Date().toISOString().split('T')[0];
   
   const todayFlights = flights.filter(f => f.arrivalDate === today || f.departureDate === today);
   const upcomingFlights = flights.filter(f => f.status === 'scheduled' && f.arrivalDate >= today).slice(0, 3);
-  const recentQuotations = mockQuotations.slice(0, 3);
+  const recentQuotations = quotations.slice(0, 3);
   
   // Calculate dynamic stats
-  const activeClients = 3; // This would come from clients context in the future
-  const openQuotations = mockQuotations.filter(q => q.status === 'created' || q.status === 'sent').length;
+  const activeClients = clients.filter(c => c.status === 'active').length;
+  const openQuotations = quotations.filter(q => q.status === 'created' || q.status === 'sent').length;
 
   return (
     <MainLayout>
