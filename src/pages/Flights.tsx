@@ -1,82 +1,73 @@
-import { useState } from "react";
-import { MainLayout } from "@/components/layout/MainLayout";
-import { PageHeader } from "@/components/layout/PageHeader";
-import { FlightCard } from "@/components/flights/FlightCard";
-import { FlightCalendar } from "@/components/flights/FlightCalendar";
-import { FlightStatusBadge } from "@/components/flights/FlightStatusBadge";
-import { useFlights } from "@/contexts/FlightsContext";
-import { Flight, FlightType, FlightStatus, flightTypeLabels, flightStatusLabels } from "@/types/aviation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, Calendar, List, Plane, ArrowRight, Clock, ArrowUpDown, Pencil, Trash2 } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { cn } from "@/lib/utils";
+import { useState } from 'react';
+import { MainLayout } from '@/components/layout/MainLayout';
+import { PageHeader } from '@/components/layout/PageHeader';
+import { FlightPortalList } from '@/components/flights/FlightPortalList';
+import { FlightCalendar } from '@/components/flights/FlightCalendar';
+import { FlightStatusBadge } from '@/components/flights/FlightStatusBadge';
+import { useFlights } from '@/contexts/FlightsContext';
+import { Flight, FlightType, FlightStatus, flightTypeLabels, flightStatusLabels } from '@/types/aviation';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Plus, Search, Calendar, List, Plane, ArrowRight, Clock, ArrowUpDown, Pencil, Trash2 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { cn } from '@/lib/utils';
 
-type SortOrder = "newest" | "oldest";
+type SortOrder = 'newest' | 'oldest';
 
 export default function Flights() {
   const { flights, addFlight, updateFlight, deleteFlight } = useFlights();
-  const [activeTab, setActiveTab] = useState<string>("portal");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState<FlightStatus | "all">("all");
-  const [filterType, setFilterType] = useState<FlightType | "all">("all");
-  const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
+  const [activeTab, setActiveTab] = useState<string>('portal');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState<FlightStatus | 'all'>('all');
+  const [filterType, setFilterType] = useState<FlightType | 'all'>('all');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
   const [isNewFlightOpen, setIsNewFlightOpen] = useState(false);
   const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editFormData, setEditFormData] = useState({
-    aircraftPrefix: "",
-    aircraftModel: "",
-    flightType: "G" as FlightType,
-    origin: "",
-    destination: "",
-    arrivalDate: "",
-    arrivalTime: "",
-    departureDate: "",
-    departureTime: "",
-    status: "scheduled" as FlightStatus,
-    observations: "",
+    aircraftPrefix: '',
+    aircraftModel: '',
+    flightType: 'G' as FlightType,
+    origin: '',
+    destination: '',
+    arrivalDate: '',
+    arrivalTime: '',
+    departureDate: '',
+    departureTime: '',
+    status: 'scheduled' as FlightStatus,
+    observations: '',
   });
 
   // Form state for new flight
   const [formData, setFormData] = useState({
-    aircraftPrefix: "",
-    aircraftModel: "",
-    flightType: "G" as FlightType,
-    origin: "",
-    destination: "",
-    arrivalDate: "",
-    arrivalTime: "",
-    departureDate: "",
-    departureTime: "",
-    status: "scheduled" as FlightStatus,
-    observations: "",
+    aircraftPrefix: '',
+    aircraftModel: '',
+    flightType: 'G' as FlightType,
+    origin: '',
+    destination: '',
+    arrivalDate: '',
+    arrivalTime: '',
+    departureDate: '',
+    departureTime: '',
+    status: 'scheduled' as FlightStatus,
+    observations: '',
   });
 
-  const filteredFlights = flights.filter((flight) => {
-    const matchesSearch =
+  const filteredFlights = flights.filter(flight => {
+    const matchesSearch = 
       flight.aircraftPrefix.toLowerCase().includes(searchTerm.toLowerCase()) ||
       flight.origin.toLowerCase().includes(searchTerm.toLowerCase()) ||
       flight.destination.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesStatus = filterStatus === "all" || flight.status === filterStatus;
-    const matchesType = filterType === "all" || flight.flightType === filterType;
-
+    
+    const matchesStatus = filterStatus === 'all' || flight.status === filterStatus;
+    const matchesType = filterType === 'all' || flight.flightType === filterType;
+    
     return matchesSearch && matchesStatus && matchesType;
   });
 
@@ -84,37 +75,37 @@ export default function Flights() {
   const sortedFlights = [...filteredFlights].sort((a, b) => {
     const dateA = new Date(`${a.arrivalDate}T${a.arrivalTime}`);
     const dateB = new Date(`${b.arrivalDate}T${b.arrivalTime}`);
-    return sortOrder === "newest" ? dateB.getTime() - dateA.getTime() : dateA.getTime() - dateB.getTime();
+    return sortOrder === 'newest' ? dateB.getTime() - dateA.getTime() : dateA.getTime() - dateB.getTime();
   });
 
   const handleCreateFlight = () => {
     const newFlight: Flight = {
       id: String(Date.now()),
       ...formData,
-      companyId: "1",
+      companyId: '1',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-
+    
     addFlight(newFlight);
     setIsNewFlightOpen(false);
     setFormData({
-      aircraftPrefix: "",
-      aircraftModel: "",
-      flightType: "G",
-      origin: "",
-      destination: "",
-      arrivalDate: "",
-      arrivalTime: "",
-      departureDate: "",
-      departureTime: "",
-      status: "scheduled",
-      observations: "",
+      aircraftPrefix: '',
+      aircraftModel: '',
+      flightType: 'G',
+      origin: '',
+      destination: '',
+      arrivalDate: '',
+      arrivalTime: '',
+      departureDate: '',
+      departureTime: '',
+      status: 'scheduled',
+      observations: '',
     });
   };
 
   const toggleSortOrder = () => {
-    setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"));
+    setSortOrder(prev => prev === 'newest' ? 'oldest' : 'newest');
   };
 
   const handleEditClick = () => {
@@ -130,7 +121,7 @@ export default function Flights() {
         departureDate: selectedFlight.departureDate,
         departureTime: selectedFlight.departureTime,
         status: selectedFlight.status,
-        observations: selectedFlight.observations || "",
+        observations: selectedFlight.observations || '',
       });
       setIsEditMode(true);
     }
@@ -162,18 +153,21 @@ export default function Flights() {
 
   // Format date for display
   const formatFlightDate = (dateStr: string) => {
-    const date = new Date(dateStr + "T00:00:00");
-    return date.toLocaleDateString("pt-BR", {
-      weekday: "short",
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
+    const date = new Date(dateStr + 'T00:00:00');
+    return date.toLocaleDateString('pt-BR', {
+      weekday: 'short',
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
     });
   };
 
   return (
     <MainLayout>
-      <PageHeader title="Portal dos Voos" description="Gerencie todas as operações aéreas">
+      <PageHeader 
+        title="Portal dos Voos" 
+        description="Gerencie todas as operações aéreas"
+      >
         <Dialog open={isNewFlightOpen} onOpenChange={setIsNewFlightOpen}>
           <DialogTrigger asChild>
             <Button className="gap-2">
@@ -188,7 +182,7 @@ export default function Flights() {
                 Cadastrar Novo Voo
               </DialogTitle>
             </DialogHeader>
-
+            
             <div className="grid gap-4 py-4">
               {/* Aircraft Info */}
               <div className="grid grid-cols-2 gap-4">
@@ -198,7 +192,7 @@ export default function Flights() {
                     id="prefix"
                     placeholder="PR-ABC"
                     value={formData.aircraftPrefix}
-                    onChange={(e) => setFormData({ ...formData, aircraftPrefix: e.target.value.toUpperCase() })}
+                    onChange={(e) => setFormData({...formData, aircraftPrefix: e.target.value.toUpperCase()})}
                     className="font-mono uppercase"
                   />
                 </div>
@@ -208,7 +202,7 @@ export default function Flights() {
                     id="model"
                     placeholder="Embraer Phenom 300"
                     value={formData.aircraftModel}
-                    onChange={(e) => setFormData({ ...formData, aircraftModel: e.target.value })}
+                    onChange={(e) => setFormData({...formData, aircraftModel: e.target.value})}
                   />
                 </div>
               </div>
@@ -216,9 +210,9 @@ export default function Flights() {
               {/* Flight Type */}
               <div className="space-y-2">
                 <Label>Tipo de Voo *</Label>
-                <Select
-                  value={formData.flightType}
-                  onValueChange={(v) => setFormData({ ...formData, flightType: v as FlightType })}
+                <Select 
+                  value={formData.flightType} 
+                  onValueChange={(v) => setFormData({...formData, flightType: v as FlightType})}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -242,7 +236,7 @@ export default function Flights() {
                     placeholder="SBGR"
                     maxLength={4}
                     value={formData.origin}
-                    onChange={(e) => setFormData({ ...formData, origin: e.target.value.toUpperCase() })}
+                    onChange={(e) => setFormData({...formData, origin: e.target.value.toUpperCase()})}
                     className="font-mono uppercase"
                   />
                 </div>
@@ -253,7 +247,7 @@ export default function Flights() {
                     placeholder="SBRJ"
                     maxLength={4}
                     value={formData.destination}
-                    onChange={(e) => setFormData({ ...formData, destination: e.target.value.toUpperCase() })}
+                    onChange={(e) => setFormData({...formData, destination: e.target.value.toUpperCase()})}
                     className="font-mono uppercase"
                   />
                 </div>
@@ -267,7 +261,7 @@ export default function Flights() {
                     id="arrivalDate"
                     type="date"
                     value={formData.arrivalDate}
-                    onChange={(e) => setFormData({ ...formData, arrivalDate: e.target.value })}
+                    onChange={(e) => setFormData({...formData, arrivalDate: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">
@@ -276,7 +270,7 @@ export default function Flights() {
                     id="arrivalTime"
                     type="time"
                     value={formData.arrivalTime}
-                    onChange={(e) => setFormData({ ...formData, arrivalTime: e.target.value })}
+                    onChange={(e) => setFormData({...formData, arrivalTime: e.target.value})}
                   />
                 </div>
               </div>
@@ -289,7 +283,7 @@ export default function Flights() {
                     id="departureDate"
                     type="date"
                     value={formData.departureDate}
-                    onChange={(e) => setFormData({ ...formData, departureDate: e.target.value })}
+                    onChange={(e) => setFormData({...formData, departureDate: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">
@@ -298,7 +292,7 @@ export default function Flights() {
                     id="departureTime"
                     type="time"
                     value={formData.departureTime}
-                    onChange={(e) => setFormData({ ...formData, departureTime: e.target.value })}
+                    onChange={(e) => setFormData({...formData, departureTime: e.target.value})}
                   />
                 </div>
               </div>
@@ -306,18 +300,16 @@ export default function Flights() {
               {/* Status */}
               <div className="space-y-2">
                 <Label>Status *</Label>
-                <Select
-                  value={formData.status}
-                  onValueChange={(v) => setFormData({ ...formData, status: v as FlightStatus })}
+                <Select 
+                  value={formData.status} 
+                  onValueChange={(v) => setFormData({...formData, status: v as FlightStatus})}
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {Object.entries(flightStatusLabels).map(([key, label]) => (
-                      <SelectItem key={key} value={key}>
-                        {label}
-                      </SelectItem>
+                      <SelectItem key={key} value={key}>{label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -330,7 +322,7 @@ export default function Flights() {
                   id="observations"
                   placeholder="Informações adicionais sobre o voo..."
                   value={formData.observations}
-                  onChange={(e) => setFormData({ ...formData, observations: e.target.value })}
+                  onChange={(e) => setFormData({...formData, observations: e.target.value})}
                   rows={3}
                 />
               </div>
@@ -340,7 +332,9 @@ export default function Flights() {
               <Button variant="outline" onClick={() => setIsNewFlightOpen(false)}>
                 Cancelar
               </Button>
-              <Button onClick={handleCreateFlight}>Cadastrar Voo</Button>
+              <Button onClick={handleCreateFlight}>
+                Cadastrar Voo
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -372,117 +366,57 @@ export default function Flights() {
                 className="pl-10"
               />
             </div>
-
+            
             <div className="flex gap-2 flex-wrap">
-              <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as FlightStatus | "all")}>
+              <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as FlightStatus | 'all')}>
                 <SelectTrigger className="w-[160px]">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos Status</SelectItem>
                   {Object.entries(flightStatusLabels).map(([key, label]) => (
-                    <SelectItem key={key} value={key}>
-                      {label}
-                    </SelectItem>
+                    <SelectItem key={key} value={key}>{label}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
 
-              <Select value={filterType} onValueChange={(v) => setFilterType(v as FlightType | "all")}>
+              <Select value={filterType} onValueChange={(v) => setFilterType(v as FlightType | 'all')}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Tipo" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos Tipos</SelectItem>
                   {Object.entries(flightTypeLabels).map(([key, label]) => (
-                    <SelectItem key={key} value={key}>
-                      ({key}) {label}
-                    </SelectItem>
+                    <SelectItem key={key} value={key}>({key}) {label}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
 
               {/* Sort Toggle */}
-              <Button variant="outline" onClick={toggleSortOrder} className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={toggleSortOrder}
+                className="flex items-center gap-2"
+              >
                 <ArrowUpDown className="w-4 h-4" />
-                {sortOrder === "newest" ? "Mais recentes" : "Mais antigos"}
+                {sortOrder === 'newest' ? 'Mais recentes' : 'Mais antigos'}
               </Button>
             </div>
           </div>
 
-          {/* Flight List */}
-          <div className="space-y-4">
-            {sortedFlights.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground bg-muted/50 rounded-lg">
-                <Plane className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p className="text-lg font-medium">Nenhum voo encontrado</p>
-                <p className="text-sm">Tente ajustar os filtros ou cadastre um novo voo</p>
-              </div>
-            ) : (
-              sortedFlights.map((flight) => (
-                <div
-                  key={flight.id}
-                  onClick={() => setSelectedFlight(flight)}
-                  className="flight-card cursor-pointer hover:border-primary/50 transition-all"
-                >
-                  {/* Date Badge */}
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="px-3 py-1.5 bg-primary/10 rounded-lg">
-                      <p className="text-sm font-bold text-primary">{formatFlightDate(flight.arrivalDate)}</p>
-                    </div>
-                    <FlightStatusBadge status={flight.status} />
-                  </div>
-
-                  {/* Flight Info */}
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
-                      <Plane className="w-6 h-6 text-primary" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-callsign text-lg text-foreground">{flight.aircraftPrefix}</p>
-                      <p className="text-sm text-muted-foreground">{flight.aircraftModel}</p>
-                    </div>
-                  </div>
-
-                  {/* Route */}
-                  <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg mb-4">
-                    <div className="text-center">
-                      <p className="text-icao text-xl">{flight.origin}</p>
-                      <p className="text-xs text-muted-foreground">Origem</p>
-                    </div>
-                    <ArrowRight className="w-6 h-6 text-primary" />
-                    <div className="text-center">
-                      <p className="text-icao text-xl">{flight.destination}</p>
-                      <p className="text-xs text-muted-foreground">Destino</p>
-                    </div>
-                  </div>
-
-                  {/* Times */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex items-center gap-2 p-3 border border-border rounded-lg">
-                      <Clock className="w-4 h-4 text-success" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">ETA</p>
-                        <p className="text-sm font-bold">{flight.arrivalTime}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 p-3 border border-border rounded-lg">
-                      <Clock className="w-4 h-4 text-info" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">ETD</p>
-                        <p className="text-sm font-bold">{flight.departureTime}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+          {/* Flight Portal List */}
+          <FlightPortalList 
+            flights={sortedFlights} 
+            onFlightClick={(flight) => setSelectedFlight(flight)} 
+          />
         </TabsContent>
 
         {/* Calendário Tab */}
         <TabsContent value="calendar">
-          <FlightCalendar flights={filteredFlights} onFlightClick={setSelectedFlight} />
+          <FlightCalendar 
+            flights={filteredFlights}
+            onFlightClick={setSelectedFlight}
+          />
         </TabsContent>
       </Tabs>
 
@@ -500,7 +434,7 @@ export default function Flights() {
                   <FlightStatusBadge status={selectedFlight.status} />
                 </DialogTitle>
               </DialogHeader>
-
+              
               <div className="space-y-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Aeronave</p>
@@ -540,9 +474,7 @@ export default function Flights() {
 
                 <div>
                   <p className="text-sm text-muted-foreground">Tipo de Voo</p>
-                  <p className="font-medium">
-                    ({selectedFlight.flightType}) {flightTypeLabels[selectedFlight.flightType]}
-                  </p>
+                  <p className="font-medium">({selectedFlight.flightType}) {flightTypeLabels[selectedFlight.flightType]}</p>
                 </div>
 
                 {selectedFlight.observations && (
@@ -558,7 +490,11 @@ export default function Flights() {
                     <Pencil className="w-4 h-4" />
                     Editar
                   </Button>
-                  <Button variant="destructive" onClick={() => setIsDeleteDialogOpen(true)} className="gap-2">
+                  <Button 
+                    variant="destructive" 
+                    onClick={() => setIsDeleteDialogOpen(true)}
+                    className="gap-2"
+                  >
                     <Trash2 className="w-4 h-4" />
                     Excluir
                   </Button>
@@ -586,9 +522,7 @@ export default function Flights() {
                       id="edit-prefix"
                       placeholder="PR-ABC"
                       value={editFormData.aircraftPrefix}
-                      onChange={(e) =>
-                        setEditFormData({ ...editFormData, aircraftPrefix: e.target.value.toUpperCase() })
-                      }
+                      onChange={(e) => setEditFormData({...editFormData, aircraftPrefix: e.target.value.toUpperCase()})}
                       className="font-mono uppercase"
                     />
                   </div>
@@ -598,7 +532,7 @@ export default function Flights() {
                       id="edit-model"
                       placeholder="Embraer Phenom 300"
                       value={editFormData.aircraftModel}
-                      onChange={(e) => setEditFormData({ ...editFormData, aircraftModel: e.target.value })}
+                      onChange={(e) => setEditFormData({...editFormData, aircraftModel: e.target.value})}
                     />
                   </div>
                 </div>
@@ -606,9 +540,9 @@ export default function Flights() {
                 {/* Flight Type */}
                 <div className="space-y-2">
                   <Label>Tipo de Voo *</Label>
-                  <Select
-                    value={editFormData.flightType}
-                    onValueChange={(v) => setEditFormData({ ...editFormData, flightType: v as FlightType })}
+                  <Select 
+                    value={editFormData.flightType} 
+                    onValueChange={(v) => setEditFormData({...editFormData, flightType: v as FlightType})}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -632,7 +566,7 @@ export default function Flights() {
                       placeholder="SBGR"
                       maxLength={4}
                       value={editFormData.origin}
-                      onChange={(e) => setEditFormData({ ...editFormData, origin: e.target.value.toUpperCase() })}
+                      onChange={(e) => setEditFormData({...editFormData, origin: e.target.value.toUpperCase()})}
                       className="font-mono uppercase"
                     />
                   </div>
@@ -643,7 +577,7 @@ export default function Flights() {
                       placeholder="SBRJ"
                       maxLength={4}
                       value={editFormData.destination}
-                      onChange={(e) => setEditFormData({ ...editFormData, destination: e.target.value.toUpperCase() })}
+                      onChange={(e) => setEditFormData({...editFormData, destination: e.target.value.toUpperCase()})}
                       className="font-mono uppercase"
                     />
                   </div>
@@ -657,7 +591,7 @@ export default function Flights() {
                       id="edit-arrivalDate"
                       type="date"
                       value={editFormData.arrivalDate}
-                      onChange={(e) => setEditFormData({ ...editFormData, arrivalDate: e.target.value })}
+                      onChange={(e) => setEditFormData({...editFormData, arrivalDate: e.target.value})}
                     />
                   </div>
                   <div className="space-y-2">
@@ -666,7 +600,7 @@ export default function Flights() {
                       id="edit-arrivalTime"
                       type="time"
                       value={editFormData.arrivalTime}
-                      onChange={(e) => setEditFormData({ ...editFormData, arrivalTime: e.target.value })}
+                      onChange={(e) => setEditFormData({...editFormData, arrivalTime: e.target.value})}
                     />
                   </div>
                 </div>
@@ -679,7 +613,7 @@ export default function Flights() {
                       id="edit-departureDate"
                       type="date"
                       value={editFormData.departureDate}
-                      onChange={(e) => setEditFormData({ ...editFormData, departureDate: e.target.value })}
+                      onChange={(e) => setEditFormData({...editFormData, departureDate: e.target.value})}
                     />
                   </div>
                   <div className="space-y-2">
@@ -688,7 +622,7 @@ export default function Flights() {
                       id="edit-departureTime"
                       type="time"
                       value={editFormData.departureTime}
-                      onChange={(e) => setEditFormData({ ...editFormData, departureTime: e.target.value })}
+                      onChange={(e) => setEditFormData({...editFormData, departureTime: e.target.value})}
                     />
                   </div>
                 </div>
@@ -696,18 +630,16 @@ export default function Flights() {
                 {/* Status */}
                 <div className="space-y-2">
                   <Label>Status *</Label>
-                  <Select
-                    value={editFormData.status}
-                    onValueChange={(v) => setEditFormData({ ...editFormData, status: v as FlightStatus })}
+                  <Select 
+                    value={editFormData.status} 
+                    onValueChange={(v) => setEditFormData({...editFormData, status: v as FlightStatus})}
                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       {Object.entries(flightStatusLabels).map(([key, label]) => (
-                        <SelectItem key={key} value={key}>
-                          {label}
-                        </SelectItem>
+                        <SelectItem key={key} value={key}>{label}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -720,7 +652,7 @@ export default function Flights() {
                     id="edit-observations"
                     placeholder="Informações adicionais sobre o voo..."
                     value={editFormData.observations}
-                    onChange={(e) => setEditFormData({ ...editFormData, observations: e.target.value })}
+                    onChange={(e) => setEditFormData({...editFormData, observations: e.target.value})}
                     rows={3}
                   />
                 </div>
@@ -730,7 +662,9 @@ export default function Flights() {
                 <Button variant="outline" onClick={() => setIsEditMode(false)}>
                   Cancelar
                 </Button>
-                <Button onClick={handleUpdateFlight}>Salvar Alterações</Button>
+                <Button onClick={handleUpdateFlight}>
+                  Salvar Alterações
+                </Button>
               </div>
             </>
           )}
@@ -743,17 +677,13 @@ export default function Flights() {
           <AlertDialogHeader>
             <AlertDialogTitle>Excluir Voo</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir o voo{" "}
-              <span className="font-mono font-bold">{selectedFlight?.aircraftPrefix}</span>? Esta ação não pode ser
-              desfeita.
+              Tem certeza que deseja excluir o voo <span className="font-mono font-bold">{selectedFlight?.aircraftPrefix}</span>? 
+              Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteFlight}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
+            <AlertDialogAction onClick={handleDeleteFlight} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               Excluir
             </AlertDialogAction>
           </AlertDialogFooter>
