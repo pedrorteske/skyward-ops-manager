@@ -99,7 +99,46 @@ export function ResourceTimeline({ flights, onFlightClick }: ResourceTimelinePro
     const left = (startHour / 24) * 100;
     const width = (duration / 24) * 100;
     
-    return { left: `${left}%`, width: `${Math.max(width, 2)}%` };
+    return { left: `${left}%`, width: `${Math.max(width, 2)}%`, startHour, endHour: startHour + duration };
+  };
+
+  // Check if two flights overlap
+  const flightsOverlap = (flight1: Flight, flight2: Flight): boolean => {
+    const pos1 = getFlightPosition(flight1);
+    const pos2 = getFlightPosition(flight2);
+    
+    // Check if time ranges overlap
+    return pos1.startHour < pos2.endHour && pos2.startHour < pos1.endHour;
+  };
+
+  // Get all conflicting flights for a resource
+  const getConflictingFlights = (resourceFlights: Flight[]): Set<string> => {
+    const conflicting = new Set<string>();
+    
+    for (let i = 0; i < resourceFlights.length; i++) {
+      for (let j = i + 1; j < resourceFlights.length; j++) {
+        if (flightsOverlap(resourceFlights[i], resourceFlights[j])) {
+          conflicting.add(resourceFlights[i].id);
+          conflicting.add(resourceFlights[j].id);
+        }
+      }
+    }
+    
+    return conflicting;
+  };
+
+  // Get all conflicts across all resources
+  const allConflicts = new Map<string, Set<string>>();
+  aircraftResources.forEach((resource) => {
+    const conflicts = getConflictingFlights(resource.flights);
+    if (conflicts.size > 0) {
+      allConflicts.set(resource.prefix, conflicts);
+    }
+  });
+
+  const hasConflict = (flight: Flight): boolean => {
+    const resourceConflicts = allConflicts.get(flight.aircraftPrefix);
+    return resourceConflicts?.has(flight.id) ?? false;
   };
 
   // Check if current date is today
@@ -113,7 +152,11 @@ export function ResourceTimeline({ flights, onFlightClick }: ResourceTimelinePro
   };
 
   // Get flight status color
-  const getFlightStatusColor = (status: Flight['status']) => {
+  const getFlightStatusColor = (status: Flight['status'], isConflict: boolean) => {
+    if (isConflict) {
+      return 'bg-destructive/90 border-destructive ring-2 ring-destructive/50 ring-offset-1 ring-offset-background';
+    }
+    
     switch (status) {
       case 'scheduled':
         return 'bg-primary/80 border-primary';
@@ -157,6 +200,9 @@ export function ResourceTimeline({ flights, onFlightClick }: ResourceTimelinePro
           </span>
           <span className="flex items-center gap-1">
             <span className="w-3 h-3 rounded bg-info/80"></span> Partiu
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="w-3 h-3 rounded bg-destructive/90 ring-2 ring-destructive/50"></span> Conflito
           </span>
         </div>
       </div>
@@ -239,6 +285,7 @@ export function ResourceTimeline({ flights, onFlightClick }: ResourceTimelinePro
                 >
                   {resource.flights.map((flight) => {
                     const position = getFlightPosition(flight);
+                    const isConflicting = hasConflict(flight);
                     return (
                       <div
                         key={flight.id}
@@ -247,7 +294,8 @@ export function ResourceTimeline({ flights, onFlightClick }: ResourceTimelinePro
                           "absolute top-2 h-12 rounded-md border-l-4 cursor-pointer",
                           "flex flex-col justify-center px-2 text-white shadow-md",
                           "hover:brightness-110 hover:shadow-lg transition-all",
-                          getFlightStatusColor(flight.status)
+                          getFlightStatusColor(flight.status, isConflicting),
+                          isConflicting && "animate-pulse"
                         )}
                         style={{
                           left: position.left,
