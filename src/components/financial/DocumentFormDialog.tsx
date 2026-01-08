@@ -66,8 +66,8 @@ export function DocumentFormDialog({
   const { addDocument, generateDocumentNumber, getDocumentsByType } = useFinancial();
 
   const [formData, setFormData] = useState({
-    clientId: '',
-    flightId: '',
+    clientValue: '', // Can be clientId or free text
+    flightValue: '', // Can be flightId or free text
     currency: 'BRL' as Currency,
     validUntil: '',
     observations: '',
@@ -90,25 +90,39 @@ export function DocumentFormDialog({
 
   useEffect(() => {
     if (sourceDocument) {
+      // Determine if clientId exists in clients
+      const existingClient = clients.find(c => c.id === sourceDocument.clientId);
+      const clientValue = existingClient ? sourceDocument.clientId : (sourceDocument.clientName || sourceDocument.clientId);
+      
+      // Determine if flightId exists in flights
+      const existingFlight = flights.find(f => f.id === sourceDocument.flightId);
+      const flightValue = existingFlight ? (sourceDocument.flightId || '') : (sourceDocument.flightInfo || '');
+      
       setFormData({
-        clientId: sourceDocument.clientId,
-        flightId: sourceDocument.flightId || '',
+        clientValue,
+        flightValue,
         currency: sourceDocument.currency,
         validUntil: sourceDocument.validUntil || '',
         observations: sourceDocument.observations || '',
       });
       setItems(sourceDocument.items.map(item => ({ ...item, id: String(Date.now() + Math.random()) })));
     }
-  }, [sourceDocument]);
+  }, [sourceDocument, clients, flights]);
 
   const handleSourceDocumentChange = (docId: string) => {
     setSourceDocumentId(docId);
     const sources = documentType === 'proforma' ? availableQuotations : [...availableQuotations, ...availableProformas];
     const doc = sources.find(d => d.id === docId);
     if (doc) {
+      const existingClient = clients.find(c => c.id === doc.clientId);
+      const clientValue = existingClient ? doc.clientId : (doc.clientName || doc.clientId);
+      
+      const existingFlight = flights.find(f => f.id === doc.flightId);
+      const flightValue = existingFlight ? (doc.flightId || '') : (doc.flightInfo || '');
+      
       setFormData({
-        clientId: doc.clientId,
-        flightId: doc.flightId || '',
+        clientValue,
+        flightValue,
         currency: doc.currency,
         validUntil: doc.validUntil || '',
         observations: doc.observations || '',
@@ -151,13 +165,17 @@ export function DocumentFormDialog({
 
   const getClientName = (id: string) => {
     const client = clients.find(c => c.id === id);
-    if (!client) return '';
+    if (!client) return id; // Return the id as text if not found
     return client.type === 'PF' ? (client as ClientPF).fullName : (client as ClientPJ).operator;
   };
 
+  // Check if value is a registered client/flight ID
+  const isRegisteredClient = (value: string) => clients.some(c => c.id === value);
+  const isRegisteredFlight = (value: string) => flights.some(f => f.id === value);
+
   const handleSubmit = () => {
-    if (!formData.clientId) {
-      toast.error('Selecione um cliente');
+    if (!formData.clientValue.trim()) {
+      toast.error('Informe um cliente');
       return;
     }
 
@@ -166,12 +184,18 @@ export function DocumentFormDialog({
       return;
     }
 
+    // Determine if client is registered or free text
+    const clientIsRegistered = isRegisteredClient(formData.clientValue);
+    const flightIsRegistered = formData.flightValue && isRegisteredFlight(formData.flightValue);
+
     const newDocument: FinancialDocument = {
       id: String(Date.now()),
       number: generateDocumentNumber(documentType),
       type: documentType,
-      clientId: formData.clientId,
-      flightId: formData.flightId || undefined,
+      clientId: clientIsRegistered ? formData.clientValue : '',
+      clientName: clientIsRegistered ? undefined : formData.clientValue,
+      flightId: flightIsRegistered ? formData.flightValue : undefined,
+      flightInfo: (!flightIsRegistered && formData.flightValue) ? formData.flightValue : undefined,
       items,
       currency: formData.currency,
       subtotal: calculateTotal(),
@@ -198,8 +222,8 @@ export function DocumentFormDialog({
 
   const resetForm = () => {
     setFormData({
-      clientId: '',
-      flightId: '',
+      clientValue: '',
+      flightValue: '',
       currency: 'BRL',
       validUntil: '',
       observations: '',
@@ -216,6 +240,26 @@ export function DocumentFormDialog({
   };
 
   const activeClients = clients.filter(c => c.status === 'active');
+
+  // Build options for client combobox
+  const clientOptions = activeClients.map(client => ({
+    value: client.id,
+    label: client.type === 'PF'
+      ? (client as ClientPF).fullName
+      : (client as ClientPJ).operator,
+  }));
+
+  // Build options for flight combobox
+  const flightOptions = flights.map((flight) => ({
+    value: flight.id,
+    label: `${flight.aircraftPrefix} - ${flight.origin}→${flight.destination}`,
+  }));
+
+  // Build options for service combobox
+  const serviceComboboxOptions = serviceOptions.map(service => ({
+    value: service,
+    label: service,
+  }));
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -240,19 +284,19 @@ export function DocumentFormDialog({
                   <SelectItem value="manual">Criar manualmente</SelectItem>
                   {documentType === 'proforma' && availableQuotations.map(doc => (
                     <SelectItem key={doc.id} value={doc.id}>
-                      {doc.number} - {getClientName(doc.clientId)}
+                      {doc.number} - {doc.clientName || getClientName(doc.clientId)}
                     </SelectItem>
                   ))}
                   {documentType === 'invoice' && (
                     <>
                       {availableQuotations.map(doc => (
                         <SelectItem key={doc.id} value={doc.id}>
-                          {doc.number} (Cotação) - {getClientName(doc.clientId)}
+                          {doc.number} (Cotação) - {doc.clientName || getClientName(doc.clientId)}
                         </SelectItem>
                       ))}
                       {availableProformas.map(doc => (
                         <SelectItem key={doc.id} value={doc.id}>
-                          {doc.number} (Proforma) - {getClientName(doc.clientId)}
+                          {doc.number} (Proforma) - {doc.clientName || getClientName(doc.clientId)}
                         </SelectItem>
                       ))}
                     </>
@@ -267,34 +311,25 @@ export function DocumentFormDialog({
             <div className="space-y-2">
               <Label>Cliente *</Label>
               <Combobox
-                options={activeClients.map(client => ({
-                  value: client.id,
-                  label: client.type === 'PF'
-                    ? (client as ClientPF).fullName
-                    : (client as ClientPJ).operator,
-                }))}
-                value={formData.clientId}
-                onValueChange={(v) => setFormData({ ...formData, clientId: v })}
-                placeholder="Selecione um cliente"
-                searchPlaceholder="Buscar cliente..."
-                emptyText="Nenhum cliente encontrado."
+                options={clientOptions}
+                value={formData.clientValue}
+                onValueChange={(v) => setFormData({ ...formData, clientValue: v })}
+                placeholder="Digite ou selecione um cliente"
+                searchPlaceholder="Buscar ou digitar cliente..."
+                emptyText="Nenhum cliente cadastrado."
+                allowCustomValue={true}
               />
             </div>
             <div className="space-y-2">
-              <Label>Prefixo (opcional)</Label>
+              <Label>Prefixo / Voo (opcional)</Label>
               <Combobox
-                options={[
-                  { value: "none", label: "Nenhum" },
-                  ...flights.map((flight) => ({
-                    value: flight.id,
-                    label: `${flight.aircraftPrefix} - ${flight.origin}→${flight.destination}`,
-                  })),
-                ]}
-                value={formData.flightId || "none"}
-                onValueChange={(v) => setFormData({ ...formData, flightId: v === "none" ? "" : v })}
-                placeholder="Vincular a um voo"
-                searchPlaceholder="Buscar voo..."
-                emptyText="Nenhum voo encontrado."
+                options={flightOptions}
+                value={formData.flightValue}
+                onValueChange={(v) => setFormData({ ...formData, flightValue: v })}
+                placeholder="Digite ou selecione um voo"
+                searchPlaceholder="Buscar ou digitar voo..."
+                emptyText="Nenhum voo cadastrado."
+                allowCustomValue={true}
               />
             </div>
           </div>
@@ -331,7 +366,7 @@ export function DocumentFormDialog({
           {/* Items */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label>Itens da Cotação</Label>
+              <Label>Itens do Documento</Label>
               <Button type="button" variant="outline" size="sm" onClick={addItem}>
                 <Plus className="w-4 h-4 mr-1" /> Adicionar Item
               </Button>
@@ -352,21 +387,16 @@ export function DocumentFormDialog({
                   {items.map((item) => (
                     <TableRow key={item.id}>
                       <TableCell>
-                        <Select
+                        <Combobox
+                          options={serviceComboboxOptions}
                           value={item.description}
                           onValueChange={(v) => updateItem(item.id, "description", v)}
-                        >
-                          <SelectTrigger className="h-9">
-                            <SelectValue placeholder="Selecione um serviço" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {serviceOptions.map((service) => (
-                              <SelectItem key={service} value={service}>
-                                {service}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          placeholder="Selecione ou digite um serviço"
+                          searchPlaceholder="Buscar ou digitar serviço..."
+                          emptyText="Nenhum serviço encontrado."
+                          allowCustomValue={true}
+                          className="h-9"
+                        />
                       </TableCell>
                       <TableCell>
                         <Input
@@ -432,7 +462,7 @@ export function DocumentFormDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
-          <Button onClick={handleSubmit} disabled={!formData.clientId || (documentType === 'quotation' && !formData.validUntil)}>
+          <Button onClick={handleSubmit} disabled={!formData.clientValue.trim() || (documentType === 'quotation' && !formData.validUntil)}>
             Criar {documentType === 'quotation' ? 'Cotação' : documentType === 'proforma' ? 'Proforma' : 'Invoice'}
           </Button>
         </div>

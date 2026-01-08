@@ -29,6 +29,7 @@ interface ComboboxProps {
   searchPlaceholder?: string;
   emptyText?: string;
   className?: string;
+  allowCustomValue?: boolean;
 }
 
 export function Combobox({
@@ -36,13 +37,52 @@ export function Combobox({
   value,
   onValueChange,
   placeholder = "Selecione...",
-  searchPlaceholder = "Buscar...",
+  searchPlaceholder = "Buscar ou digitar...",
   emptyText = "Nenhum resultado encontrado.",
   className,
+  allowCustomValue = true,
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
+  const [inputValue, setInputValue] = React.useState("");
 
+  // Check if the value is a custom value (not in options)
   const selectedOption = options.find((option) => option.value === value);
+  const isCustomValue = value && !selectedOption;
+  
+  // Display value: if it's a custom value, show the value itself, otherwise show the label
+  const displayValue = isCustomValue ? value : selectedOption?.label;
+
+  const filteredOptions = options.filter((option) =>
+    option.label.toLowerCase().includes(inputValue.toLowerCase())
+  );
+
+  const handleSelect = (optionValue: string) => {
+    onValueChange(optionValue === value ? "" : optionValue);
+    setInputValue("");
+    setOpen(false);
+  };
+
+  const handleInputChange = (newValue: string) => {
+    setInputValue(newValue);
+  };
+
+  const handleInputKeyDown = (e: React.KeyboardEvent) => {
+    if (allowCustomValue && e.key === "Enter" && inputValue.trim()) {
+      e.preventDefault();
+      // Check if input matches an existing option
+      const matchingOption = options.find(
+        (opt) => opt.label.toLowerCase() === inputValue.toLowerCase()
+      );
+      if (matchingOption) {
+        onValueChange(matchingOption.value);
+      } else {
+        // Use the input as custom value
+        onValueChange(inputValue.trim());
+      }
+      setInputValue("");
+      setOpen(false);
+    }
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -57,24 +97,37 @@ export function Combobox({
             className
           )}
         >
-          {selectedOption ? selectedOption.label : placeholder}
+          {displayValue || placeholder}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0 bg-popover border border-border z-50" align="start">
-        <Command>
-          <CommandInput placeholder={searchPlaceholder} />
+        <Command shouldFilter={false}>
+          <CommandInput 
+            placeholder={searchPlaceholder} 
+            value={inputValue}
+            onValueChange={handleInputChange}
+            onKeyDown={handleInputKeyDown}
+          />
           <CommandList>
-            <CommandEmpty>{emptyText}</CommandEmpty>
+            {filteredOptions.length === 0 && !allowCustomValue && (
+              <CommandEmpty>{emptyText}</CommandEmpty>
+            )}
+            {filteredOptions.length === 0 && allowCustomValue && inputValue.trim() && (
+              <CommandEmpty>
+                <span className="text-muted-foreground">Pressione Enter para usar: </span>
+                <span className="font-medium">{inputValue}</span>
+              </CommandEmpty>
+            )}
+            {filteredOptions.length === 0 && allowCustomValue && !inputValue.trim() && (
+              <CommandEmpty>{emptyText}</CommandEmpty>
+            )}
             <CommandGroup>
-              {options.map((option) => (
+              {filteredOptions.map((option) => (
                 <CommandItem
                   key={option.value}
                   value={option.label}
-                  onSelect={() => {
-                    onValueChange(option.value === value ? "" : option.value);
-                    setOpen(false);
-                  }}
+                  onSelect={() => handleSelect(option.value)}
                 >
                   <Check
                     className={cn(

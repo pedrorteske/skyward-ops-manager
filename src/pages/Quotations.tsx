@@ -369,21 +369,16 @@ export default function Quotations() {
                       {items.map((item) => (
                         <TableRow key={item.id}>
                           <TableCell>
-                            <Select
+                            <Combobox
+                              options={serviceOptions.map(s => ({ value: s, label: s }))}
                               value={item.description}
                               onValueChange={(v) => updateItem(item.id, "description", v)}
-                            >
-                              <SelectTrigger className="h-9">
-                                <SelectValue placeholder="Selecione um serviço" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {serviceOptions.map((service) => (
-                                  <SelectItem key={service} value={service}>
-                                    {service}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                              placeholder="Selecione ou digite um serviço"
+                              searchPlaceholder="Buscar ou digitar..."
+                              emptyText="Nenhum serviço encontrado."
+                              allowCustomValue={true}
+                              className="h-9"
+                            />
                           </TableCell>
                           <TableCell>
                             <Input
@@ -769,21 +764,16 @@ export default function Quotations() {
                         {editItems.map((item) => (
                           <TableRow key={item.id}>
                             <TableCell>
-                              <Select
+                              <Combobox
+                                options={serviceOptions.map(s => ({ value: s, label: s }))}
                                 value={item.description}
                                 onValueChange={(v) => updateEditItem(item.id, "description", v)}
-                              >
-                                <SelectTrigger className="h-9">
-                                  <SelectValue placeholder="Selecione um serviço" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {serviceOptions.map((service) => (
-                                    <SelectItem key={service} value={service}>
-                                      {service}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                                placeholder="Selecione ou digite um serviço"
+                                searchPlaceholder="Buscar ou digitar..."
+                                emptyText="Nenhum serviço encontrado."
+                                allowCustomValue={true}
+                                className="h-9"
+                              />
                             </TableCell>
                             <TableCell>
                               <Input
