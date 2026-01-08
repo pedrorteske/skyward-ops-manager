@@ -7,6 +7,7 @@ import { Quotation, QuotationItem, QuotationStatus, quotationStatusLabels, Curre
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Combobox } from '@/components/ui/combobox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -178,40 +179,34 @@ export default function Quotations() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Cliente *</Label>
-                  <Select 
-                    value={formData.clientId} 
+                  <Combobox
+                    options={mockClients.filter(c => c.status === 'active').map((client) => ({
+                      value: client.id,
+                      label: client.type === 'PF' ? client.fullName : client.operator,
+                    }))}
+                    value={formData.clientId}
                     onValueChange={(v) => setFormData({...formData, clientId: v})}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione um cliente" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {mockClients.filter(c => c.status === 'active').map((client) => (
-                        <SelectItem key={client.id} value={client.id}>
-                          {client.type === 'PF' ? client.fullName : client.operator}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    placeholder="Selecione um cliente"
+                    searchPlaceholder="Buscar cliente..."
+                    emptyText="Nenhum cliente encontrado."
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Voo (opcional)</Label>
-                  <Select 
-                    value={formData.flightId || "none"} 
+                  <Combobox
+                    options={[
+                      { value: "none", label: "Nenhum" },
+                      ...mockFlights.map((flight) => ({
+                        value: flight.id,
+                        label: `${flight.aircraftPrefix} - ${flight.origin}→${flight.destination}`,
+                      }))
+                    ]}
+                    value={formData.flightId || "none"}
                     onValueChange={(v) => setFormData({...formData, flightId: v === "none" ? "" : v})}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Vincular a um voo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Nenhum</SelectItem>
-                      {mockFlights.map((flight) => (
-                        <SelectItem key={flight.id} value={flight.id}>
-                          {flight.aircraftPrefix} - {flight.origin}→{flight.destination}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    placeholder="Vincular a um voo"
+                    searchPlaceholder="Buscar voo..."
+                    emptyText="Nenhum voo encontrado."
+                  />
                 </div>
               </div>
 
