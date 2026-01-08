@@ -49,10 +49,10 @@ export function FlightPortalList({ flights, onFlightClick }: FlightPortalListPro
       <div className="grid grid-cols-14 gap-2 px-4 py-3 bg-muted/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
         <div className="col-span-2">Aeronave</div>
         <div className="col-span-2">Rota</div>
-        <div className="col-span-2">Data</div>
-        <div className="col-span-2">ETA</div>
-        <div className="col-span-2">Data</div>
-        <div className="col-span-2">ETD</div>
+        <div className="col-span-2">Data Chegada</div>
+        <div className="col-span-2">Hora Chegada</div>
+        <div className="col-span-2">Data Saída</div>
+        <div className="col-span-2">Hora Saída</div>
         <div className="col-span-2 text-right">Status</div>
       </div>
 
@@ -95,7 +95,7 @@ export function FlightPortalList({ flights, onFlightClick }: FlightPortalListPro
               </span>
             </div>
 
-            {/* ETA */}
+            {/* Arrival Time */}
             <div className="col-span-2">
               <span className="text-sm font-mono text-foreground">
                 {formatTime(flight.arrivalTime)}
@@ -109,7 +109,7 @@ export function FlightPortalList({ flights, onFlightClick }: FlightPortalListPro
               </span>
             </div>
 
-            {/* ETD */}
+            {/* Departure Time */}
             <div className="col-span-2">
               <span className="text-sm font-mono text-foreground">
                 {formatTime(flight.departureTime)}
