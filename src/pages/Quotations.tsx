@@ -197,14 +197,14 @@ export default function Quotations() {
                 <div className="space-y-2">
                   <Label>Voo (opcional)</Label>
                   <Select 
-                    value={formData.flightId} 
-                    onValueChange={(v) => setFormData({...formData, flightId: v})}
+                    value={formData.flightId || "none"} 
+                    onValueChange={(v) => setFormData({...formData, flightId: v === "none" ? "" : v})}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Vincular a um voo" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Nenhum</SelectItem>
+                      <SelectItem value="none">Nenhum</SelectItem>
                       {mockFlights.map((flight) => (
                         <SelectItem key={flight.id} value={flight.id}>
                           {flight.aircraftPrefix} - {flight.origin}→{flight.destination}
