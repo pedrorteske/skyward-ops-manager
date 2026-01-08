@@ -34,16 +34,6 @@ export function FlightPortalList({ flights, onFlightClick }: FlightPortalListPro
     }).toUpperCase();
   };
 
-  const isToday = (dateStr: string) => {
-    const today = new Date();
-    const flightDate = new Date(dateStr + 'T00:00:00');
-    return (
-      flightDate.getDate() === today.getDate() &&
-      flightDate.getMonth() === today.getMonth() &&
-      flightDate.getFullYear() === today.getFullYear()
-    );
-  };
-
   if (flights.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground bg-card rounded-lg border border-border">
@@ -67,30 +57,21 @@ export function FlightPortalList({ flights, onFlightClick }: FlightPortalListPro
 
       {/* Flight Rows */}
       <div className="divide-y divide-border">
-        {flights.map((flight) => {
-          const flightIsToday = isToday(flight.arrivalDate);
-          return (
-            <div
-              key={flight.id}
-              onClick={() => onFlightClick?.(flight)}
-              className={cn(
-                "grid grid-cols-12 gap-2 px-4 py-3 items-center cursor-pointer transition-colors",
-                "hover:bg-muted/30",
-                flightIsToday && "bg-primary/5 border-l-2 border-l-primary"
-              )}
-            >
-              {/* Date */}
-              <div className="col-span-2 flex items-center gap-1.5">
-                {flightIsToday && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                )}
-                <span className={cn(
-                  "text-xs font-medium",
-                  flightIsToday ? "text-primary font-bold" : "text-foreground"
-                )}>
-                  {flightIsToday ? 'HOJE' : formatDate(flight.arrivalDate)}
-                </span>
-              </div>
+        {flights.map((flight) => (
+          <div
+            key={flight.id}
+            onClick={() => onFlightClick?.(flight)}
+            className={cn(
+              "grid grid-cols-12 gap-2 px-4 py-3 items-center cursor-pointer transition-colors",
+              "hover:bg-muted/30"
+            )}
+          >
+            {/* Date */}
+            <div className="col-span-2">
+              <span className="text-xs font-medium text-foreground">
+                {formatDate(flight.arrivalDate)}
+              </span>
+            </div>
 
             {/* Aircraft */}
             <div className="col-span-2 flex items-center gap-2">
@@ -138,8 +119,7 @@ export function FlightPortalList({ flights, onFlightClick }: FlightPortalListPro
               </span>
             </div>
           </div>
-          );
-        })}
+        ))}
       </div>
     </div>
   );
