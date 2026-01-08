@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { FinancialDocument, FinancialDocumentStatus, FinancialDocumentType } from '@/types/financial';
+import React, { createContext, useContext, useState, type ReactNode } from 'react';
+import type { FinancialDocument, FinancialDocumentStatus, FinancialDocumentType } from '@/types/financial';
 
 interface FinancialContextType {
   documents: FinancialDocument[];
