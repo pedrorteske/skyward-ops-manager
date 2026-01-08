@@ -61,10 +61,12 @@ export function ResourceTimeline({ flights, onFlightClick }: ResourceTimelinePro
   // Format date for comparison
   const dateString = currentDate.toISOString().split('T')[0];
 
-  // Filter flights for the current date
-  const flightsForDate = flights.filter(
-    (flight) => flight.arrivalDate === dateString || flight.departureDate === dateString
-  );
+  // Filter flights for the current date - check both arrival and departure dates
+  const flightsForDate = flights.filter((flight) => {
+    const hasArrivalOnDate = flight.arrivalDate === dateString;
+    const hasDepartureOnDate = flight.departureDate === dateString;
+    return hasArrivalOnDate || hasDepartureOnDate;
+  });
 
   // Group flights by aircraft
   const aircraftResources: AircraftResource[] = [];
@@ -85,21 +87,42 @@ export function ResourceTimeline({ flights, onFlightClick }: ResourceTimelinePro
     }
   });
 
-  // Calculate position and width of flight bar
+  // Calculate position and width of flight bar based on available data
   const getFlightPosition = (flight: Flight) => {
-    const arrivalTime = flight.arrivalTime.split(':');
-    const departureTime = flight.departureTime.split(':');
+    const hasArrival = flight.arrivalDate && flight.arrivalTime;
+    const hasDeparture = flight.departureDate && flight.departureTime;
     
-    const startHour = parseInt(arrivalTime[0]) + parseInt(arrivalTime[1]) / 60;
-    const endHour = parseInt(departureTime[0]) + parseInt(departureTime[1]) / 60;
+    let startHour = 0;
+    let endHour = 0;
     
-    // Handle overnight flights
-    const duration = endHour >= startHour ? endHour - startHour : (24 - startHour) + endHour;
+    if (hasArrival && hasDeparture) {
+      // Both arrival and departure - show full operation period
+      const arrivalTime = flight.arrivalTime.split(':');
+      const departureTime = flight.departureTime.split(':');
+      startHour = parseInt(arrivalTime[0]) + parseInt(arrivalTime[1]) / 60;
+      endHour = parseInt(departureTime[0]) + parseInt(departureTime[1]) / 60;
+      
+      // Handle overnight flights or same time
+      if (endHour <= startHour) {
+        endHour = startHour + 1; // Minimum 1 hour duration for display
+      }
+    } else if (hasDeparture) {
+      // Only departure - show block starting at departure time
+      const departureTime = flight.departureTime.split(':');
+      startHour = parseInt(departureTime[0]) + parseInt(departureTime[1]) / 60;
+      endHour = startHour + 1; // 1 hour block for departure only
+    } else if (hasArrival) {
+      // Only arrival - show block at arrival time
+      const arrivalTime = flight.arrivalTime.split(':');
+      startHour = parseInt(arrivalTime[0]) + parseInt(arrivalTime[1]) / 60;
+      endHour = startHour + 1; // 1 hour block for arrival only
+    }
     
+    const duration = endHour - startHour;
     const left = (startHour / 24) * 100;
     const width = (duration / 24) * 100;
     
-    return { left: `${left}%`, width: `${Math.max(width, 2)}%`, startHour, endHour: startHour + duration };
+    return { left: `${left}%`, width: `${Math.max(width, 2)}%`, startHour, endHour };
   };
 
   // Check if two flights overlap
@@ -310,13 +333,13 @@ export function ResourceTimeline({ flights, onFlightClick }: ResourceTimelinePro
                           <span className="truncate">{flight.aircraftModel}</span>
                         </div>
                         <div className="flex items-center gap-2 text-[10px] opacity-90 mt-0.5">
-                          <span className="font-mono">
-                            ETA: {flight.arrivalTime}
-                          </span>
-                          <span>→</span>
-                          <span className="font-mono">
-                            ETD: {flight.departureTime}
-                          </span>
+                          {flight.arrivalTime && (
+                            <span className="font-mono">ETA: {flight.arrivalTime}</span>
+                          )}
+                          {flight.arrivalTime && flight.departureTime && <span>→</span>}
+                          {flight.departureTime && (
+                            <span className="font-mono">ETD: {flight.departureTime}</span>
+                          )}
                         </div>
                       </div>
                     );
