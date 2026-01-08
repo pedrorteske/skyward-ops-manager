@@ -3,6 +3,7 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { StatsCard } from '@/components/dashboard/StatsCard';
 import { FlightCard } from '@/components/flights/FlightCard';
 import { QuotationStatusBadge } from '@/components/quotations/QuotationStatusBadge';
+import { ResourceTimeline } from '@/components/dashboard/ResourceTimeline';
 import { mockFlights, mockQuotations, mockDashboardStats, getClientById } from '@/data/mockData';
 import { Plane, PlaneLanding, FileText, Users, ArrowRight, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -50,6 +51,19 @@ export default function Dashboard() {
           icon={Users}
           variant="info"
         />
+      </div>
+
+      {/* Resource Timeline / Scheduler */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-foreground">Calendário Operacional</h2>
+          <Link to="/flights">
+            <Button variant="ghost" size="sm" className="text-primary">
+              Ver todos os voos <ArrowRight className="w-4 h-4 ml-1" />
+            </Button>
+          </Link>
+        </div>
+        <ResourceTimeline flights={mockFlights} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
