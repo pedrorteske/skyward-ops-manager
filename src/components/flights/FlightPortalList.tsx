@@ -1,97 +1,120 @@
 import { Flight, flightStatusLabels } from '@/types/aviation';
 import { cn } from '@/lib/utils';
-import { Circle } from 'lucide-react';
+import { Plane, ArrowRight } from 'lucide-react';
 
 interface FlightPortalListProps {
   flights: Flight[];
   onFlightClick?: (flight: Flight) => void;
 }
 
-const statusIndicator: Record<Flight['status'], string> = {
-  scheduled: 'text-sky-500',
-  arrived: 'text-emerald-500',
-  departed: 'text-violet-500',
-  cancelled: 'text-red-500',
-  delayed: 'text-amber-500',
+const statusColors: Record<Flight['status'], string> = {
+  scheduled: 'text-info',
+  arrived: 'text-success',
+  departed: 'text-primary',
+  cancelled: 'text-destructive',
+  delayed: 'text-warning',
+};
+
+const statusBgColors: Record<Flight['status'], string> = {
+  scheduled: 'bg-info/10',
+  arrived: 'bg-success/10',
+  departed: 'bg-primary/10',
+  cancelled: 'bg-destructive/10',
+  delayed: 'bg-warning/10',
 };
 
 export function FlightPortalList({ flights, onFlightClick }: FlightPortalListProps) {
+  const formatTime = (time: string) => time;
+  
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr + 'T00:00:00');
     return date.toLocaleDateString('pt-BR', {
       day: '2-digit',
-      month: '2-digit',
-    });
+      month: 'short',
+    }).toUpperCase();
   };
 
   if (flights.length === 0) {
     return (
-      <div className="text-center py-8 text-muted-foreground/60">
-        <p className="text-xs font-medium tracking-wide uppercase">Nenhum voo registrado</p>
+      <div className="text-center py-12 text-muted-foreground bg-card rounded-lg border border-border">
+        <Plane className="w-10 h-10 mx-auto mb-3 opacity-40" />
+        <p className="text-sm font-medium">Nenhum voo encontrado</p>
       </div>
     );
   }
 
   return (
-    <div className="font-mono text-xs">
+    <div className="bg-card rounded-xl border border-border overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-0 px-3 py-2 text-muted-foreground/70 uppercase tracking-widest border-b border-border/50 bg-muted/30">
-        <div className="w-28 shrink-0">Aeronave</div>
-        <div className="w-24 shrink-0">Rota</div>
-        <div className="w-20 shrink-0 text-center">Data</div>
-        <div className="w-16 shrink-0 text-center">ETA</div>
-        <div className="w-16 shrink-0 text-center">ETD</div>
-        <div className="flex-1 text-right pr-1">Status</div>
+      <div className="grid grid-cols-12 gap-2 px-4 py-3 bg-muted/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+        <div className="col-span-2">Data</div>
+        <div className="col-span-2">Aeronave</div>
+        <div className="col-span-3">Rota</div>
+        <div className="col-span-2">Chegada</div>
+        <div className="col-span-2">Saída</div>
+        <div className="col-span-1 text-right">Status</div>
       </div>
 
       {/* Flight Rows */}
-      <div>
-        {flights.map((flight, index) => (
+      <div className="divide-y divide-border">
+        {flights.map((flight) => (
           <div
             key={flight.id}
             onClick={() => onFlightClick?.(flight)}
             className={cn(
-              "flex items-center gap-0 px-3 py-2 cursor-pointer transition-colors",
-              "hover:bg-muted/40",
-              index % 2 === 0 ? "bg-transparent" : "bg-muted/20"
+              "grid grid-cols-12 gap-2 px-4 py-3 items-center cursor-pointer transition-colors",
+              "hover:bg-muted/30"
             )}
           >
-            {/* Aircraft - Prefix + Model */}
-            <div className="w-28 shrink-0 flex items-center gap-1.5">
-              <span className="font-semibold text-foreground tracking-wide">
-                {flight.aircraftPrefix}
+            {/* Date */}
+            <div className="col-span-2">
+              <span className="text-xs font-medium text-foreground">
+                {formatDate(flight.arrivalDate)}
               </span>
-              <span className="text-muted-foreground/60 text-[10px]">
-                {flight.aircraftModel}
-              </span>
+            </div>
+
+            {/* Aircraft */}
+            <div className="col-span-2 flex items-center gap-2">
+              <Plane className="w-3.5 h-3.5 text-primary shrink-0" />
+              <div className="min-w-0">
+                <p className="text-sm font-mono font-semibold text-foreground truncate">
+                  {flight.aircraftPrefix}
+                </p>
+              </div>
             </div>
 
             {/* Route */}
-            <div className="w-24 shrink-0">
-              <span className="text-foreground font-medium">{flight.origin}</span>
-              <span className="text-muted-foreground/50 mx-1">→</span>
-              <span className="text-foreground font-medium">{flight.destination}</span>
+            <div className="col-span-3 flex items-center gap-1.5">
+              <span className="text-sm font-mono font-bold text-foreground">
+                {flight.origin}
+              </span>
+              <ArrowRight className="w-3 h-3 text-muted-foreground shrink-0" />
+              <span className="text-sm font-mono font-bold text-foreground">
+                {flight.destination}
+              </span>
             </div>
 
-            {/* Date */}
-            <div className="w-20 shrink-0 text-center text-muted-foreground">
-              {formatDate(flight.arrivalDate)}
+            {/* Arrival Time */}
+            <div className="col-span-2">
+              <span className="text-sm font-mono text-foreground">
+                {formatTime(flight.arrivalTime)}
+              </span>
             </div>
 
-            {/* ETA */}
-            <div className="w-16 shrink-0 text-center text-foreground font-medium">
-              {flight.arrivalTime}
-            </div>
-
-            {/* ETD */}
-            <div className="w-16 shrink-0 text-center text-foreground font-medium">
-              {flight.departureTime}
+            {/* Departure Time */}
+            <div className="col-span-2">
+              <span className="text-sm font-mono text-foreground">
+                {formatTime(flight.departureTime)}
+              </span>
             </div>
 
             {/* Status */}
-            <div className="flex-1 flex items-center justify-end gap-1.5 pr-1">
-              <Circle className={cn("w-2 h-2 fill-current", statusIndicator[flight.status])} />
-              <span className={cn("text-[10px] uppercase tracking-wide", statusIndicator[flight.status])}>
+            <div className="col-span-1 flex justify-end">
+              <span className={cn(
+                "text-xs font-medium px-2 py-1 rounded-full",
+                statusColors[flight.status],
+                statusBgColors[flight.status]
+              )}>
                 {flightStatusLabels[flight.status]}
               </span>
             </div>
