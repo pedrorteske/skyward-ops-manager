@@ -3,14 +3,16 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { FileText, Receipt, FileCheck, Plane, Download, Mail, Trash2 } from 'lucide-react';
-import { FinancialDocument, FinancialDocumentStatus, documentTypeLabels, financialStatusLabels } from '@/types/financial';
+import type { FinancialDocument, FinancialDocumentStatus } from '@/types/financial';
+import { documentTypeLabels, financialStatusLabels } from '@/types/financial';
 import { FinancialStatusBadge } from './FinancialStatusBadge';
 import { useClients } from '@/contexts/ClientsContext';
 import { useFlights } from '@/contexts/FlightsContext';
 import { useFinancial } from '@/contexts/FinancialContext';
-import { ClientPF, ClientPJ } from '@/types/aviation';
+import type { ClientPF, ClientPJ } from '@/types/aviation';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { generateFinancialPDF } from '@/lib/pdfGenerator';
 
 interface DocumentDetailDialogProps {
   document: FinancialDocument | null;
@@ -65,7 +67,41 @@ export function DocumentDetailDialog({ document, open, onOpenChange }: DocumentD
   };
 
   const handleGeneratePDF = () => {
-    toast.info('Funcionalidade de geração de PDF será implementada com Lovable Cloud');
+    const clientName = document.clientName || getClientName();
+    const clientEmail = document.clientName ? '' : getClientEmail();
+    const clientDoc = client?.type === 'PF' 
+      ? (client as ClientPF).cpf 
+      : client?.type === 'PJ' 
+        ? (client as ClientPJ).cnpj 
+        : undefined;
+
+    const clientInfoForPDF = {
+      name: clientName,
+      email: clientEmail,
+      document: clientDoc,
+    };
+
+    let flightInfoForPDF;
+    if (flight) {
+      flightInfoForPDF = {
+        prefix: flight.aircraftPrefix,
+        route: `${flight.origin} → ${flight.destination}`,
+        date: flight.arrivalDate 
+          ? new Date(flight.arrivalDate).toLocaleDateString('pt-BR')
+          : flight.departureDate 
+            ? new Date(flight.departureDate).toLocaleDateString('pt-BR')
+            : 'N/A',
+      };
+    } else if (document.flightInfo) {
+      flightInfoForPDF = {
+        prefix: '-',
+        route: document.flightInfo,
+        date: '-',
+      };
+    }
+
+    generateFinancialPDF(document, clientInfoForPDF, flightInfoForPDF);
+    toast.success('PDF gerado com sucesso!');
   };
 
   const handleSendEmail = () => {
