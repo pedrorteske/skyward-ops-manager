@@ -9,7 +9,8 @@ import {
   LogOut,
   Menu,
   X,
-  Building2
+  Building2,
+  Wallet
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -25,6 +26,7 @@ const navItems = [
   { href: '/flights', label: 'Portal dos Voos', icon: Plane },
   { href: '/clients', label: 'Clientes', icon: Users },
   { href: '/quotations', label: 'Cotações', icon: FileText },
+  { href: '/financial', label: 'Financeiro', icon: Wallet },
   { href: '/settings', label: 'Configurações', icon: Settings },
 ];
 
