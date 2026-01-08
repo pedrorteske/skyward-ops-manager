@@ -27,16 +27,19 @@ export default function Financial() {
   const [selectedDocument, setSelectedDocument] = useState<FinancialDocument | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
 
-  const getClientName = (clientId: string) => {
-    const client = clients.find(c => c.id === clientId);
-    if (!client) return 'Cliente não encontrado';
+  const getClientName = (doc: FinancialDocument) => {
+    // If there's a clientName (free text), use it
+    if (doc.clientName) return doc.clientName;
+    // Otherwise, look up the registered client
+    const client = clients.find(c => c.id === doc.clientId);
+    if (!client) return doc.clientId || 'Cliente não encontrado';
     return client.type === 'PF' ? (client as ClientPF).fullName : (client as ClientPJ).operator;
   };
 
   const filteredDocuments = documents.filter(doc => {
     const matchesSearch =
       doc.number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      getClientName(doc.clientId).toLowerCase().includes(searchTerm.toLowerCase());
+      getClientName(doc).toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'all' || doc.status === filterStatus;
     const matchesType = activeTab === 'all' || doc.type === activeTab;
     return matchesSearch && matchesStatus && matchesType;
@@ -227,7 +230,7 @@ export default function Financial() {
                         <TableCell>
                           <span className="font-mono font-medium">{doc.number}</span>
                         </TableCell>
-                        <TableCell>{getClientName(doc.clientId)}</TableCell>
+                        <TableCell>{getClientName(doc)}</TableCell>
                         <TableCell>
                           {new Date(doc.createdAt).toLocaleDateString('pt-BR')}
                         </TableCell>

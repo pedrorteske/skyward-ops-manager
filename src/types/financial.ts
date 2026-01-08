@@ -35,7 +35,9 @@ export interface FinancialDocument {
   number: string;
   type: FinancialDocumentType;
   clientId: string;
+  clientName?: string; // Free text client name when not linked to a registered client
   flightId?: string;
+  flightInfo?: string; // Free text flight info when not linked to a registered flight
   items: FinancialItem[];
   currency: Currency;
   subtotal: number;
