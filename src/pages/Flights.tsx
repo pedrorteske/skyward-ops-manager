@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { FlightCard } from '@/components/flights/FlightCard';
+import { FlightCalendar } from '@/components/flights/FlightCalendar';
 import { FlightStatusBadge } from '@/components/flights/FlightStatusBadge';
 import { mockFlights } from '@/data/mockData';
 import { Flight, FlightType, FlightStatus, flightTypeLabels, flightStatusLabels } from '@/types/aviation';
@@ -11,17 +12,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Search, Calendar, List, Filter, Plane, ArrowRight, Clock, X } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Plus, Search, Calendar, List, Plane, ArrowRight, Clock, ArrowUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-type ViewMode = 'list' | 'calendar';
+type SortOrder = 'newest' | 'oldest';
 
 export default function Flights() {
   const [flights, setFlights] = useState<Flight[]>(mockFlights);
-  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [activeTab, setActiveTab] = useState<string>('portal');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<FlightStatus | 'all'>('all');
   const [filterType, setFilterType] = useState<FlightType | 'all'>('all');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
   const [isNewFlightOpen, setIsNewFlightOpen] = useState(false);
   const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
 
@@ -52,6 +55,13 @@ export default function Flights() {
     return matchesSearch && matchesStatus && matchesType;
   });
 
+  // Sort flights by date
+  const sortedFlights = [...filteredFlights].sort((a, b) => {
+    const dateA = new Date(`${a.arrivalDate}T${a.arrivalTime}`);
+    const dateB = new Date(`${b.arrivalDate}T${b.arrivalTime}`);
+    return sortOrder === 'newest' ? dateB.getTime() - dateA.getTime() : dateA.getTime() - dateB.getTime();
+  });
+
   const handleCreateFlight = () => {
     const newFlight: Flight = {
       id: String(Date.now()),
@@ -78,13 +88,20 @@ export default function Flights() {
     });
   };
 
-  // Simple calendar view - group flights by date
-  const flightsByDate = filteredFlights.reduce((acc, flight) => {
-    const date = flight.arrivalDate;
-    if (!acc[date]) acc[date] = [];
-    acc[date].push(flight);
-    return acc;
-  }, {} as Record<string, Flight[]>);
+  const toggleSortOrder = () => {
+    setSortOrder(prev => prev === 'newest' ? 'oldest' : 'newest');
+  };
+
+  // Format date for display
+  const formatFlightDate = (dateStr: string) => {
+    const date = new Date(dateStr + 'T00:00:00');
+    return date.toLocaleDateString('pt-BR', {
+      weekday: 'short',
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+  };
 
   return (
     <MainLayout>
@@ -264,116 +281,150 @@ export default function Flights() {
         </Dialog>
       </PageHeader>
 
-      {/* Filters Bar */}
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por prefixo, origem ou destino..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        
-        <div className="flex gap-2">
-          <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as FlightStatus | 'all')}>
-            <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos Status</SelectItem>
-              {Object.entries(flightStatusLabels).map(([key, label]) => (
-                <SelectItem key={key} value={key}>{label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      {/* Tabs Navigation */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="portal" className="flex items-center gap-2">
+            <List className="w-4 h-4" />
+            Portal de Voos
+          </TabsTrigger>
+          <TabsTrigger value="calendar" className="flex items-center gap-2">
+            <Calendar className="w-4 h-4" />
+            Calendário
+          </TabsTrigger>
+        </TabsList>
 
-          <Select value={filterType} onValueChange={(v) => setFilterType(v as FlightType | 'all')}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Tipo" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos Tipos</SelectItem>
-              {Object.entries(flightTypeLabels).map(([key, label]) => (
-                <SelectItem key={key} value={key}>({key}) {label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        {/* Portal de Voos Tab */}
+        <TabsContent value="portal" className="space-y-6">
+          {/* Filters Bar */}
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por prefixo, origem ou destino..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            
+            <div className="flex gap-2 flex-wrap">
+              <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as FlightStatus | 'all')}>
+                <SelectTrigger className="w-[160px]">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos Status</SelectItem>
+                  {Object.entries(flightStatusLabels).map(([key, label]) => (
+                    <SelectItem key={key} value={key}>{label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-          {/* View Toggle */}
-          <div className="flex rounded-lg border border-border overflow-hidden">
-            <Button
-              variant={viewMode === 'list' ? 'default' : 'ghost'}
-              size="icon"
-              onClick={() => setViewMode('list')}
-              className="rounded-none"
-            >
-              <List className="w-4 h-4" />
-            </Button>
-            <Button
-              variant={viewMode === 'calendar' ? 'default' : 'ghost'}
-              size="icon"
-              onClick={() => setViewMode('calendar')}
-              className="rounded-none"
-            >
-              <Calendar className="w-4 h-4" />
-            </Button>
+              <Select value={filterType} onValueChange={(v) => setFilterType(v as FlightType | 'all')}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos Tipos</SelectItem>
+                  {Object.entries(flightTypeLabels).map(([key, label]) => (
+                    <SelectItem key={key} value={key}>({key}) {label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {/* Sort Toggle */}
+              <Button
+                variant="outline"
+                onClick={toggleSortOrder}
+                className="flex items-center gap-2"
+              >
+                <ArrowUpDown className="w-4 h-4" />
+                {sortOrder === 'newest' ? 'Mais recentes' : 'Mais antigos'}
+              </Button>
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* Flight List/Calendar */}
-      {viewMode === 'list' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {filteredFlights.map((flight) => (
-            <FlightCard 
-              key={flight.id} 
-              flight={flight}
-              onClick={() => setSelectedFlight(flight)}
-            />
-          ))}
-          {filteredFlights.length === 0 && (
-            <div className="col-span-full text-center py-12 text-muted-foreground bg-muted/50 rounded-lg">
-              <Plane className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p className="text-lg font-medium">Nenhum voo encontrado</p>
-              <p className="text-sm">Tente ajustar os filtros ou cadastre um novo voo</p>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="space-y-6">
-          {Object.entries(flightsByDate).sort().map(([date, dateFlights]) => (
-            <div key={date}>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
-                {new Date(date).toLocaleDateString('pt-BR', { 
-                  weekday: 'long', 
-                  day: '2-digit', 
-                  month: 'long', 
-                  year: 'numeric' 
-                })}
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {dateFlights.map((flight) => (
-                  <FlightCard 
-                    key={flight.id} 
-                    flight={flight}
-                    onClick={() => setSelectedFlight(flight)}
-                  />
-                ))}
+          {/* Flight List */}
+          <div className="space-y-4">
+            {sortedFlights.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground bg-muted/50 rounded-lg">
+                <Plane className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                <p className="text-lg font-medium">Nenhum voo encontrado</p>
+                <p className="text-sm">Tente ajustar os filtros ou cadastre um novo voo</p>
               </div>
-            </div>
-          ))}
-          {Object.keys(flightsByDate).length === 0 && (
-            <div className="text-center py-12 text-muted-foreground bg-muted/50 rounded-lg">
-              <Calendar className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p className="text-lg font-medium">Nenhum voo no calendário</p>
-              <p className="text-sm">Cadastre novos voos para visualizar no calendário</p>
-            </div>
-          )}
-        </div>
-      )}
+            ) : (
+              sortedFlights.map((flight) => (
+                <div 
+                  key={flight.id}
+                  onClick={() => setSelectedFlight(flight)}
+                  className="flight-card cursor-pointer hover:border-primary/50 transition-all"
+                >
+                  {/* Date Badge */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="px-3 py-1.5 bg-primary/10 rounded-lg">
+                      <p className="text-sm font-bold text-primary">
+                        {formatFlightDate(flight.arrivalDate)}
+                      </p>
+                    </div>
+                    <FlightStatusBadge status={flight.status} />
+                  </div>
+
+                  {/* Flight Info */}
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
+                      <Plane className="w-6 h-6 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-callsign text-lg text-foreground">{flight.aircraftPrefix}</p>
+                      <p className="text-sm text-muted-foreground">{flight.aircraftModel}</p>
+                    </div>
+                  </div>
+
+                  {/* Route */}
+                  <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg mb-4">
+                    <div className="text-center">
+                      <p className="text-icao text-xl">{flight.origin}</p>
+                      <p className="text-xs text-muted-foreground">Origem</p>
+                    </div>
+                    <ArrowRight className="w-6 h-6 text-primary" />
+                    <div className="text-center">
+                      <p className="text-icao text-xl">{flight.destination}</p>
+                      <p className="text-xs text-muted-foreground">Destino</p>
+                    </div>
+                  </div>
+
+                  {/* Times */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex items-center gap-2 p-3 border border-border rounded-lg">
+                      <Clock className="w-4 h-4 text-success" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Chegada</p>
+                        <p className="text-sm font-bold">{flight.arrivalTime}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 p-3 border border-border rounded-lg">
+                      <Clock className="w-4 h-4 text-info" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Saída</p>
+                        <p className="text-sm font-bold">{flight.departureTime}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </TabsContent>
+
+        {/* Calendário Tab */}
+        <TabsContent value="calendar">
+          <FlightCalendar 
+            flights={filteredFlights}
+            onFlightClick={setSelectedFlight}
+          />
+        </TabsContent>
+      </Tabs>
 
       {/* Flight Detail Modal */}
       <Dialog open={!!selectedFlight} onOpenChange={() => setSelectedFlight(null)}>
