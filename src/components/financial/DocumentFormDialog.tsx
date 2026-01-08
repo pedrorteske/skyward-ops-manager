@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Combobox } from '@/components/ui/combobox';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Plus, Trash2, FileText, Receipt, FileCheck } from 'lucide-react';
 import { useClients } from '@/contexts/ClientsContext';
 import { useFlights } from '@/contexts/FlightsContext';
@@ -13,6 +14,21 @@ import { useFinancial } from '@/contexts/FinancialContext';
 import { FinancialDocument, FinancialDocumentType, FinancialItem, Currency } from '@/types/financial';
 import { ClientPF, ClientPJ } from '@/types/aviation';
 import { toast } from 'sonner';
+
+const serviceOptions = [
+  "Handling de chegada",
+  "Handling de saída",
+  "Handling completo",
+  "Estacionamento (24h)",
+  "Hangaragem (por dia)",
+  "Abastecimento JET-A1 (litros)",
+  "Catering executivo",
+  "Transporte terrestre VIP",
+  "Despacho aduaneiro",
+  "GPU (Ground Power Unit)",
+  "Lavagem de aeronave",
+  "Serviço personalizado",
+];
 
 interface DocumentFormDialogProps {
   open: boolean;
@@ -49,10 +65,13 @@ export function DocumentFormDialog({
   const { flights } = useFlights();
   const { addDocument, generateDocumentNumber, getDocumentsByType } = useFinancial();
 
-  const [clientId, setClientId] = useState('');
-  const [flightId, setFlightId] = useState('');
-  const [currency, setCurrency] = useState<Currency>('BRL');
-  const [observations, setObservations] = useState('');
+  const [formData, setFormData] = useState({
+    clientId: '',
+    flightId: '',
+    currency: 'BRL' as Currency,
+    validUntil: '',
+    observations: '',
+  });
   const [items, setItems] = useState<FinancialItem[]>([
     { id: '1', description: '', quantity: 1, unitPrice: 0, total: 0 },
   ]);
@@ -71,10 +90,13 @@ export function DocumentFormDialog({
 
   useEffect(() => {
     if (sourceDocument) {
-      setClientId(sourceDocument.clientId);
-      setFlightId(sourceDocument.flightId || '');
-      setCurrency(sourceDocument.currency);
-      setObservations(sourceDocument.observations || '');
+      setFormData({
+        clientId: sourceDocument.clientId,
+        flightId: sourceDocument.flightId || '',
+        currency: sourceDocument.currency,
+        validUntil: sourceDocument.validUntil || '',
+        observations: sourceDocument.observations || '',
+      });
       setItems(sourceDocument.items.map(item => ({ ...item, id: String(Date.now() + Math.random()) })));
     }
   }, [sourceDocument]);
@@ -84,10 +106,13 @@ export function DocumentFormDialog({
     const sources = documentType === 'proforma' ? availableQuotations : [...availableQuotations, ...availableProformas];
     const doc = sources.find(d => d.id === docId);
     if (doc) {
-      setClientId(doc.clientId);
-      setFlightId(doc.flightId || '');
-      setCurrency(doc.currency);
-      setObservations(doc.observations || '');
+      setFormData({
+        clientId: doc.clientId,
+        flightId: doc.flightId || '',
+        currency: doc.currency,
+        validUntil: doc.validUntil || '',
+        observations: doc.observations || '',
+      });
       setItems(doc.items.map(item => ({ ...item, id: String(Date.now() + Math.random()) })));
     }
   };
@@ -124,14 +149,14 @@ export function DocumentFormDialog({
     return items.reduce((acc, item) => acc + item.total, 0);
   };
 
-  const getClientName = (clientId: string) => {
-    const client = clients.find(c => c.id === clientId);
+  const getClientName = (id: string) => {
+    const client = clients.find(c => c.id === id);
     if (!client) return '';
     return client.type === 'PF' ? (client as ClientPF).fullName : (client as ClientPJ).operator;
   };
 
   const handleSubmit = () => {
-    if (!clientId) {
+    if (!formData.clientId) {
       toast.error('Selecione um cliente');
       return;
     }
@@ -145,20 +170,22 @@ export function DocumentFormDialog({
       id: String(Date.now()),
       number: generateDocumentNumber(documentType),
       type: documentType,
-      clientId,
-      flightId: flightId || undefined,
+      clientId: formData.clientId,
+      flightId: formData.flightId || undefined,
       items,
-      currency,
+      currency: formData.currency,
       subtotal: calculateTotal(),
       total: calculateTotal(),
       status: 'created',
-      observations: observations || undefined,
+      observations: formData.observations || undefined,
       companyId: '1',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      validUntil: documentType === 'quotation' 
-        ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() 
-        : undefined,
+      validUntil: documentType === 'quotation' && formData.validUntil
+        ? formData.validUntil
+        : documentType === 'quotation' 
+          ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() 
+          : undefined,
       quotationId: documentType !== 'quotation' && sourceDocumentId ? sourceDocumentId : undefined,
       proformaId: documentType === 'invoice' && sourceDocumentId ? sourceDocumentId : undefined,
     };
@@ -170,10 +197,13 @@ export function DocumentFormDialog({
   };
 
   const resetForm = () => {
-    setClientId('');
-    setFlightId('');
-    setCurrency('BRL');
-    setObservations('');
+    setFormData({
+      clientId: '',
+      flightId: '',
+      currency: 'BRL',
+      validUntil: '',
+      observations: '',
+    });
     setSourceDocumentId('');
     setItems([{ id: '1', description: '', quantity: 1, unitPrice: 0, total: 0 }]);
   };
@@ -181,7 +211,7 @@ export function DocumentFormDialog({
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
-      currency: currency,
+      currency: formData.currency,
     }).format(value);
   };
 
@@ -189,7 +219,7 @@ export function DocumentFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <IconComponent className={`w-5 h-5 ${config.color}`} />
@@ -232,128 +262,156 @@ export function DocumentFormDialog({
             </div>
           )}
 
-          {/* Client Selection */}
-          <div className="space-y-2">
-            <Label>Cliente *</Label>
-            <Combobox
-              options={activeClients.map(client => ({
-                value: client.id,
-                label: client.type === 'PF'
-                  ? (client as ClientPF).fullName
-                  : (client as ClientPJ).operator,
-              }))}
-              value={clientId}
-              onValueChange={setClientId}
-              placeholder="Selecione ou digite o cliente"
-              searchPlaceholder="Buscar cliente..."
-              emptyText="Nenhum cliente encontrado"
-            />
+          {/* Client & Flight Selection */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Cliente *</Label>
+              <Combobox
+                options={activeClients.map(client => ({
+                  value: client.id,
+                  label: client.type === 'PF'
+                    ? (client as ClientPF).fullName
+                    : (client as ClientPJ).operator,
+                }))}
+                value={formData.clientId}
+                onValueChange={(v) => setFormData({ ...formData, clientId: v })}
+                placeholder="Selecione um cliente"
+                searchPlaceholder="Buscar cliente..."
+                emptyText="Nenhum cliente encontrado."
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Prefixo (opcional)</Label>
+              <Combobox
+                options={[
+                  { value: "none", label: "Nenhum" },
+                  ...flights.map((flight) => ({
+                    value: flight.id,
+                    label: `${flight.aircraftPrefix} - ${flight.origin}→${flight.destination}`,
+                  })),
+                ]}
+                value={formData.flightId || "none"}
+                onValueChange={(v) => setFormData({ ...formData, flightId: v === "none" ? "" : v })}
+                placeholder="Vincular a um voo"
+                searchPlaceholder="Buscar voo..."
+                emptyText="Nenhum voo encontrado."
+              />
+            </div>
           </div>
 
-          {/* Flight Selection (optional) */}
-          <div className="space-y-2">
-            <Label>Voo (opcional)</Label>
-            <Combobox
-              options={[
-                { value: '', label: 'Nenhum' },
-                ...flights.map(flight => ({
-                  value: flight.id,
-                  label: `${flight.aircraftPrefix} - ${flight.origin} → ${flight.destination}`,
-                })),
-              ]}
-              value={flightId}
-              onValueChange={setFlightId}
-              placeholder="Vincular a um voo"
-              searchPlaceholder="Buscar voo..."
-              emptyText="Nenhum voo encontrado"
-            />
-          </div>
-
-          {/* Currency Selection */}
-          <div className="space-y-2">
-            <Label>Moeda *</Label>
-            <Select value={currency} onValueChange={(v) => setCurrency(v as Currency)}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="BRL">R$ (BRL)</SelectItem>
-                <SelectItem value="USD">$ (USD)</SelectItem>
-              </SelectContent>
-            </Select>
+          {/* Currency & Validity */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Moeda *</Label>
+              <Select
+                value={formData.currency}
+                onValueChange={(v) => setFormData({ ...formData, currency: v as Currency })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="BRL">BRL - Real Brasileiro</SelectItem>
+                  <SelectItem value="USD">USD - Dólar Americano</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {documentType === 'quotation' && (
+              <div className="space-y-2">
+                <Label>Válida até *</Label>
+                <Input
+                  type="date"
+                  value={formData.validUntil}
+                  onChange={(e) => setFormData({ ...formData, validUntil: e.target.value })}
+                />
+              </div>
+            )}
           </div>
 
           {/* Items */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label>Itens *</Label>
+              <Label>Itens da Cotação</Label>
               <Button type="button" variant="outline" size="sm" onClick={addItem}>
-                <Plus className="w-4 h-4 mr-1" />
-                Adicionar Item
+                <Plus className="w-4 h-4 mr-1" /> Adicionar Item
               </Button>
             </div>
 
-            <div className="space-y-2">
-              {items.map((item, index) => (
-                <div key={item.id} className="grid grid-cols-12 gap-2 items-end p-3 bg-muted/50 rounded-lg">
-                  <div className="col-span-5">
-                    {index === 0 && <Label className="text-xs text-muted-foreground">Descrição</Label>}
-                    <Input
-                      placeholder="Descrição do serviço"
-                      value={item.description}
-                      onChange={(e) => updateItem(item.id, 'description', e.target.value)}
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    {index === 0 && <Label className="text-xs text-muted-foreground">Qtd</Label>}
-                    <Input
-                      type="number"
-                      min="1"
-                      value={item.quantity}
-                      onChange={(e) => updateItem(item.id, 'quantity', Number(e.target.value))}
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    {index === 0 && <Label className="text-xs text-muted-foreground">Valor Unit.</Label>}
-                    <Input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={item.unitPrice}
-                      onChange={(e) => updateItem(item.id, 'unitPrice', Number(e.target.value))}
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    {index === 0 && <Label className="text-xs text-muted-foreground">Total</Label>}
-                    <Input
-                      value={formatCurrency(item.total)}
-                      disabled
-                      className="bg-muted"
-                    />
-                  </div>
-                  <div className="col-span-1">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeItem(item.id)}
-                      disabled={items.length === 1}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+            <div className="border rounded-lg overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[40%]">Descrição</TableHead>
+                    <TableHead className="w-[15%]">Qtd</TableHead>
+                    <TableHead className="w-[20%]">Preço Unit.</TableHead>
+                    <TableHead className="w-[20%]">Total</TableHead>
+                    <TableHead className="w-[5%]"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {items.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell>
+                        <Select
+                          value={item.description}
+                          onValueChange={(v) => updateItem(item.id, "description", v)}
+                        >
+                          <SelectTrigger className="h-9">
+                            <SelectValue placeholder="Selecione um serviço" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {serviceOptions.map((service) => (
+                              <SelectItem key={service} value={service}>
+                                {service}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          min="1"
+                          className="h-9"
+                          value={item.quantity}
+                          onChange={(e) => updateItem(item.id, "quantity", Number(e.target.value))}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          className="h-9"
+                          value={item.unitPrice}
+                          onChange={(e) => updateItem(item.id, "unitPrice", Number(e.target.value))}
+                        />
+                      </TableCell>
+                      <TableCell className="font-medium">{formatCurrency(item.total)}</TableCell>
+                      <TableCell>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:text-destructive"
+                          onClick={() => removeItem(item.id)}
+                          disabled={items.length === 1}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+
+              <div className="border-t bg-muted/50 p-4">
+                <div className="flex justify-end gap-8">
+                  <div className="text-right">
+                    <p className="text-sm text-muted-foreground">Total</p>
+                    <p className="text-2xl font-bold">{formatCurrency(calculateTotal())}</p>
                   </div>
                 </div>
-              ))}
-            </div>
-
-            {/* Total */}
-            <div className="flex justify-end pt-2 border-t">
-              <div className="text-right">
-                <span className="text-sm text-muted-foreground">Total: </span>
-                <span className="text-xl font-bold text-foreground">
-                  {formatCurrency(calculateTotal())}
-                </span>
               </div>
             </div>
           </div>
@@ -363,8 +421,9 @@ export function DocumentFormDialog({
             <Label>Observações</Label>
             <Textarea
               placeholder="Observações adicionais..."
-              value={observations}
-              onChange={(e) => setObservations(e.target.value)}
+              value={formData.observations}
+              onChange={(e) => setFormData({ ...formData, observations: e.target.value })}
+              rows={3}
             />
           </div>
         </div>
@@ -373,7 +432,7 @@ export function DocumentFormDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
-          <Button onClick={handleSubmit}>
+          <Button onClick={handleSubmit} disabled={!formData.clientId || (documentType === 'quotation' && !formData.validUntil)}>
             Criar {documentType === 'quotation' ? 'Cotação' : documentType === 'proforma' ? 'Proforma' : 'Invoice'}
           </Button>
         </div>
