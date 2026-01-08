@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
+import { ClientsDashboard } from '@/components/clients/ClientsDashboard';
 
 export default function Clients() {
   const { clients, addClient, updateClient, deleteClient } = useClients();
@@ -391,6 +392,9 @@ export default function Clients() {
           </DialogContent>
         </Dialog>
       </PageHeader>
+
+      {/* KPI Dashboard */}
+      <ClientsDashboard clients={clients} />
 
       {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
