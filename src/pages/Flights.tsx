@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { FlightCard } from '@/components/flights/FlightCard';
+import { FlightPortalList } from '@/components/flights/FlightPortalList';
 import { FlightCalendar } from '@/components/flights/FlightCalendar';
 import { FlightStatusBadge } from '@/components/flights/FlightStatusBadge';
 import { useFlights } from '@/contexts/FlightsContext';
@@ -404,76 +404,11 @@ export default function Flights() {
             </div>
           </div>
 
-          {/* Flight List */}
-          <div className="space-y-4">
-            {sortedFlights.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground bg-muted/50 rounded-lg">
-                <Plane className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p className="text-lg font-medium">Nenhum voo encontrado</p>
-                <p className="text-sm">Tente ajustar os filtros ou cadastre um novo voo</p>
-              </div>
-            ) : (
-              sortedFlights.map((flight) => (
-                <div 
-                  key={flight.id}
-                  onClick={() => setSelectedFlight(flight)}
-                  className="flight-card cursor-pointer hover:border-primary/50 transition-all"
-                >
-                  {/* Date Badge */}
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="px-3 py-1.5 bg-primary/10 rounded-lg">
-                      <p className="text-sm font-bold text-primary">
-                        {formatFlightDate(flight.arrivalDate)}
-                      </p>
-                    </div>
-                    <FlightStatusBadge status={flight.status} />
-                  </div>
-
-                  {/* Flight Info */}
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
-                      <Plane className="w-6 h-6 text-primary" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-callsign text-lg text-foreground">{flight.aircraftPrefix}</p>
-                      <p className="text-sm text-muted-foreground">{flight.aircraftModel}</p>
-                    </div>
-                  </div>
-
-                  {/* Route */}
-                  <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg mb-4">
-                    <div className="text-center">
-                      <p className="text-icao text-xl">{flight.origin}</p>
-                      <p className="text-xs text-muted-foreground">Origem</p>
-                    </div>
-                    <ArrowRight className="w-6 h-6 text-primary" />
-                    <div className="text-center">
-                      <p className="text-icao text-xl">{flight.destination}</p>
-                      <p className="text-xs text-muted-foreground">Destino</p>
-                    </div>
-                  </div>
-
-                  {/* Times */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex items-center gap-2 p-3 border border-border rounded-lg">
-                      <Clock className="w-4 h-4 text-success" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">Chegada</p>
-                        <p className="text-sm font-bold">{flight.arrivalTime}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 p-3 border border-border rounded-lg">
-                      <Clock className="w-4 h-4 text-info" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">Saída</p>
-                        <p className="text-sm font-bold">{flight.departureTime}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+          {/* Flight Portal List */}
+          <FlightPortalList 
+            flights={sortedFlights} 
+            onFlightClick={(flight) => setSelectedFlight(flight)} 
+          />
         </TabsContent>
 
         {/* Calendário Tab */}
