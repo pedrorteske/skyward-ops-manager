@@ -4,15 +4,25 @@ import { StatsCard } from '@/components/dashboard/StatsCard';
 import { FlightCard } from '@/components/flights/FlightCard';
 import { QuotationStatusBadge } from '@/components/quotations/QuotationStatusBadge';
 import { ResourceTimeline } from '@/components/dashboard/ResourceTimeline';
-import { mockFlights, mockQuotations, mockDashboardStats, getClientById } from '@/data/mockData';
+import { useFlights } from '@/contexts/FlightsContext';
+import { mockQuotations, getClientById } from '@/data/mockData';
 import { Plane, PlaneLanding, FileText, Users, ArrowRight, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
 export default function Dashboard() {
-  const todayFlights = mockFlights.filter(f => f.arrivalDate === '2026-01-08' || f.departureDate === '2026-01-08');
-  const upcomingFlights = mockFlights.filter(f => f.status === 'scheduled').slice(0, 3);
+  const { flights } = useFlights();
+  
+  // Get today's date in YYYY-MM-DD format
+  const today = new Date().toISOString().split('T')[0];
+  
+  const todayFlights = flights.filter(f => f.arrivalDate === today || f.departureDate === today);
+  const upcomingFlights = flights.filter(f => f.status === 'scheduled' && f.arrivalDate >= today).slice(0, 3);
   const recentQuotations = mockQuotations.slice(0, 3);
+  
+  // Calculate dynamic stats
+  const activeClients = 3; // This would come from clients context in the future
+  const openQuotations = mockQuotations.filter(q => q.status === 'created' || q.status === 'sent').length;
 
   return (
     <MainLayout>
@@ -25,28 +35,28 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatsCard
           title="Voos Hoje"
-          value={mockDashboardStats.flightsToday}
+          value={todayFlights.length}
           description="Operações programadas"
           icon={Plane}
           variant="primary"
         />
         <StatsCard
           title="Próximas Chegadas"
-          value={mockDashboardStats.upcomingArrivals}
-          description="Nas próximas 24h"
+          value={upcomingFlights.length}
+          description="Voos agendados"
           icon={PlaneLanding}
           variant="success"
         />
         <StatsCard
           title="Cotações em Aberto"
-          value={mockDashboardStats.openQuotations}
+          value={openQuotations}
           description="Aguardando resposta"
           icon={FileText}
           variant="warning"
         />
         <StatsCard
           title="Clientes Ativos"
-          value={mockDashboardStats.activeClients}
+          value={activeClients}
           description="Cadastros ativos"
           icon={Users}
           variant="info"
@@ -63,7 +73,7 @@ export default function Dashboard() {
             </Button>
           </Link>
         </div>
-        <ResourceTimeline flights={mockFlights} />
+        <ResourceTimeline flights={flights} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

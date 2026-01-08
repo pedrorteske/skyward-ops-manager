@@ -4,7 +4,7 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { FlightCard } from '@/components/flights/FlightCard';
 import { FlightCalendar } from '@/components/flights/FlightCalendar';
 import { FlightStatusBadge } from '@/components/flights/FlightStatusBadge';
-import { mockFlights } from '@/data/mockData';
+import { useFlights } from '@/contexts/FlightsContext';
 import { Flight, FlightType, FlightStatus, flightTypeLabels, flightStatusLabels } from '@/types/aviation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,7 +19,7 @@ import { cn } from '@/lib/utils';
 type SortOrder = 'newest' | 'oldest';
 
 export default function Flights() {
-  const [flights, setFlights] = useState<Flight[]>(mockFlights);
+  const { flights, addFlight } = useFlights();
   const [activeTab, setActiveTab] = useState<string>('portal');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<FlightStatus | 'all'>('all');
@@ -71,7 +71,7 @@ export default function Flights() {
       updatedAt: new Date().toISOString(),
     };
     
-    setFlights([newFlight, ...flights]);
+    addFlight(newFlight);
     setIsNewFlightOpen(false);
     setFormData({
       aircraftPrefix: '',

@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { FlightsProvider } from "@/contexts/FlightsContext";
 import Dashboard from "./pages/Dashboard";
 import Flights from "./pages/Flights";
 import Clients from "./pages/Clients";
@@ -16,20 +17,22 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/flights" element={<Flights />} />
-            <Route path="/clients" element={<Clients />} />
-            <Route path="/quotations" element={<Quotations />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <FlightsProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/flights" element={<Flights />} />
+              <Route path="/clients" element={<Clients />} />
+              <Route path="/quotations" element={<Quotations />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </FlightsProvider>
     </AuthProvider>
   </QueryClientProvider>
 );
