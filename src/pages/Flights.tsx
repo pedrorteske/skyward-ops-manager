@@ -13,13 +13,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Search, Calendar, List, Plane, ArrowRight, Clock, ArrowUpDown } from 'lucide-react';
+import { Plus, Search, Calendar, List, Plane, ArrowRight, Clock, ArrowUpDown, Pencil, Trash2 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
 
 type SortOrder = 'newest' | 'oldest';
 
 export default function Flights() {
-  const { flights, addFlight } = useFlights();
+  const { flights, addFlight, updateFlight, deleteFlight } = useFlights();
   const [activeTab, setActiveTab] = useState<string>('portal');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<FlightStatus | 'all'>('all');
@@ -27,6 +28,21 @@ export default function Flights() {
   const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
   const [isNewFlightOpen, setIsNewFlightOpen] = useState(false);
   const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    aircraftPrefix: '',
+    aircraftModel: '',
+    flightType: 'G' as FlightType,
+    origin: '',
+    destination: '',
+    arrivalDate: '',
+    arrivalTime: '',
+    departureDate: '',
+    departureTime: '',
+    status: 'scheduled' as FlightStatus,
+    observations: '',
+  });
 
   // Form state for new flight
   const [formData, setFormData] = useState({
@@ -90,6 +106,49 @@ export default function Flights() {
 
   const toggleSortOrder = () => {
     setSortOrder(prev => prev === 'newest' ? 'oldest' : 'newest');
+  };
+
+  const handleEditClick = () => {
+    if (selectedFlight) {
+      setEditFormData({
+        aircraftPrefix: selectedFlight.aircraftPrefix,
+        aircraftModel: selectedFlight.aircraftModel,
+        flightType: selectedFlight.flightType,
+        origin: selectedFlight.origin,
+        destination: selectedFlight.destination,
+        arrivalDate: selectedFlight.arrivalDate,
+        arrivalTime: selectedFlight.arrivalTime,
+        departureDate: selectedFlight.departureDate,
+        departureTime: selectedFlight.departureTime,
+        status: selectedFlight.status,
+        observations: selectedFlight.observations || '',
+      });
+      setIsEditMode(true);
+    }
+  };
+
+  const handleUpdateFlight = () => {
+    if (selectedFlight) {
+      updateFlight(selectedFlight.id, {
+        ...editFormData,
+        updatedAt: new Date().toISOString(),
+      });
+      setIsEditMode(false);
+      setSelectedFlight(null);
+    }
+  };
+
+  const handleDeleteFlight = () => {
+    if (selectedFlight) {
+      deleteFlight(selectedFlight.id);
+      setIsDeleteDialogOpen(false);
+      setSelectedFlight(null);
+    }
+  };
+
+  const handleCloseDetail = () => {
+    setSelectedFlight(null);
+    setIsEditMode(false);
   };
 
   // Format date for display
@@ -427,9 +486,9 @@ export default function Flights() {
       </Tabs>
 
       {/* Flight Detail Modal */}
-      <Dialog open={!!selectedFlight} onOpenChange={() => setSelectedFlight(null)}>
-        <DialogContent className="max-w-lg">
-          {selectedFlight && (
+      <Dialog open={!!selectedFlight} onOpenChange={handleCloseDetail}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          {selectedFlight && !isEditMode && (
             <>
               <DialogHeader>
                 <DialogTitle className="flex items-center justify-between">
@@ -489,11 +548,212 @@ export default function Flights() {
                     <p className="text-sm">{selectedFlight.observations}</p>
                   </div>
                 )}
+
+                {/* Action Buttons */}
+                <div className="flex gap-2 pt-4 border-t">
+                  <Button onClick={handleEditClick} className="flex-1 gap-2">
+                    <Pencil className="w-4 h-4" />
+                    Editar
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    onClick={() => setIsDeleteDialogOpen(true)}
+                    className="gap-2"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Excluir
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Edit Mode */}
+          {selectedFlight && isEditMode && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Pencil className="w-5 h-5 text-primary" />
+                  Editar Voo
+                </DialogTitle>
+              </DialogHeader>
+
+              <div className="grid gap-4 py-4">
+                {/* Aircraft Info */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-prefix">Prefixo da Aeronave *</Label>
+                    <Input
+                      id="edit-prefix"
+                      placeholder="PR-ABC"
+                      value={editFormData.aircraftPrefix}
+                      onChange={(e) => setEditFormData({...editFormData, aircraftPrefix: e.target.value.toUpperCase()})}
+                      className="font-mono uppercase"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-model">Modelo da Aeronave *</Label>
+                    <Input
+                      id="edit-model"
+                      placeholder="Embraer Phenom 300"
+                      value={editFormData.aircraftModel}
+                      onChange={(e) => setEditFormData({...editFormData, aircraftModel: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                {/* Flight Type */}
+                <div className="space-y-2">
+                  <Label>Tipo de Voo *</Label>
+                  <Select 
+                    value={editFormData.flightType} 
+                    onValueChange={(v) => setEditFormData({...editFormData, flightType: v as FlightType})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(flightTypeLabels).map(([key, label]) => (
+                        <SelectItem key={key} value={key}>
+                          ({key}) {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Route */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-origin">Origem (ICAO) *</Label>
+                    <Input
+                      id="edit-origin"
+                      placeholder="SBGR"
+                      maxLength={4}
+                      value={editFormData.origin}
+                      onChange={(e) => setEditFormData({...editFormData, origin: e.target.value.toUpperCase()})}
+                      className="font-mono uppercase"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-destination">Destino (ICAO) *</Label>
+                    <Input
+                      id="edit-destination"
+                      placeholder="SBRJ"
+                      maxLength={4}
+                      value={editFormData.destination}
+                      onChange={(e) => setEditFormData({...editFormData, destination: e.target.value.toUpperCase()})}
+                      className="font-mono uppercase"
+                    />
+                  </div>
+                </div>
+
+                {/* Arrival */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-arrivalDate">Data de Chegada *</Label>
+                    <Input
+                      id="edit-arrivalDate"
+                      type="date"
+                      value={editFormData.arrivalDate}
+                      onChange={(e) => setEditFormData({...editFormData, arrivalDate: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-arrivalTime">Hora de Chegada *</Label>
+                    <Input
+                      id="edit-arrivalTime"
+                      type="time"
+                      value={editFormData.arrivalTime}
+                      onChange={(e) => setEditFormData({...editFormData, arrivalTime: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                {/* Departure */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-departureDate">Data de Saída *</Label>
+                    <Input
+                      id="edit-departureDate"
+                      type="date"
+                      value={editFormData.departureDate}
+                      onChange={(e) => setEditFormData({...editFormData, departureDate: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-departureTime">Hora de Saída *</Label>
+                    <Input
+                      id="edit-departureTime"
+                      type="time"
+                      value={editFormData.departureTime}
+                      onChange={(e) => setEditFormData({...editFormData, departureTime: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                {/* Status */}
+                <div className="space-y-2">
+                  <Label>Status *</Label>
+                  <Select 
+                    value={editFormData.status} 
+                    onValueChange={(v) => setEditFormData({...editFormData, status: v as FlightStatus})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(flightStatusLabels).map(([key, label]) => (
+                        <SelectItem key={key} value={key}>{label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Observations */}
+                <div className="space-y-2">
+                  <Label htmlFor="edit-observations">Observações Operacionais</Label>
+                  <Textarea
+                    id="edit-observations"
+                    placeholder="Informações adicionais sobre o voo..."
+                    value={editFormData.observations}
+                    onChange={(e) => setEditFormData({...editFormData, observations: e.target.value})}
+                    rows={3}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setIsEditMode(false)}>
+                  Cancelar
+                </Button>
+                <Button onClick={handleUpdateFlight}>
+                  Salvar Alterações
+                </Button>
               </div>
             </>
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir Voo</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir o voo <span className="font-mono font-bold">{selectedFlight?.aircraftPrefix}</span>? 
+              Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteFlight} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </MainLayout>
   );
 }
