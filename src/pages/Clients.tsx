@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { mockClients } from '@/data/mockData';
+import { useClients } from '@/contexts/ClientsContext';
 import { Client, ClientPF, ClientPJ, ClientType } from '@/types/aviation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,7 +17,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { toast } from 'sonner';
 
 export default function Clients() {
-  const [clients, setClients] = useState<Client[]>(mockClients);
+  const { clients, addClient, updateClient, deleteClient } = useClients();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<ClientType | 'all'>('all');
   const [filterStatus, setFilterStatus] = useState<'active' | 'inactive' | 'all'>('all');
@@ -97,9 +97,10 @@ export default function Clients() {
           updatedAt: new Date().toISOString(),
         } as ClientPJ;
     
-    setClients([newClient, ...clients]);
+    addClient(newClient);
     setIsNewClientOpen(false);
     resetForm();
+    toast.success('Cliente cadastrado com sucesso!');
   };
 
   const resetForm = () => {
@@ -169,7 +170,7 @@ export default function Clients() {
           updatedAt: new Date().toISOString(),
         } as ClientPJ;
 
-    setClients(clients.map(c => c.id === selectedClient.id ? updatedClient : c));
+    updateClient(selectedClient.id, updatedClient);
     setIsEditDialogOpen(false);
     setSelectedClient(null);
     toast.success('Cliente atualizado com sucesso!');
@@ -182,7 +183,7 @@ export default function Clients() {
 
   const handleDeleteClient = () => {
     if (selectedClient) {
-      setClients(clients.filter(c => c.id !== selectedClient.id));
+      deleteClient(selectedClient.id);
       setIsDeleteDialogOpen(false);
       setSelectedClient(null);
       toast.success('Cliente excluído com sucesso!');

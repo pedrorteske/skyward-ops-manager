@@ -2,7 +2,10 @@ import { useState } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { QuotationStatusBadge } from "@/components/quotations/QuotationStatusBadge";
-import { mockQuotations, mockClients, mockFlights, getClientById, getFlightById } from "@/data/mockData";
+import { useQuotations } from "@/contexts/QuotationsContext";
+import { useClients } from "@/contexts/ClientsContext";
+import { useFlights } from "@/contexts/FlightsContext";
+import { getFlightById } from "@/data/mockData";
 import { Quotation, QuotationItem, QuotationStatus, quotationStatusLabels, Currency, Client } from "@/types/aviation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,7 +36,9 @@ const serviceOptions = [
 ];
 
 export default function Quotations() {
-  const [quotations, setQuotations] = useState<Quotation[]>(mockQuotations);
+  const { quotations, addQuotation, updateQuotation, deleteQuotation, updateQuotationStatus } = useQuotations();
+  const { clients, getClientById } = useClients();
+  const { flights } = useFlights();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<QuotationStatus | "all">("all");
   const [isNewQuotationOpen, setIsNewQuotationOpen] = useState(false);
@@ -132,7 +137,7 @@ export default function Quotations() {
       validUntil: formData.validUntil,
     };
 
-    setQuotations([newQuotation, ...quotations]);
+    addQuotation(newQuotation);
     setIsNewQuotationOpen(false);
     resetForm();
     toast.success("Cotação criada com sucesso!");
@@ -216,7 +221,7 @@ export default function Quotations() {
         updatedAt: new Date().toISOString(),
       };
 
-      setQuotations(quotations.map((q) => (q.id === selectedQuotation.id ? updatedQuotation : q)));
+      updateQuotation(selectedQuotation.id, updatedQuotation);
       setIsEditMode(false);
       setSelectedQuotation(null);
       toast.success("Cotação atualizada com sucesso!");
@@ -225,7 +230,7 @@ export default function Quotations() {
 
   const handleDeleteQuotation = () => {
     if (selectedQuotation) {
-      setQuotations(quotations.filter((q) => q.id !== selectedQuotation.id));
+      deleteQuotation(selectedQuotation.id);
       setIsDeleteDialogOpen(false);
       setSelectedQuotation(null);
       toast.success("Cotação excluída com sucesso!");
@@ -239,7 +244,7 @@ export default function Quotations() {
 
   const handleSendEmail = (quotation: Quotation) => {
     toast.success("E-mail enviado com sucesso!");
-    setQuotations(quotations.map((q) => (q.id === quotation.id ? { ...q, status: "sent" as QuotationStatus } : q)));
+    updateQuotationStatus(quotation.id, "sent");
   };
 
   const handleDownloadPDF = (quotation: Quotation) => {
@@ -281,7 +286,7 @@ export default function Quotations() {
                 <div className="space-y-2">
                   <Label>Cliente *</Label>
                   <Combobox
-                    options={mockClients
+                    options={clients
                       .filter((c) => c.status === "active")
                       .map((client) => ({
                         value: client.id,
@@ -299,7 +304,7 @@ export default function Quotations() {
                   <Combobox
                     options={[
                       { value: "none", label: "Nenhum" },
-                      ...mockFlights.map((flight) => ({
+                      ...flights.map((flight) => ({
                         value: flight.id,
                         label: `${flight.aircraftPrefix} - ${flight.origin}→${flight.destination}`,
                       })),
@@ -681,7 +686,7 @@ export default function Quotations() {
                   <div className="space-y-2">
                     <Label>Cliente *</Label>
                     <Combobox
-                      options={mockClients
+                      options={clients
                         .filter((c) => c.status === "active")
                         .map((client) => ({
                           value: client.id,
@@ -699,7 +704,7 @@ export default function Quotations() {
                     <Combobox
                       options={[
                         { value: "none", label: "Nenhum" },
-                        ...mockFlights.map((flight) => ({
+                        ...flights.map((flight) => ({
                           value: flight.id,
                           label: `${flight.aircraftPrefix} - ${flight.origin}→${flight.destination}`,
                         })),
