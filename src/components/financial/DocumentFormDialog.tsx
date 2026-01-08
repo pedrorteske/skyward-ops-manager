@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Combobox } from '@/components/ui/combobox';
 import { Plus, Trash2, FileText, Receipt, FileCheck } from 'lucide-react';
 import { useClients } from '@/contexts/ClientsContext';
 import { useFlights } from '@/contexts/FlightsContext';
@@ -234,38 +235,38 @@ export function DocumentFormDialog({
           {/* Client Selection */}
           <div className="space-y-2">
             <Label>Cliente *</Label>
-            <Select value={clientId} onValueChange={setClientId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione um cliente" />
-              </SelectTrigger>
-              <SelectContent>
-                {activeClients.map(client => (
-                  <SelectItem key={client.id} value={client.id}>
-                    {client.type === 'PF'
-                      ? (client as ClientPF).fullName
-                      : (client as ClientPJ).operator}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Combobox
+              options={activeClients.map(client => ({
+                value: client.id,
+                label: client.type === 'PF'
+                  ? (client as ClientPF).fullName
+                  : (client as ClientPJ).operator,
+              }))}
+              value={clientId}
+              onValueChange={setClientId}
+              placeholder="Selecione ou digite o cliente"
+              searchPlaceholder="Buscar cliente..."
+              emptyText="Nenhum cliente encontrado"
+            />
           </div>
 
           {/* Flight Selection (optional) */}
           <div className="space-y-2">
             <Label>Voo (opcional)</Label>
-            <Select value={flightId || "no-flight"} onValueChange={(v) => setFlightId(v === "no-flight" ? "" : v)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Vincular a um voo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="no-flight">Nenhum</SelectItem>
-                {flights.map(flight => (
-                  <SelectItem key={flight.id} value={flight.id}>
-                    {flight.aircraftPrefix} - {flight.origin} → {flight.destination}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Combobox
+              options={[
+                { value: '', label: 'Nenhum' },
+                ...flights.map(flight => ({
+                  value: flight.id,
+                  label: `${flight.aircraftPrefix} - ${flight.origin} → ${flight.destination}`,
+                })),
+              ]}
+              value={flightId}
+              onValueChange={setFlightId}
+              placeholder="Vincular a um voo"
+              searchPlaceholder="Buscar voo..."
+              emptyText="Nenhum voo encontrado"
+            />
           </div>
 
           {/* Currency Selection */}
