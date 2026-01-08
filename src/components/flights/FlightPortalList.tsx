@@ -46,13 +46,14 @@ export function FlightPortalList({ flights, onFlightClick }: FlightPortalListPro
   return (
     <div className="bg-card rounded-xl border border-border overflow-hidden">
       {/* Header */}
-      <div className="grid grid-cols-12 gap-2 px-4 py-3 bg-muted/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
-        <div className="col-span-2">Data</div>
+      <div className="grid grid-cols-14 gap-2 px-4 py-3 bg-muted/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
         <div className="col-span-2">Aeronave</div>
-        <div className="col-span-3">Rota</div>
-        <div className="col-span-2">Chegada</div>
-        <div className="col-span-2">Saída</div>
-        <div className="col-span-1 text-right">Status</div>
+        <div className="col-span-2">Rota</div>
+        <div className="col-span-2">Data Chegada</div>
+        <div className="col-span-2">Hora Chegada</div>
+        <div className="col-span-2">Data Saída</div>
+        <div className="col-span-2">Hora Saída</div>
+        <div className="col-span-2 text-right">Status</div>
       </div>
 
       {/* Flight Rows */}
@@ -62,17 +63,10 @@ export function FlightPortalList({ flights, onFlightClick }: FlightPortalListPro
             key={flight.id}
             onClick={() => onFlightClick?.(flight)}
             className={cn(
-              "grid grid-cols-12 gap-2 px-4 py-3 items-center cursor-pointer transition-colors",
+              "grid grid-cols-14 gap-2 px-4 py-3 items-center cursor-pointer transition-colors",
               "hover:bg-muted/30"
             )}
           >
-            {/* Date */}
-            <div className="col-span-2">
-              <span className="text-xs font-medium text-foreground">
-                {formatDate(flight.arrivalDate)}
-              </span>
-            </div>
-
             {/* Aircraft */}
             <div className="col-span-2 flex items-center gap-2">
               <Plane className="w-3.5 h-3.5 text-primary shrink-0" />
@@ -84,7 +78,7 @@ export function FlightPortalList({ flights, onFlightClick }: FlightPortalListPro
             </div>
 
             {/* Route */}
-            <div className="col-span-3 flex items-center gap-1.5">
+            <div className="col-span-2 flex items-center gap-1.5">
               <span className="text-sm font-mono font-bold text-foreground">
                 {flight.origin}
               </span>
@@ -94,10 +88,24 @@ export function FlightPortalList({ flights, onFlightClick }: FlightPortalListPro
               </span>
             </div>
 
+            {/* Arrival Date */}
+            <div className="col-span-2">
+              <span className="text-xs font-medium text-foreground">
+                {formatDate(flight.arrivalDate)}
+              </span>
+            </div>
+
             {/* Arrival Time */}
             <div className="col-span-2">
               <span className="text-sm font-mono text-foreground">
                 {formatTime(flight.arrivalTime)}
+              </span>
+            </div>
+
+            {/* Departure Date */}
+            <div className="col-span-2">
+              <span className="text-xs font-medium text-foreground">
+                {formatDate(flight.departureDate)}
               </span>
             </div>
 
@@ -109,7 +117,7 @@ export function FlightPortalList({ flights, onFlightClick }: FlightPortalListPro
             </div>
 
             {/* Status */}
-            <div className="col-span-1 flex justify-end">
+            <div className="col-span-2 flex justify-end">
               <span className={cn(
                 "text-xs font-medium px-2 py-1 rounded-full",
                 statusColors[flight.status],
