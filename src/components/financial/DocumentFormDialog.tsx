@@ -253,12 +253,12 @@ export function DocumentFormDialog({
           {/* Flight Selection (optional) */}
           <div className="space-y-2">
             <Label>Voo (opcional)</Label>
-            <Select value={flightId} onValueChange={setFlightId}>
+            <Select value={flightId || "no-flight"} onValueChange={(v) => setFlightId(v === "no-flight" ? "" : v)}>
               <SelectTrigger>
                 <SelectValue placeholder="Vincular a um voo" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">Nenhum</SelectItem>
+                <SelectItem value="no-flight">Nenhum</SelectItem>
                 {flights.map(flight => (
                   <SelectItem key={flight.id} value={flight.id}>
                     {flight.aircraftPrefix} - {flight.origin} → {flight.destination}
