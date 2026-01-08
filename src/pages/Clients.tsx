@@ -10,9 +10,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Search, User, Building2, Mail, Phone, MoreHorizontal } from 'lucide-react';
+import { Plus, Search, User, Building2, Mail, Phone, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
 
 export default function Clients() {
   const [clients, setClients] = useState<Client[]>(mockClients);
@@ -20,8 +22,12 @@ export default function Clients() {
   const [filterType, setFilterType] = useState<ClientType | 'all'>('all');
   const [filterStatus, setFilterStatus] = useState<'active' | 'inactive' | 'all'>('all');
   const [isNewClientOpen, setIsNewClientOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   
   const [clientType, setClientType] = useState<ClientType>('PJ');
+  const [editClientType, setEditClientType] = useState<ClientType>('PJ');
   const [formDataPF, setFormDataPF] = useState({
     fullName: '',
     cpf: '',
@@ -31,6 +37,24 @@ export default function Clients() {
     status: 'active' as 'active' | 'inactive',
   });
   const [formDataPJ, setFormDataPJ] = useState({
+    operator: '',
+    cnpj: '',
+    commercialEmail: '',
+    phone: '',
+    contactPerson: '',
+    observations: '',
+    status: 'active' as 'active' | 'inactive',
+  });
+
+  const [editFormDataPF, setEditFormDataPF] = useState({
+    fullName: '',
+    cpf: '',
+    email: '',
+    phone: '',
+    observations: '',
+    status: 'active' as 'active' | 'inactive',
+  });
+  const [editFormDataPJ, setEditFormDataPJ] = useState({
     operator: '',
     cnpj: '',
     commercialEmail: '',
@@ -96,6 +120,77 @@ export default function Clients() {
       observations: '',
       status: 'active',
     });
+  };
+
+  const handleEditClick = (client: Client) => {
+    setSelectedClient(client);
+    setEditClientType(client.type);
+    
+    if (client.type === 'PF') {
+      const pfClient = client as ClientPF;
+      setEditFormDataPF({
+        fullName: pfClient.fullName,
+        cpf: pfClient.cpf,
+        email: pfClient.email,
+        phone: pfClient.phone,
+        observations: pfClient.observations || '',
+        status: pfClient.status,
+      });
+    } else {
+      const pjClient = client as ClientPJ;
+      setEditFormDataPJ({
+        operator: pjClient.operator,
+        cnpj: pjClient.cnpj,
+        commercialEmail: pjClient.commercialEmail,
+        phone: pjClient.phone,
+        contactPerson: pjClient.contactPerson,
+        observations: pjClient.observations || '',
+        status: pjClient.status,
+      });
+    }
+    
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateClient = () => {
+    if (!selectedClient) return;
+
+    const updatedClient: Client = editClientType === 'PF'
+      ? {
+          ...selectedClient,
+          type: 'PF',
+          ...editFormDataPF,
+          updatedAt: new Date().toISOString(),
+        } as ClientPF
+      : {
+          ...selectedClient,
+          type: 'PJ',
+          ...editFormDataPJ,
+          updatedAt: new Date().toISOString(),
+        } as ClientPJ;
+
+    setClients(clients.map(c => c.id === selectedClient.id ? updatedClient : c));
+    setIsEditDialogOpen(false);
+    setSelectedClient(null);
+    toast.success('Cliente atualizado com sucesso!');
+  };
+
+  const handleDeleteClick = (client: Client) => {
+    setSelectedClient(client);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteClient = () => {
+    if (selectedClient) {
+      setClients(clients.filter(c => c.id !== selectedClient.id));
+      setIsDeleteDialogOpen(false);
+      setSelectedClient(null);
+      toast.success('Cliente excluído com sucesso!');
+    }
+  };
+
+  const getClientName = (client: Client) => {
+    return client.type === 'PF' ? (client as ClientPF).fullName : (client as ClientPJ).operator;
   };
 
   return (
@@ -412,9 +507,17 @@ export default function Clients() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Editar</DropdownMenuItem>
-                      <DropdownMenuItem>Ver detalhes</DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">Excluir</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleEditClick(client)}>
+                        <Pencil className="w-4 h-4 mr-2" />
+                        Editar
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        className="text-destructive"
+                        onClick={() => handleDeleteClick(client)}
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Excluir
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
@@ -431,6 +534,187 @@ export default function Clients() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Edit Client Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Pencil className="w-5 h-5 text-primary" />
+              Editar Cliente
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            {editClientType === 'PF' ? (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-fullName">Nome Completo *</Label>
+                  <Input
+                    id="edit-fullName"
+                    placeholder="João Pedro Martins"
+                    value={editFormDataPF.fullName}
+                    onChange={(e) => setEditFormDataPF({...editFormDataPF, fullName: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-cpf">CPF *</Label>
+                  <Input
+                    id="edit-cpf"
+                    placeholder="000.000.000-00"
+                    value={editFormDataPF.cpf}
+                    onChange={(e) => setEditFormDataPF({...editFormDataPF, cpf: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-emailPF">E-mail *</Label>
+                  <Input
+                    id="edit-emailPF"
+                    type="email"
+                    placeholder="email@exemplo.com"
+                    value={editFormDataPF.email}
+                    onChange={(e) => setEditFormDataPF({...editFormDataPF, email: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-phonePF">Telefone *</Label>
+                  <Input
+                    id="edit-phonePF"
+                    placeholder="(11) 99999-9999"
+                    value={editFormDataPF.phone}
+                    onChange={(e) => setEditFormDataPF({...editFormDataPF, phone: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-observationsPF">Observações</Label>
+                  <Textarea
+                    id="edit-observationsPF"
+                    placeholder="Observações sobre o cliente..."
+                    value={editFormDataPF.observations}
+                    onChange={(e) => setEditFormDataPF({...editFormDataPF, observations: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Status *</Label>
+                  <Select 
+                    value={editFormDataPF.status} 
+                    onValueChange={(v) => setEditFormDataPF({...editFormDataPF, status: v as 'active' | 'inactive'})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">Ativo</SelectItem>
+                      <SelectItem value="inactive">Inativo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-operator">Operador *</Label>
+                  <Input
+                    id="edit-operator"
+                    placeholder="Nome da Empresa"
+                    value={editFormDataPJ.operator}
+                    onChange={(e) => setEditFormDataPJ({...editFormDataPJ, operator: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-cnpj">CNPJ *</Label>
+                  <Input
+                    id="edit-cnpj"
+                    placeholder="00.000.000/0001-00"
+                    value={editFormDataPJ.cnpj}
+                    onChange={(e) => setEditFormDataPJ({...editFormDataPJ, cnpj: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-commercialEmail">E-mail Comercial *</Label>
+                  <Input
+                    id="edit-commercialEmail"
+                    type="email"
+                    placeholder="comercial@empresa.com"
+                    value={editFormDataPJ.commercialEmail}
+                    onChange={(e) => setEditFormDataPJ({...editFormDataPJ, commercialEmail: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-phonePJ">Telefone *</Label>
+                  <Input
+                    id="edit-phonePJ"
+                    placeholder="(11) 3000-0000"
+                    value={editFormDataPJ.phone}
+                    onChange={(e) => setEditFormDataPJ({...editFormDataPJ, phone: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-contactPerson">Contato Responsável *</Label>
+                  <Input
+                    id="edit-contactPerson"
+                    placeholder="Nome do responsável"
+                    value={editFormDataPJ.contactPerson}
+                    onChange={(e) => setEditFormDataPJ({...editFormDataPJ, contactPerson: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-observationsPJ">Observações</Label>
+                  <Textarea
+                    id="edit-observationsPJ"
+                    placeholder="Observações sobre o cliente..."
+                    value={editFormDataPJ.observations}
+                    onChange={(e) => setEditFormDataPJ({...editFormDataPJ, observations: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Status *</Label>
+                  <Select 
+                    value={editFormDataPJ.status} 
+                    onValueChange={(v) => setEditFormDataPJ({...editFormDataPJ, status: v as 'active' | 'inactive'})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">Ativo</SelectItem>
+                      <SelectItem value="inactive">Inativo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            )}
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleUpdateClient}>
+              Salvar Alterações
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir Cliente</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir o cliente <span className="font-bold">{selectedClient && getClientName(selectedClient)}</span>? 
+              Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteClient} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </MainLayout>
   );
 }
