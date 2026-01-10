@@ -9,7 +9,7 @@ import { FinancialStatusBadge } from './FinancialStatusBadge';
 import { useClients } from '@/contexts/ClientsContext';
 import { useFlights } from '@/contexts/FlightsContext';
 import { useFinancial } from '@/contexts/FinancialContext';
-import type { ClientPF, ClientPJ } from '@/types/aviation';
+import type { ClientPF, ClientPJ, ClientINT } from '@/types/aviation';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { generateFinancialPDF } from '@/lib/pdfGenerator';
@@ -45,13 +45,19 @@ export function DocumentDetailDialog({ document, open, onOpenChange }: DocumentD
   const flight = document.flightId ? flights.find(f => f.id === document.flightId) : null;
 
   const getClientName = () => {
+    if (document.clientName) return document.clientName;
     if (!client) return 'Cliente não encontrado';
-    return client.type === 'PF' ? (client as ClientPF).fullName : (client as ClientPJ).operator;
+    if (client.type === 'PF') return (client as ClientPF).fullName;
+    if (client.type === 'PJ') return (client as ClientPJ).operator;
+    return (client as ClientINT).operator;
   };
 
   const getClientEmail = () => {
+    if (document.clientName) return '';
     if (!client) return '';
-    return client.type === 'PF' ? (client as ClientPF).email : (client as ClientPJ).commercialEmail;
+    if (client.type === 'PF') return (client as ClientPF).email;
+    if (client.type === 'PJ') return (client as ClientPJ).commercialEmail;
+    return (client as ClientINT).email;
   };
 
   const formatCurrency = (value: number) => {
@@ -73,7 +79,9 @@ export function DocumentDetailDialog({ document, open, onOpenChange }: DocumentD
       ? (client as ClientPF).cpf 
       : client?.type === 'PJ' 
         ? (client as ClientPJ).cnpj 
-        : undefined;
+        : client?.type === 'INT'
+          ? (client as ClientINT).country
+          : undefined;
 
     const clientInfoForPDF = {
       name: clientName,

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { useClients } from '@/contexts/ClientsContext';
-import { Client, ClientPF, ClientPJ, ClientType } from '@/types/aviation';
+import { Client, ClientPF, ClientPJ, ClientINT, ClientType } from '@/types/aviation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Search, User, Building2, Mail, Phone, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Search, User, Building2, Mail, Phone, MoreHorizontal, Pencil, Trash2, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -29,6 +29,7 @@ export default function Clients() {
   
   const [clientType, setClientType] = useState<ClientType>('PJ');
   const [editClientType, setEditClientType] = useState<ClientType>('PJ');
+  
   const [formDataPF, setFormDataPF] = useState({
     fullName: '',
     cpf: '',
@@ -43,6 +44,14 @@ export default function Clients() {
     commercialEmail: '',
     phone: '',
     contactPerson: '',
+    observations: '',
+    status: 'active' as 'active' | 'inactive',
+  });
+  const [formDataINT, setFormDataINT] = useState({
+    operator: '',
+    country: '',
+    email: '',
+    phone: '',
     observations: '',
     status: 'active' as 'active' | 'inactive',
   });
@@ -64,14 +73,30 @@ export default function Clients() {
     observations: '',
     status: 'active' as 'active' | 'inactive',
   });
+  const [editFormDataINT, setEditFormDataINT] = useState({
+    operator: '',
+    country: '',
+    email: '',
+    phone: '',
+    observations: '',
+    status: 'active' as 'active' | 'inactive',
+  });
 
   const filteredClients = clients.filter(client => {
     const searchLower = searchTerm.toLowerCase();
-    const matchesSearch = client.type === 'PF' 
-      ? (client as ClientPF).fullName.toLowerCase().includes(searchLower) ||
-        (client as ClientPF).email.toLowerCase().includes(searchLower)
-      : (client as ClientPJ).operator.toLowerCase().includes(searchLower) ||
+    let matchesSearch = false;
+    
+    if (client.type === 'PF') {
+      matchesSearch = (client as ClientPF).fullName.toLowerCase().includes(searchLower) ||
+        (client as ClientPF).email.toLowerCase().includes(searchLower);
+    } else if (client.type === 'PJ') {
+      matchesSearch = (client as ClientPJ).operator.toLowerCase().includes(searchLower) ||
         (client as ClientPJ).commercialEmail.toLowerCase().includes(searchLower);
+    } else if (client.type === 'INT') {
+      matchesSearch = (client as ClientINT).operator.toLowerCase().includes(searchLower) ||
+        (client as ClientINT).email.toLowerCase().includes(searchLower) ||
+        (client as ClientINT).country.toLowerCase().includes(searchLower);
+    }
     
     const matchesType = filterType === 'all' || client.type === filterType;
     const matchesStatus = filterStatus === 'all' || client.status === filterStatus;
@@ -80,23 +105,36 @@ export default function Clients() {
   });
 
   const handleCreateClient = () => {
-    const newClient: Client = clientType === 'PF' 
-      ? {
-          id: String(Date.now()),
-          type: 'PF',
-          ...formDataPF,
-          companyId: '1',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        } as ClientPF
-      : {
-          id: String(Date.now()),
-          type: 'PJ',
-          ...formDataPJ,
-          companyId: '1',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        } as ClientPJ;
+    let newClient: Client;
+    
+    if (clientType === 'PF') {
+      newClient = {
+        id: String(Date.now()),
+        type: 'PF',
+        ...formDataPF,
+        companyId: '1',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      } as ClientPF;
+    } else if (clientType === 'PJ') {
+      newClient = {
+        id: String(Date.now()),
+        type: 'PJ',
+        ...formDataPJ,
+        companyId: '1',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      } as ClientPJ;
+    } else {
+      newClient = {
+        id: String(Date.now()),
+        type: 'INT',
+        ...formDataINT,
+        companyId: '1',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      } as ClientINT;
+    }
     
     addClient(newClient);
     setIsNewClientOpen(false);
@@ -122,6 +160,14 @@ export default function Clients() {
       observations: '',
       status: 'active',
     });
+    setFormDataINT({
+      operator: '',
+      country: '',
+      email: '',
+      phone: '',
+      observations: '',
+      status: 'active',
+    });
   };
 
   const handleEditClick = (client: Client) => {
@@ -138,7 +184,7 @@ export default function Clients() {
         observations: pfClient.observations || '',
         status: pfClient.status,
       });
-    } else {
+    } else if (client.type === 'PJ') {
       const pjClient = client as ClientPJ;
       setEditFormDataPJ({
         operator: pjClient.operator,
@@ -149,6 +195,16 @@ export default function Clients() {
         observations: pjClient.observations || '',
         status: pjClient.status,
       });
+    } else {
+      const intClient = client as ClientINT;
+      setEditFormDataINT({
+        operator: intClient.operator,
+        country: intClient.country,
+        email: intClient.email,
+        phone: intClient.phone,
+        observations: intClient.observations || '',
+        status: intClient.status,
+      });
     }
     
     setIsEditDialogOpen(true);
@@ -157,19 +213,30 @@ export default function Clients() {
   const handleUpdateClient = () => {
     if (!selectedClient) return;
 
-    const updatedClient: Client = editClientType === 'PF'
-      ? {
-          ...selectedClient,
-          type: 'PF',
-          ...editFormDataPF,
-          updatedAt: new Date().toISOString(),
-        } as ClientPF
-      : {
-          ...selectedClient,
-          type: 'PJ',
-          ...editFormDataPJ,
-          updatedAt: new Date().toISOString(),
-        } as ClientPJ;
+    let updatedClient: Client;
+    
+    if (editClientType === 'PF') {
+      updatedClient = {
+        ...selectedClient,
+        type: 'PF',
+        ...editFormDataPF,
+        updatedAt: new Date().toISOString(),
+      } as ClientPF;
+    } else if (editClientType === 'PJ') {
+      updatedClient = {
+        ...selectedClient,
+        type: 'PJ',
+        ...editFormDataPJ,
+        updatedAt: new Date().toISOString(),
+      } as ClientPJ;
+    } else {
+      updatedClient = {
+        ...selectedClient,
+        type: 'INT',
+        ...editFormDataINT,
+        updatedAt: new Date().toISOString(),
+      } as ClientINT;
+    }
 
     updateClient(selectedClient.id, updatedClient);
     setIsEditDialogOpen(false);
@@ -192,14 +259,40 @@ export default function Clients() {
   };
 
   const getClientName = (client: Client) => {
-    return client.type === 'PF' ? (client as ClientPF).fullName : (client as ClientPJ).operator;
+    if (client.type === 'PF') return (client as ClientPF).fullName;
+    if (client.type === 'PJ') return (client as ClientPJ).operator;
+    return (client as ClientINT).operator;
+  };
+
+  const getClientEmail = (client: Client) => {
+    if (client.type === 'PF') return (client as ClientPF).email;
+    if (client.type === 'PJ') return (client as ClientPJ).commercialEmail;
+    return (client as ClientINT).email;
+  };
+
+  const getClientDocument = (client: Client) => {
+    if (client.type === 'PF') return (client as ClientPF).cpf;
+    if (client.type === 'PJ') return (client as ClientPJ).cnpj;
+    return (client as ClientINT).country;
+  };
+
+  const getClientTypeIcon = (type: ClientType) => {
+    if (type === 'PF') return <User className="w-4 h-4 text-info" />;
+    if (type === 'PJ') return <Building2 className="w-4 h-4 text-primary" />;
+    return <Globe className="w-4 h-4 text-success" />;
+  };
+
+  const getClientTypeColor = (type: ClientType) => {
+    if (type === 'PF') return "bg-info/10";
+    if (type === 'PJ') return "bg-primary/10";
+    return "bg-success/10";
   };
 
   return (
     <MainLayout>
       <PageHeader 
         title="Clientes" 
-        description="Gerencie seus clientes PF e PJ"
+        description="Gerencie seus clientes PF, PJ e Internacionais"
       >
         <Dialog open={isNewClientOpen} onOpenChange={setIsNewClientOpen}>
           <DialogTrigger asChild>
@@ -237,11 +330,17 @@ export default function Clients() {
                         Pessoa Jurídica (PJ)
                       </div>
                     </SelectItem>
+                    <SelectItem value="INT">
+                      <div className="flex items-center gap-2">
+                        <Globe className="w-4 h-4" />
+                        Internacional (INT)
+                      </div>
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              {clientType === 'PF' ? (
+              {clientType === 'PF' && (
                 <>
                   <div className="space-y-2">
                     <Label htmlFor="fullName">Nome Completo *</Label>
@@ -305,7 +404,9 @@ export default function Clients() {
                     </Select>
                   </div>
                 </>
-              ) : (
+              )}
+
+              {clientType === 'PJ' && (
                 <>
                   <div className="space-y-2">
                     <Label htmlFor="operator">Operador *</Label>
@@ -379,6 +480,72 @@ export default function Clients() {
                   </div>
                 </>
               )}
+
+              {clientType === 'INT' && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="operatorINT">Operador *</Label>
+                    <Input
+                      id="operatorINT"
+                      placeholder="Nome da Empresa/Operador"
+                      value={formDataINT.operator}
+                      onChange={(e) => setFormDataINT({...formDataINT, operator: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="country">País *</Label>
+                    <Input
+                      id="country"
+                      placeholder="Estados Unidos, Argentina, etc."
+                      value={formDataINT.country}
+                      onChange={(e) => setFormDataINT({...formDataINT, country: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="emailINT">E-mail *</Label>
+                    <Input
+                      id="emailINT"
+                      type="email"
+                      placeholder="contact@company.com"
+                      value={formDataINT.email}
+                      onChange={(e) => setFormDataINT({...formDataINT, email: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phoneINT">Telefone *</Label>
+                    <Input
+                      id="phoneINT"
+                      placeholder="+1 555 123 4567"
+                      value={formDataINT.phone}
+                      onChange={(e) => setFormDataINT({...formDataINT, phone: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="observationsINT">Observações</Label>
+                    <Textarea
+                      id="observationsINT"
+                      placeholder="Observações sobre o cliente..."
+                      value={formDataINT.observations}
+                      onChange={(e) => setFormDataINT({...formDataINT, observations: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Status *</Label>
+                    <Select 
+                      value={formDataINT.status} 
+                      onValueChange={(v) => setFormDataINT({...formDataINT, status: v as 'active' | 'inactive'})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="active">Ativo</SelectItem>
+                        <SelectItem value="inactive">Inativo</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="flex justify-end gap-2">
@@ -401,7 +568,7 @@ export default function Clients() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar por nome, operador ou e-mail..."
+            placeholder="Buscar por nome, operador, e-mail ou país..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -410,13 +577,14 @@ export default function Clients() {
         
         <div className="flex gap-2">
           <Select value={filterType} onValueChange={(v) => setFilterType(v as ClientType | 'all')}>
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Tipo" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos</SelectItem>
               <SelectItem value="PF">Pessoa Física</SelectItem>
               <SelectItem value="PJ">Pessoa Jurídica</SelectItem>
+              <SelectItem value="INT">Internacional</SelectItem>
             </SelectContent>
           </Select>
 
@@ -440,7 +608,7 @@ export default function Clients() {
             <TableRow>
               <TableHead>Tipo</TableHead>
               <TableHead>Nome/Operador</TableHead>
-              <TableHead>CPF/CNPJ</TableHead>
+              <TableHead>CPF/CNPJ/País</TableHead>
               <TableHead>Contato</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="w-[50px]"></TableHead>
@@ -452,41 +620,34 @@ export default function Clients() {
                 <TableCell>
                   <div className={cn(
                     "w-8 h-8 rounded-lg flex items-center justify-center",
-                    client.type === 'PF' ? "bg-info/10" : "bg-primary/10"
+                    getClientTypeColor(client.type)
                   )}>
-                    {client.type === 'PF' ? (
-                      <User className="w-4 h-4 text-info" />
-                    ) : (
-                      <Building2 className="w-4 h-4 text-primary" />
-                    )}
+                    {getClientTypeIcon(client.type)}
                   </div>
                 </TableCell>
                 <TableCell>
                   <div>
-                    <p className="font-medium">
-                      {client.type === 'PF' 
-                        ? (client as ClientPF).fullName 
-                        : (client as ClientPJ).operator}
-                    </p>
+                    <p className="font-medium">{getClientName(client)}</p>
                     {client.type === 'PJ' && (
                       <p className="text-xs text-muted-foreground">
                         {(client as ClientPJ).contactPerson}
                       </p>
                     )}
+                    {client.type === 'INT' && (
+                      <p className="text-xs text-muted-foreground">
+                        {(client as ClientINT).country}
+                      </p>
+                    )}
                   </div>
                 </TableCell>
                 <TableCell className="font-mono text-sm">
-                  {client.type === 'PF' 
-                    ? (client as ClientPF).cpf 
-                    : (client as ClientPJ).cnpj}
+                  {getClientDocument(client)}
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-1 text-sm">
                       <Mail className="w-3 h-3 text-muted-foreground" />
-                      {client.type === 'PF' 
-                        ? (client as ClientPF).email 
-                        : (client as ClientPJ).commercialEmail}
+                      {getClientEmail(client)}
                     </div>
                     <div className="flex items-center gap-1 text-sm">
                       <Phone className="w-3 h-3 text-muted-foreground" />
@@ -551,7 +712,7 @@ export default function Clients() {
           </DialogHeader>
           
           <div className="grid gap-4 py-4">
-            {editClientType === 'PF' ? (
+            {editClientType === 'PF' && (
               <>
                 <div className="space-y-2">
                   <Label htmlFor="edit-fullName">Nome Completo *</Label>
@@ -615,7 +776,9 @@ export default function Clients() {
                   </Select>
                 </div>
               </>
-            ) : (
+            )}
+
+            {editClientType === 'PJ' && (
               <>
                 <div className="space-y-2">
                   <Label htmlFor="edit-operator">Operador *</Label>
@@ -677,6 +840,72 @@ export default function Clients() {
                   <Select 
                     value={editFormDataPJ.status} 
                     onValueChange={(v) => setEditFormDataPJ({...editFormDataPJ, status: v as 'active' | 'inactive'})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">Ativo</SelectItem>
+                      <SelectItem value="inactive">Inativo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            )}
+
+            {editClientType === 'INT' && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-operatorINT">Operador *</Label>
+                  <Input
+                    id="edit-operatorINT"
+                    placeholder="Nome da Empresa/Operador"
+                    value={editFormDataINT.operator}
+                    onChange={(e) => setEditFormDataINT({...editFormDataINT, operator: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-country">País *</Label>
+                  <Input
+                    id="edit-country"
+                    placeholder="Estados Unidos, Argentina, etc."
+                    value={editFormDataINT.country}
+                    onChange={(e) => setEditFormDataINT({...editFormDataINT, country: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-emailINT">E-mail *</Label>
+                  <Input
+                    id="edit-emailINT"
+                    type="email"
+                    placeholder="contact@company.com"
+                    value={editFormDataINT.email}
+                    onChange={(e) => setEditFormDataINT({...editFormDataINT, email: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-phoneINT">Telefone *</Label>
+                  <Input
+                    id="edit-phoneINT"
+                    placeholder="+1 555 123 4567"
+                    value={editFormDataINT.phone}
+                    onChange={(e) => setEditFormDataINT({...editFormDataINT, phone: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-observationsINT">Observações</Label>
+                  <Textarea
+                    id="edit-observationsINT"
+                    placeholder="Observações sobre o cliente..."
+                    value={editFormDataINT.observations}
+                    onChange={(e) => setEditFormDataINT({...editFormDataINT, observations: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Status *</Label>
+                  <Select 
+                    value={editFormDataINT.status} 
+                    onValueChange={(v) => setEditFormDataINT({...editFormDataINT, status: v as 'active' | 'inactive'})}
                   >
                     <SelectTrigger>
                       <SelectValue />

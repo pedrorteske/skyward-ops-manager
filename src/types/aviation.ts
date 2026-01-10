@@ -39,7 +39,7 @@ export interface Flight {
 }
 
 // Client Types
-export type ClientType = 'PF' | 'PJ';
+export type ClientType = 'PF' | 'PJ' | 'INT';
 
 export interface ClientPF {
   id: string;
@@ -70,7 +70,21 @@ export interface ClientPJ {
   updatedAt: string;
 }
 
-export type Client = ClientPF | ClientPJ;
+export interface ClientINT {
+  id: string;
+  type: 'INT';
+  operator: string;
+  country: string;
+  email: string;
+  phone: string;
+  observations?: string;
+  status: 'active' | 'inactive';
+  companyId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type Client = ClientPF | ClientPJ | ClientINT;
 
 // Quotation Types
 export type QuotationStatus = 'created' | 'sent' | 'approved' | 'rejected';
