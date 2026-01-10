@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { FileText, Receipt, FileCheck, Search, DollarSign, TrendingUp, Clock } from 'lucide-react';
 import { FinancialDocument, FinancialDocumentType, FinancialDocumentStatus, documentTypeLabels } from '@/types/financial';
-import { ClientPF, ClientPJ } from '@/types/aviation';
+import { ClientPF, ClientPJ, ClientINT } from '@/types/aviation';
 import { cn } from '@/lib/utils';
 
 export default function Financial() {
@@ -33,7 +33,9 @@ export default function Financial() {
     // Otherwise, look up the registered client
     const client = clients.find(c => c.id === doc.clientId);
     if (!client) return doc.clientId || 'Cliente não encontrado';
-    return client.type === 'PF' ? (client as ClientPF).fullName : (client as ClientPJ).operator;
+    if (client.type === 'PF') return (client as ClientPF).fullName;
+    if (client.type === 'PJ') return (client as ClientPJ).operator;
+    return (client as ClientINT).operator;
   };
 
   const filteredDocuments = documents.filter(doc => {

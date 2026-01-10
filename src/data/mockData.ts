@@ -1,4 +1,4 @@
-import { Flight, Client, ClientPF, ClientPJ, Quotation, DashboardStats } from '@/types/aviation';
+import { Flight, Client, ClientPF, ClientPJ, ClientINT, Quotation, DashboardStats } from '@/types/aviation';
 
 // Mock Flights - Empty for production
 export const mockFlights: Flight[] = [];

@@ -1,4 +1,4 @@
-import { Users, User, Building2 } from 'lucide-react';
+import { Users, User, Building2, Globe } from 'lucide-react';
 import { ClientKPICard } from './ClientKPICard';
 import { Client } from '@/types/aviation';
 
@@ -13,6 +13,7 @@ export function ClientsDashboard({ clients }: ClientsDashboardProps) {
   const totalClients = activeClients.length;
   const pfClients = activeClients.filter(client => client.type === 'PF').length;
   const pjClients = activeClients.filter(client => client.type === 'PJ').length;
+  const intClients = activeClients.filter(client => client.type === 'INT').length;
 
   return (
     <div className="mb-8">
@@ -37,6 +38,13 @@ export function ClientsDashboard({ clients }: ClientsDashboardProps) {
           icon={Building2}
           variant="primary"
           subtitle="PJ"
+        />
+        <ClientKPICard
+          title="Internacional"
+          value={intClients}
+          icon={Globe}
+          variant="success"
+          subtitle="INT"
         />
       </div>
     </div>

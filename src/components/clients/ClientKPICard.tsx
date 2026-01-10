@@ -5,7 +5,7 @@ interface ClientKPICardProps {
   title: string;
   value: number;
   icon: LucideIcon;
-  variant?: 'default' | 'primary' | 'info';
+  variant?: 'default' | 'primary' | 'info' | 'success';
   subtitle?: string;
 }
 
@@ -18,11 +18,11 @@ const variantStyles = {
     valueColor: 'text-primary',
   },
   primary: {
-    ring: 'ring-success/20',
-    bg: 'bg-gradient-to-br from-success/10 to-success/5',
-    iconBg: 'bg-success/20',
-    iconColor: 'text-success',
-    valueColor: 'text-success',
+    ring: 'ring-accent/20',
+    bg: 'bg-gradient-to-br from-accent/10 to-accent/5',
+    iconBg: 'bg-accent/20',
+    iconColor: 'text-accent-foreground',
+    valueColor: 'text-accent-foreground',
   },
   info: {
     ring: 'ring-info/20',
@@ -30,6 +30,13 @@ const variantStyles = {
     iconBg: 'bg-info/20',
     iconColor: 'text-info',
     valueColor: 'text-info',
+  },
+  success: {
+    ring: 'ring-success/20',
+    bg: 'bg-gradient-to-br from-success/10 to-success/5',
+    iconBg: 'bg-success/20',
+    iconColor: 'text-success',
+    valueColor: 'text-success',
   },
 };
 

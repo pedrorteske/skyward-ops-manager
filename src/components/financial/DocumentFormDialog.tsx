@@ -12,7 +12,7 @@ import { useClients } from '@/contexts/ClientsContext';
 import { useFlights } from '@/contexts/FlightsContext';
 import { useFinancial } from '@/contexts/FinancialContext';
 import { FinancialDocument, FinancialDocumentType, FinancialItem, Currency } from '@/types/financial';
-import { ClientPF, ClientPJ } from '@/types/aviation';
+import { ClientPF, ClientPJ, ClientINT } from '@/types/aviation';
 import { toast } from 'sonner';
 
 const serviceOptions = [
@@ -135,7 +135,9 @@ export function DocumentFormDialog({
   const getClientName = (id: string) => {
     const client = clients.find(c => c.id === id);
     if (!client) return id; // Return the id as text if not found
-    return client.type === 'PF' ? (client as ClientPF).fullName : (client as ClientPJ).operator;
+    if (client.type === 'PF') return (client as ClientPF).fullName;
+    if (client.type === 'PJ') return (client as ClientPJ).operator;
+    return (client as ClientINT).operator;
   };
 
   // Check if value is a registered client/flight ID

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Client, ClientPF, ClientPJ } from '@/types/aviation';
+import { Client, ClientPF, ClientPJ, ClientINT } from '@/types/aviation';
 import { mockClients } from '@/data/mockData';
 
 interface ClientsContextType {
