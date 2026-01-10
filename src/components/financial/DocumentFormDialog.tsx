@@ -63,7 +63,7 @@ export function DocumentFormDialog({
 }: DocumentFormDialogProps) {
   const { clients } = useClients();
   const { flights } = useFlights();
-  const { addDocument, generateDocumentNumber, getDocumentsByType } = useFinancial();
+  const { addDocument, generateDocumentNumber } = useFinancial();
 
   const [formData, setFormData] = useState({
     clientValue: '', // Can be clientId or free text
@@ -75,18 +75,8 @@ export function DocumentFormDialog({
   const [items, setItems] = useState<FinancialItem[]>([
     { id: '1', description: '', quantity: 1, unitPrice: 0, total: 0 },
   ]);
-  const [sourceDocumentId, setSourceDocumentId] = useState('');
-
   const config = documentTypeConfig[documentType];
   const IconComponent = config.icon;
-
-  // Get available source documents
-  const availableQuotations = getDocumentsByType('quotation').filter(
-    doc => doc.status === 'approved'
-  );
-  const availableProformas = getDocumentsByType('proforma').filter(
-    doc => doc.status === 'approved' || doc.status === 'sent'
-  );
 
   useEffect(() => {
     if (sourceDocument) {
@@ -109,27 +99,6 @@ export function DocumentFormDialog({
     }
   }, [sourceDocument, clients, flights]);
 
-  const handleSourceDocumentChange = (docId: string) => {
-    setSourceDocumentId(docId);
-    const sources = documentType === 'proforma' ? availableQuotations : [...availableQuotations, ...availableProformas];
-    const doc = sources.find(d => d.id === docId);
-    if (doc) {
-      const existingClient = clients.find(c => c.id === doc.clientId);
-      const clientValue = existingClient ? doc.clientId : (doc.clientName || doc.clientId);
-      
-      const existingFlight = flights.find(f => f.id === doc.flightId);
-      const flightValue = existingFlight ? (doc.flightId || '') : (doc.flightInfo || '');
-      
-      setFormData({
-        clientValue,
-        flightValue,
-        currency: doc.currency,
-        validUntil: doc.validUntil || '',
-        observations: doc.observations || '',
-      });
-      setItems(doc.items.map(item => ({ ...item, id: String(Date.now() + Math.random()) })));
-    }
-  };
 
   const addItem = () => {
     setItems([
@@ -210,8 +179,6 @@ export function DocumentFormDialog({
         : documentType === 'quotation' 
           ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() 
           : undefined,
-      quotationId: documentType !== 'quotation' && sourceDocumentId ? sourceDocumentId : undefined,
-      proformaId: documentType === 'invoice' && sourceDocumentId ? sourceDocumentId : undefined,
     };
 
     addDocument(newDocument);
@@ -228,7 +195,6 @@ export function DocumentFormDialog({
       validUntil: '',
       observations: '',
     });
-    setSourceDocumentId('');
     setItems([{ id: '1', description: '', quantity: 1, unitPrice: 0, total: 0 }]);
   };
 
@@ -272,40 +238,6 @@ export function DocumentFormDialog({
         </DialogHeader>
 
         <div className="grid gap-4 py-4">
-          {/* Source Document Selection (for proforma and invoice) */}
-          {documentType !== 'quotation' && (
-            <div className="space-y-2">
-              <Label>Criar a partir de</Label>
-              <Select value={sourceDocumentId} onValueChange={handleSourceDocumentChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um documento (opcional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="manual">Criar manualmente</SelectItem>
-                  {documentType === 'proforma' && availableQuotations.map(doc => (
-                    <SelectItem key={doc.id} value={doc.id}>
-                      {doc.number} - {doc.clientName || getClientName(doc.clientId)}
-                    </SelectItem>
-                  ))}
-                  {documentType === 'invoice' && (
-                    <>
-                      {availableQuotations.map(doc => (
-                        <SelectItem key={doc.id} value={doc.id}>
-                          {doc.number} (Cotação) - {doc.clientName || getClientName(doc.clientId)}
-                        </SelectItem>
-                      ))}
-                      {availableProformas.map(doc => (
-                        <SelectItem key={doc.id} value={doc.id}>
-                          {doc.number} (Proforma) - {doc.clientName || getClientName(doc.clientId)}
-                        </SelectItem>
-                      ))}
-                    </>
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
           {/* Client & Flight Selection */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
