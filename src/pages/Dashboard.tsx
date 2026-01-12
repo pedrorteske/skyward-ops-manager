@@ -1,76 +1,316 @@
+import { useState, useMemo } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { StatsCard } from '@/components/dashboard/StatsCard';
-import { FlightCard } from '@/components/flights/FlightCard';
-import { QuotationStatusBadge } from '@/components/quotations/QuotationStatusBadge';
+import { DashboardKPICard } from '@/components/dashboard/DashboardKPICard';
+import { DashboardFilters, DashboardFiltersState } from '@/components/dashboard/DashboardFilters';
+import { OperationsColumnChart } from '@/components/dashboard/OperationsColumnChart';
+import { BaseDistributionChart } from '@/components/dashboard/BaseDistributionChart';
+import { FlightTypePieChart } from '@/components/dashboard/FlightTypePieChart';
+import { AircraftRankingChart } from '@/components/dashboard/AircraftRankingChart';
+import { RankingTable } from '@/components/dashboard/RankingTable';
 import { ResourceTimeline } from '@/components/dashboard/ResourceTimeline';
 import { useFlights } from '@/contexts/FlightsContext';
-import { useClients } from '@/contexts/ClientsContext';
-import { useQuotations } from '@/contexts/QuotationsContext';
-import { Plane, PlaneLanding, FileText, Users, ArrowRight } from 'lucide-react';
+import { Flight, FlightType, flightTypeLabels } from '@/types/aviation';
+import {
+  Plane,
+  CheckCircle2,
+  Clock,
+  XCircle,
+  Building2,
+  PlaneTakeoff,
+  ArrowRight,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import { format, parseISO, isWithinInterval, startOfMonth, endOfMonth } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+
+// Extended flight types for ANAC classification
+const flightTypeColors: Record<string, string> = {
+  S: 'hsl(var(--primary))',
+  N: 'hsl(var(--info))',
+  G: 'hsl(var(--success))',
+  M: 'hsl(var(--warning))',
+  executive: 'hsl(217, 91%, 60%)',
+  taxi: 'hsl(142, 71%, 45%)',
+  commercial_regular: 'hsl(262, 83%, 58%)',
+  commercial_non_regular: 'hsl(326, 78%, 55%)',
+  cargo: 'hsl(25, 95%, 53%)',
+  aeromedical: 'hsl(0, 84%, 60%)',
+  domestic: 'hsl(199, 89%, 48%)',
+  international: 'hsl(45, 93%, 47%)',
+  instruction: 'hsl(173, 58%, 39%)',
+};
 
 export default function Dashboard() {
   const { flights } = useFlights();
-  const { clients, getClientById } = useClients();
-  const { quotations } = useQuotations();
-  
-  // Get today's date in YYYY-MM-DD format
-  const today = new Date().toISOString().split('T')[0];
-  
-  const todayFlights = flights.filter(f => f.arrivalDate === today || f.departureDate === today);
-  const upcomingFlights = flights.filter(f => {
-    // Check if flight has future arrival or departure
-    const hasArrival = f.arrivalDate && f.arrivalDate >= today;
-    const hasDeparture = f.departureDate && f.departureDate >= today;
-    return f.status === 'scheduled' && (hasArrival || hasDeparture);
-  }).slice(0, 5);
-  
-  // Calculate dynamic stats
-  const activeClients = clients.filter(c => c.status === 'active').length;
-  const openQuotations = quotations.filter(q => q.status === 'created' || q.status === 'sent').length;
+
+  // Filter state
+  const [filters, setFilters] = useState<DashboardFiltersState>({
+    startDate: undefined,
+    endDate: undefined,
+    base: 'all',
+    flightType: 'all',
+    status: 'all',
+  });
+
+  // Extract unique bases from flights
+  const uniqueBases = useMemo(() => {
+    const bases = new Set<string>();
+    flights.forEach((flight) => {
+      if (flight.origin) bases.add(flight.origin);
+      if (flight.destination) bases.add(flight.destination);
+    });
+    return Array.from(bases).sort();
+  }, [flights]);
+
+  // Flight types for filter
+  const flightTypes = [
+    { value: 'S', label: 'Transporte Regular' },
+    { value: 'N', label: 'Transporte Não Regular' },
+    { value: 'G', label: 'Aviação Geral' },
+    { value: 'M', label: 'Aeronave Militar' },
+  ];
+
+  // Filter flights based on current filters
+  const filteredFlights = useMemo(() => {
+    return flights.filter((flight) => {
+      // Date range filter
+      if (filters.startDate || filters.endDate) {
+        const flightDate = parseISO(flight.arrivalDate || flight.departureDate);
+        if (filters.startDate && flightDate < filters.startDate) return false;
+        if (filters.endDate && flightDate > filters.endDate) return false;
+      }
+
+      // Base filter
+      if (filters.base !== 'all') {
+        if (flight.origin !== filters.base && flight.destination !== filters.base) {
+          return false;
+        }
+      }
+
+      // Flight type filter
+      if (filters.flightType !== 'all' && flight.flightType !== filters.flightType) {
+        return false;
+      }
+
+      // Status filter
+      if (filters.status !== 'all' && flight.status !== filters.status) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [flights, filters]);
+
+  // Calculate KPIs
+  const kpis = useMemo(() => {
+    const total = filteredFlights.length;
+    const completed = filteredFlights.filter(
+      (f) => f.status === 'arrived' || f.status === 'departed'
+    ).length;
+    const inProgress = filteredFlights.filter((f) => f.status === 'scheduled').length;
+    const cancelled = filteredFlights.filter((f) => f.status === 'cancelled').length;
+
+    // Unique bases
+    const activeBases = new Set<string>();
+    filteredFlights.forEach((f) => {
+      if (f.origin) activeBases.add(f.origin);
+      if (f.destination) activeBases.add(f.destination);
+    });
+
+    // Unique aircraft
+    const activeAircraft = new Set<string>();
+    filteredFlights.forEach((f) => {
+      if (f.aircraftPrefix) activeAircraft.add(f.aircraftPrefix);
+    });
+
+    return {
+      total,
+      completed,
+      inProgress,
+      cancelled,
+      activeBases: activeBases.size,
+      activeAircraft: activeAircraft.size,
+    };
+  }, [filteredFlights]);
+
+  // Monthly operations data
+  const monthlyData = useMemo(() => {
+    const monthMap = new Map<string, number>();
+    const now = new Date();
+    
+    // Initialize last 12 months
+    for (let i = 11; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = format(date, 'MMM/yy', { locale: ptBR });
+      monthMap.set(key, 0);
+    }
+
+    filteredFlights.forEach((flight) => {
+      const date = parseISO(flight.arrivalDate || flight.departureDate);
+      const key = format(date, 'MMM/yy', { locale: ptBR });
+      if (monthMap.has(key)) {
+        monthMap.set(key, (monthMap.get(key) || 0) + 1);
+      }
+    });
+
+    return Array.from(monthMap.entries()).map(([month, operations]) => ({
+      month,
+      operations,
+    }));
+  }, [filteredFlights]);
+
+  // Base distribution data
+  const baseData = useMemo(() => {
+    const baseMap = new Map<string, number>();
+
+    filteredFlights.forEach((flight) => {
+      if (flight.origin) {
+        baseMap.set(flight.origin, (baseMap.get(flight.origin) || 0) + 1);
+      }
+      if (flight.destination) {
+        baseMap.set(flight.destination, (baseMap.get(flight.destination) || 0) + 1);
+      }
+    });
+
+    return Array.from(baseMap.entries())
+      .map(([base, operations]) => ({ base, operations }))
+      .sort((a, b) => b.operations - a.operations)
+      .slice(0, 8);
+  }, [filteredFlights]);
+
+  // Flight type distribution (ANAC classification)
+  const flightTypeData = useMemo(() => {
+    const typeMap = new Map<FlightType, number>();
+
+    filteredFlights.forEach((flight) => {
+      const type = flight.flightType;
+      typeMap.set(type, (typeMap.get(type) || 0) + 1);
+    });
+
+    return Array.from(typeMap.entries()).map(([type, value]) => ({
+      name: flightTypeLabels[type],
+      value,
+      color: flightTypeColors[type] || 'hsl(var(--muted-foreground))',
+    }));
+  }, [filteredFlights]);
+
+  // Aircraft ranking
+  const aircraftData = useMemo(() => {
+    const aircraftMap = new Map<string, { operations: number; model: string }>();
+
+    filteredFlights.forEach((flight) => {
+      const prefix = flight.aircraftPrefix;
+      const existing = aircraftMap.get(prefix);
+      if (existing) {
+        existing.operations++;
+      } else {
+        aircraftMap.set(prefix, { operations: 1, model: flight.aircraftModel });
+      }
+    });
+
+    return Array.from(aircraftMap.entries())
+      .map(([aircraft, data]) => ({
+        aircraft,
+        operations: data.operations,
+        model: data.model,
+      }))
+      .sort((a, b) => b.operations - a.operations)
+      .slice(0, 8);
+  }, [filteredFlights]);
+
+  // Aircraft ranking for table
+  const aircraftRanking = useMemo(() => {
+    return aircraftData.slice(0, 10).map((item, index) => ({
+      position: index + 1,
+      prefix: item.aircraft,
+      model: item.model,
+      operations: item.operations,
+    }));
+  }, [aircraftData]);
+
+  // Base ranking for table
+  const baseRanking = useMemo(() => {
+    return baseData.slice(0, 10).map((item, index) => ({
+      position: index + 1,
+      icao: item.base,
+      operations: item.operations,
+    }));
+  }, [baseData]);
 
   return (
     <MainLayout>
-      <PageHeader 
-        title="Dashboard" 
-        description="Visão geral das operações aéreas"
+      <PageHeader
+        title="Dashboard Operacional"
+        description="Visão consolidada das operações aéreas"
       />
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatsCard
-          title="Voos Hoje"
-          value={todayFlights.length}
-          description="Operações programadas"
-          icon={Plane}
-          variant="primary"
-        />
-        <StatsCard
-          title="Próximas Chegadas"
-          value={upcomingFlights.length}
-          description="Voos agendados"
-          icon={PlaneLanding}
-          variant="success"
-        />
-        <StatsCard
-          title="Cotações em Aberto"
-          value={openQuotations}
-          description="Aguardando resposta"
-          icon={FileText}
-          variant="warning"
-        />
-        <StatsCard
-          title="Clientes Ativos"
-          value={activeClients}
-          description="Cadastros ativos"
-          icon={Users}
-          variant="info"
+      {/* Filters */}
+      <div className="mb-6">
+        <DashboardFilters
+          filters={filters}
+          onFiltersChange={setFilters}
+          bases={uniqueBases}
+          flightTypes={flightTypes}
         />
       </div>
 
-      {/* Resource Timeline / Scheduler */}
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+        <DashboardKPICard
+          title="Total de Operações"
+          value={kpis.total}
+          icon={Plane}
+          description="No período"
+          variant="primary"
+        />
+        <DashboardKPICard
+          title="Concluídas"
+          value={kpis.completed}
+          icon={CheckCircle2}
+          description="Chegaram ou partiram"
+          variant="success"
+        />
+        <DashboardKPICard
+          title="Em Andamento"
+          value={kpis.inProgress}
+          icon={Clock}
+          description="Programadas"
+          variant="info"
+        />
+        <DashboardKPICard
+          title="Canceladas"
+          value={kpis.cancelled}
+          icon={XCircle}
+          description="No período"
+          variant="danger"
+        />
+        <DashboardKPICard
+          title="Bases Ativas"
+          value={kpis.activeBases}
+          icon={Building2}
+          description="Aeroportos"
+          variant="warning"
+        />
+        <DashboardKPICard
+          title="Aeronaves Ativas"
+          value={kpis.activeAircraft}
+          icon={PlaneTakeoff}
+          description="Com operações"
+          variant="default"
+        />
+      </div>
+
+      {/* Charts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <OperationsColumnChart data={monthlyData} />
+        <BaseDistributionChart data={baseData} />
+        <FlightTypePieChart data={flightTypeData} />
+        <AircraftRankingChart data={aircraftData} />
+      </div>
+
+      {/* Resource Timeline */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-foreground">Calendário Operacional</h2>
@@ -80,58 +320,13 @@ export default function Dashboard() {
             </Button>
           </Link>
         </div>
-        <ResourceTimeline flights={flights} />
+        <ResourceTimeline flights={filteredFlights} />
       </div>
 
-      {/* Upcoming Arrivals */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-foreground">Próximas Chegadas</h2>
-          <Link to="/flights">
-            <Button variant="ghost" size="sm" className="text-primary">
-              Ver todos <ArrowRight className="w-4 h-4 ml-1" />
-            </Button>
-          </Link>
-        </div>
-        <div className="aviation-card overflow-hidden">
-          {upcomingFlights.length > 0 ? (
-            <div className="divide-y divide-border">
-              {upcomingFlights.map((flight) => (
-                <div key={flight.id} className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors">
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <PlaneLanding className="w-6 h-6 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="text-callsign">{flight.aircraftPrefix}</p>
-                      <span className="text-xs text-muted-foreground">•</span>
-                      <p className="text-sm text-muted-foreground">{flight.aircraftModel}</p>
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-0.5">
-                      {flight.origin} → {flight.destination}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium">
-                      {new Date(flight.arrivalDate).toLocaleDateString('pt-BR', { 
-                        day: '2-digit', 
-                        month: 'short' 
-                      })}
-                    </p>
-                    <p className="text-lg font-bold text-primary">
-                      ETA {flight.arrivalTime}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              <PlaneLanding className="w-10 h-10 mx-auto mb-2 opacity-50" />
-              <p>Nenhum voo programado</p>
-            </div>
-          )}
-        </div>
+      {/* Rankings Tables */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <RankingTable type="aircraft" aircraftData={aircraftRanking} />
+        <RankingTable type="base" baseData={baseRanking} />
       </div>
     </MainLayout>
   );
