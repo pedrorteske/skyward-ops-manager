@@ -76,9 +76,17 @@ export default function Dashboard() {
     return flights.filter((flight) => {
       // Date range filter
       if (filters.startDate || filters.endDate) {
-        const flightDate = parseISO(flight.arrivalDate || flight.departureDate);
-        if (filters.startDate && flightDate < filters.startDate) return false;
-        if (filters.endDate && flightDate > filters.endDate) return false;
+        const dateStr = flight.arrivalDate || flight.departureDate;
+        if (!dateStr) return false;
+        
+        try {
+          const flightDate = parseISO(dateStr);
+          if (isNaN(flightDate.getTime())) return false;
+          if (filters.startDate && flightDate < filters.startDate) return false;
+          if (filters.endDate && flightDate > filters.endDate) return false;
+        } catch {
+          return false;
+        }
       }
 
       // Base filter
@@ -147,10 +155,19 @@ export default function Dashboard() {
     }
 
     filteredFlights.forEach((flight) => {
-      const date = parseISO(flight.arrivalDate || flight.departureDate);
-      const key = format(date, 'MMM/yy', { locale: ptBR });
-      if (monthMap.has(key)) {
-        monthMap.set(key, (monthMap.get(key) || 0) + 1);
+      const dateStr = flight.arrivalDate || flight.departureDate;
+      if (!dateStr) return;
+      
+      try {
+        const date = parseISO(dateStr);
+        if (isNaN(date.getTime())) return;
+        
+        const key = format(date, 'MMM/yy', { locale: ptBR });
+        if (monthMap.has(key)) {
+          monthMap.set(key, (monthMap.get(key) || 0) + 1);
+        }
+      } catch {
+        // Skip invalid dates
       }
     });
 
