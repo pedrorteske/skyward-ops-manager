@@ -4,6 +4,7 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { FlightPortalList } from '@/components/flights/FlightPortalList';
 import { FlightCalendar } from '@/components/flights/FlightCalendar';
 import { FlightStatusBadge } from '@/components/flights/FlightStatusBadge';
+import { ResourceTimeline } from '@/components/dashboard/ResourceTimeline';
 import { useFlights } from '@/contexts/FlightsContext';
 import { Flight, FlightType, FlightStatus, flightTypeLabels, flightStatusLabels } from '@/types/aviation';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Search, Calendar, List, Plane, ArrowRight, Clock, ArrowUpDown, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Search, Calendar, List, Plane, ArrowRight, Clock, ArrowUpDown, Pencil, Trash2, LayoutGrid } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
 
@@ -342,7 +343,7 @@ export default function Flights() {
 
       {/* Tabs Navigation */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className="grid w-full max-w-lg grid-cols-3">
           <TabsTrigger value="portal" className="flex items-center gap-2">
             <List className="w-4 h-4" />
             Portal de Voos
@@ -350,6 +351,10 @@ export default function Flights() {
           <TabsTrigger value="calendar" className="flex items-center gap-2">
             <Calendar className="w-4 h-4" />
             Calendário
+          </TabsTrigger>
+          <TabsTrigger value="timeline" className="flex items-center gap-2">
+            <LayoutGrid className="w-4 h-4" />
+            Linha do Tempo
           </TabsTrigger>
         </TabsList>
 
@@ -414,6 +419,14 @@ export default function Flights() {
         {/* Calendário Tab */}
         <TabsContent value="calendar">
           <FlightCalendar 
+            flights={filteredFlights}
+            onFlightClick={setSelectedFlight}
+          />
+        </TabsContent>
+
+        {/* Linha do Tempo Tab */}
+        <TabsContent value="timeline">
+          <ResourceTimeline 
             flights={filteredFlights}
             onFlightClick={setSelectedFlight}
           />

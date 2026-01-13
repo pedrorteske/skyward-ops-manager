@@ -8,7 +8,6 @@ import { BaseDistributionChart } from '@/components/dashboard/BaseDistributionCh
 import { FlightTypePieChart } from '@/components/dashboard/FlightTypePieChart';
 import { AircraftRankingChart } from '@/components/dashboard/AircraftRankingChart';
 import { RankingTable } from '@/components/dashboard/RankingTable';
-import { ResourceTimeline } from '@/components/dashboard/ResourceTimeline';
 import { useFlights } from '@/contexts/FlightsContext';
 import { Flight, FlightType, flightTypeLabels } from '@/types/aviation';
 import {
@@ -308,19 +307,6 @@ export default function Dashboard() {
         <BaseDistributionChart data={baseData} />
         <FlightTypePieChart data={flightTypeData} />
         <AircraftRankingChart data={aircraftData} />
-      </div>
-
-      {/* Resource Timeline */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-foreground">Calendário Operacional</h2>
-          <Link to="/flights">
-            <Button variant="ghost" size="sm" className="text-primary">
-              Ver todos os voos <ArrowRight className="w-4 h-4 ml-1" />
-            </Button>
-          </Link>
-        </div>
-        <ResourceTimeline flights={filteredFlights} />
       </div>
 
       {/* Rankings Tables */}
