@@ -1,13 +1,18 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { format, isToday, isTomorrow, parseISO, startOfDay, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Plane, Clock, FileText, Users } from 'lucide-react';
+import { Plane, Clock, FileText, Users, Calendar, History } from 'lucide-react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { HomeKPICard } from '@/components/home/HomeKPICard';
 import { UpcomingFlightsCard } from '@/components/home/UpcomingFlightsCard';
 import { QuickActionsCard } from '@/components/home/QuickActionsCard';
 import { RecentQuotationsCard } from '@/components/home/RecentQuotationsCard';
 import { FinancialSummaryCard } from '@/components/home/FinancialSummaryCard';
+import { FlightCalendar } from '@/components/flights/FlightCalendar';
+import { ResourceTimeline } from '@/components/dashboard/ResourceTimeline';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Flight } from '@/types/aviation';
 import { useFlights } from '@/contexts/FlightsContext';
 import { useClients } from '@/contexts/ClientsContext';
 import { useQuotations } from '@/contexts/QuotationsContext';
@@ -144,6 +149,49 @@ export default function Home() {
         <div>
           <FinancialSummaryCard documents={documents} />
         </div>
+      </div>
+
+      {/* Flight Calendar & Timeline Section */}
+      <div className="mt-8">
+        <Card>
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Calendar className="w-5 h-5 text-primary" />
+              Calendário e Linha do Tempo de Voos
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="calendar" className="w-full">
+              <TabsList className="mb-4">
+                <TabsTrigger value="calendar" className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  Calendário
+                </TabsTrigger>
+                <TabsTrigger value="timeline" className="flex items-center gap-2">
+                  <History className="w-4 h-4" />
+                  Linha do Tempo
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="calendar">
+                <FlightCalendar 
+                  flights={flights} 
+                  onFlightClick={(flight: Flight) => {
+                    // Navigate to flights page or show details
+                    window.location.href = '/flights';
+                  }}
+                />
+              </TabsContent>
+              <TabsContent value="timeline">
+                <ResourceTimeline 
+                  flights={flights}
+                  onFlightClick={(flight: Flight) => {
+                    window.location.href = '/flights';
+                  }}
+                />
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
       </div>
     </MainLayout>
   );
