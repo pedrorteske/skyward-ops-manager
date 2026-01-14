@@ -9,6 +9,7 @@ import { ClientsProvider } from "@/contexts/ClientsContext";
 import { QuotationsProvider } from "@/contexts/QuotationsContext";
 import { FinancialProvider } from "@/contexts/FinancialContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import Landing from "./pages/Landing";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Flights from "./pages/Flights";
@@ -34,9 +35,10 @@ const App = () => (
                   <Toaster />
                   <Sonner />
                   <Routes>
+                    <Route path="/" element={<Landing />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route
-                      path="/"
+                      path="/home"
                       element={
                         <ProtectedRoute>
                           <Home />

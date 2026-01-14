@@ -23,7 +23,7 @@ interface MainLayoutProps {
 }
 
 const navItems = [
-  { href: '/', label: 'Home', icon: Home },
+  { href: '/home', label: 'Home', icon: Home },
   { href: '/dashboard', label: 'Dashboard Analítico', icon: LayoutDashboard },
   { href: '/flights', label: 'Portal dos Voos', icon: Plane },
   { href: '/clients', label: 'Clientes', icon: Users },
