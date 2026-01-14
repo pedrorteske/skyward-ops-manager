@@ -253,7 +253,6 @@ export default function Flights() {
                 <Input
                   id="base"
                   maxLength={4}
-                  placeholder="Ex: SBSP"
                   value={formData.base}
                   onChange={(e) => setFormData({...formData, base: e.target.value.toUpperCase()})}
                   className="font-mono uppercase"
@@ -603,7 +602,6 @@ export default function Flights() {
                   <Input
                     id="edit-base"
                     maxLength={4}
-                    placeholder="Ex: SBSP"
                     value={editFormData.base}
                     onChange={(e) => setEditFormData({...editFormData, base: e.target.value.toUpperCase()})}
                     className="font-mono uppercase"
