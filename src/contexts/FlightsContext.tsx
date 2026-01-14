@@ -23,6 +23,7 @@ const mapDbToFlight = (row: any): Flight => ({
   flightType: row.flight_type as FlightType,
   origin: row.origin,
   destination: row.destination,
+  base: row.base,
   arrivalDate: row.arrival_date,
   arrivalTime: row.arrival_time,
   departureDate: row.departure_date,
@@ -98,6 +99,7 @@ export const FlightsProvider: React.FC<{ children: ReactNode }> = ({ children })
         flight_type: flight.flightType,
         origin: flight.origin,
         destination: flight.destination,
+        base: flight.base,
         arrival_date: flight.arrivalDate,
         arrival_time: flight.arrivalTime,
         departure_date: flight.departureDate,
@@ -132,6 +134,7 @@ export const FlightsProvider: React.FC<{ children: ReactNode }> = ({ children })
     if (updates.flightType !== undefined) dbUpdates.flight_type = updates.flightType;
     if (updates.origin !== undefined) dbUpdates.origin = updates.origin;
     if (updates.destination !== undefined) dbUpdates.destination = updates.destination;
+    if (updates.base !== undefined) dbUpdates.base = updates.base;
     if (updates.arrivalDate !== undefined) dbUpdates.arrival_date = updates.arrivalDate;
     if (updates.arrivalTime !== undefined) dbUpdates.arrival_time = updates.arrivalTime;
     if (updates.departureDate !== undefined) dbUpdates.departure_date = updates.departureDate;
