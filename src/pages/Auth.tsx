@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Plane, Mail, Lock, User, Building2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,11 +8,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Auth() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const { user, isLoading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Handle tab from URL query parameter
+  const defaultTab = searchParams.get('tab') === 'signup' ? 'signup' : 'login';
+  const [activeTab, setActiveTab] = useState(defaultTab);
   
   // Login state
   const [loginEmail, setLoginEmail] = useState('');
@@ -23,6 +30,21 @@ export default function Auth() {
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
   const [signupCompanyName, setSignupCompanyName] = useState('');
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (!authLoading && user) {
+      navigate('/home', { replace: true });
+    }
+  }, [user, authLoading, navigate]);
+  
+  // Update tab when URL changes
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'signup') {
+      setActiveTab('signup');
+    }
+  }, [searchParams]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,7 +83,7 @@ export default function Auth() {
       description: "Login realizado com sucesso",
     });
     
-    navigate('/');
+    navigate('/home');
   };
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -87,7 +109,7 @@ export default function Auth() {
 
     setIsLoading(true);
     
-    const redirectUrl = `${window.location.origin}/`;
+    const redirectUrl = `${window.location.origin}/home`;
     
     const { error } = await supabase.auth.signUp({
       email: signupEmail,
@@ -125,7 +147,7 @@ export default function Auth() {
       description: "Cadastro realizado com sucesso",
     });
     
-    navigate('/');
+    navigate('/home');
   };
 
   return (
@@ -141,7 +163,7 @@ export default function Auth() {
         </div>
 
         <Card className="border-border/50 shadow-xl">
-          <Tabs defaultValue="login" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <CardHeader className="pb-4">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login">Entrar</TabsTrigger>
