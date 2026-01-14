@@ -8,6 +8,7 @@ import { UpcomingFlightsCard } from '@/components/home/UpcomingFlightsCard';
 import { QuickActionsCard } from '@/components/home/QuickActionsCard';
 import { RecentQuotationsCard } from '@/components/home/RecentQuotationsCard';
 import { FinancialSummaryCard } from '@/components/home/FinancialSummaryCard';
+import { ResourceTimeline } from '@/components/dashboard/ResourceTimeline';
 import { useFlights } from '@/contexts/FlightsContext';
 import { useClients } from '@/contexts/ClientsContext';
 import { useQuotations } from '@/contexts/QuotationsContext';
@@ -88,6 +89,11 @@ export default function Home() {
           {greeting}, {user?.name?.split(' ')[0] || 'Administrador'}!
         </h1>
         <p className="text-muted-foreground capitalize">{todayFormatted}</p>
+      </div>
+
+      {/* Flight Timeline */}
+      <div className="mb-8">
+        <ResourceTimeline flights={flights} />
       </div>
 
       {/* KPI Cards */}
