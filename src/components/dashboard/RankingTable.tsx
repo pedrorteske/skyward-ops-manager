@@ -11,7 +11,6 @@ import { Trophy, Plane, MapPin } from 'lucide-react';
 
 interface AircraftRanking {
   position: number;
-  prefix: string;
   model: string;
   operations: number;
 }
@@ -48,7 +47,7 @@ export function RankingTable({ type, aircraftData, baseData }: RankingTableProps
         <CardHeader className="pb-3">
           <CardTitle className="text-base font-semibold flex items-center gap-2">
             <Plane className="w-5 h-5 text-primary" />
-            Top Aeronaves
+            Top Modelos de Aeronaves
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
@@ -56,14 +55,13 @@ export function RankingTable({ type, aircraftData, baseData }: RankingTableProps
             <TableHeader>
               <TableRow>
                 <TableHead className="w-12">#</TableHead>
-                <TableHead>Prefixo</TableHead>
                 <TableHead>Modelo</TableHead>
                 <TableHead className="text-right">Operações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {aircraftData.map((item) => (
-                <TableRow key={item.prefix}>
+                <TableRow key={item.model}>
                   <TableCell>
                     <div className="flex items-center gap-1">
                       {item.position <= 3 ? (
@@ -73,10 +71,7 @@ export function RankingTable({ type, aircraftData, baseData }: RankingTableProps
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="font-mono font-semibold text-primary">
-                    {item.prefix}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
+                  <TableCell className="font-semibold text-primary">
                     {item.model}
                   </TableCell>
                   <TableCell className="text-right font-semibold">
@@ -86,7 +81,7 @@ export function RankingTable({ type, aircraftData, baseData }: RankingTableProps
               ))}
               {aircraftData.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
                     Nenhum dado disponível
                   </TableCell>
                 </TableRow>

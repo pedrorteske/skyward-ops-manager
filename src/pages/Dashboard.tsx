@@ -53,12 +53,11 @@ export default function Dashboard() {
     status: 'all',
   });
 
-  // Extract unique bases from flights
+  // Extract unique bases from flights (only from base field)
   const uniqueBases = useMemo(() => {
     const bases = new Set<string>();
     flights.forEach((flight) => {
-      if (flight.origin) bases.add(flight.origin);
-      if (flight.destination) bases.add(flight.destination);
+      if (flight.base) bases.add(flight.base);
     });
     return Array.from(bases).sort();
   }, [flights]);
@@ -89,9 +88,9 @@ export default function Dashboard() {
         }
       }
 
-      // Base filter
+      // Base filter (using base field only)
       if (filters.base !== 'all') {
-        if (flight.origin !== filters.base && flight.destination !== filters.base) {
+        if (flight.base !== filters.base) {
           return false;
         }
       }
@@ -119,11 +118,10 @@ export default function Dashboard() {
     const inProgress = filteredFlights.filter((f) => f.status === 'scheduled').length;
     const cancelled = filteredFlights.filter((f) => f.status === 'cancelled').length;
 
-    // Unique bases
+    // Unique bases (only from base field)
     const activeBases = new Set<string>();
     filteredFlights.forEach((f) => {
-      if (f.origin) activeBases.add(f.origin);
-      if (f.destination) activeBases.add(f.destination);
+      if (f.base) activeBases.add(f.base);
     });
 
     // Unique aircraft
@@ -177,16 +175,13 @@ export default function Dashboard() {
     }));
   }, [filteredFlights]);
 
-  // Base distribution data
+  // Base distribution data (using base field only)
   const baseData = useMemo(() => {
     const baseMap = new Map<string, number>();
 
     filteredFlights.forEach((flight) => {
-      if (flight.origin) {
-        baseMap.set(flight.origin, (baseMap.get(flight.origin) || 0) + 1);
-      }
-      if (flight.destination) {
-        baseMap.set(flight.destination, (baseMap.get(flight.destination) || 0) + 1);
+      if (flight.base) {
+        baseMap.set(flight.base, (baseMap.get(flight.base) || 0) + 1);
       }
     });
 
@@ -212,35 +207,30 @@ export default function Dashboard() {
     }));
   }, [filteredFlights]);
 
-  // Aircraft ranking
+  // Aircraft ranking (grouped by model only)
   const aircraftData = useMemo(() => {
-    const aircraftMap = new Map<string, { operations: number; model: string }>();
+    const modelMap = new Map<string, number>();
 
     filteredFlights.forEach((flight) => {
-      const prefix = flight.aircraftPrefix;
-      const existing = aircraftMap.get(prefix);
-      if (existing) {
-        existing.operations++;
-      } else {
-        aircraftMap.set(prefix, { operations: 1, model: flight.aircraftModel });
+      const model = flight.aircraftModel;
+      if (model) {
+        modelMap.set(model, (modelMap.get(model) || 0) + 1);
       }
     });
 
-    return Array.from(aircraftMap.entries())
-      .map(([aircraft, data]) => ({
-        aircraft,
-        operations: data.operations,
-        model: data.model,
+    return Array.from(modelMap.entries())
+      .map(([model, operations]) => ({
+        model,
+        operations,
       }))
       .sort((a, b) => b.operations - a.operations)
       .slice(0, 8);
   }, [filteredFlights]);
 
-  // Aircraft ranking for table
+  // Aircraft ranking for table (grouped by model)
   const aircraftRanking = useMemo(() => {
     return aircraftData.slice(0, 10).map((item, index) => ({
       position: index + 1,
-      prefix: item.aircraft,
       model: item.model,
       operations: item.operations,
     }));

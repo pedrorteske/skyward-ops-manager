@@ -10,9 +10,8 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface AircraftData {
-  aircraft: string;
-  operations: number;
   model: string;
+  operations: number;
 }
 
 interface AircraftRankingChartProps {
@@ -24,7 +23,7 @@ export function AircraftRankingChart({ data }: AircraftRankingChartProps) {
     <Card className="h-full">
       <CardHeader className="pb-2">
         <CardTitle className="text-base font-semibold">
-          Ranking de Aeronaves
+          Ranking de Modelos de Aeronaves
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -44,8 +43,8 @@ export function AircraftRankingChart({ data }: AircraftRankingChartProps) {
               />
               <YAxis
                 type="category"
-                dataKey="aircraft"
-                width={90}
+                dataKey="model"
+                width={120}
                 tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
                 tickLine={false}
                 axisLine={{ stroke: 'hsl(var(--border))' }}
@@ -58,10 +57,6 @@ export function AircraftRankingChart({ data }: AircraftRankingChartProps) {
                   color: 'hsl(var(--foreground))',
                 }}
                 labelStyle={{ color: 'hsl(var(--foreground))' }}
-                formatter={(value: number, name: string, props: any) => [
-                  value,
-                  `${props.payload.model}`,
-                ]}
               />
               <Bar
                 dataKey="operations"
