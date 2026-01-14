@@ -343,50 +343,45 @@ export default function Clients() {
               {clientType === 'PF' && (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="fullName">Nome Completo *</Label>
-                    <Input
-                      id="fullName"
-                      placeholder="João Pedro Martins"
-                      value={formDataPF.fullName}
-                      onChange={(e) => setFormDataPF({...formDataPF, fullName: e.target.value})}
-                    />
+                  <Label htmlFor="fullName">Nome Completo *</Label>
+                  <Input
+                    id="fullName"
+                    value={formDataPF.fullName}
+                    onChange={(e) => setFormDataPF({...formDataPF, fullName: e.target.value})}
+                  />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="cpf">CPF *</Label>
-                    <Input
-                      id="cpf"
-                      placeholder="000.000.000-00"
-                      value={formDataPF.cpf}
-                      onChange={(e) => setFormDataPF({...formDataPF, cpf: e.target.value})}
-                    />
+                  <Label htmlFor="cpf">CPF *</Label>
+                  <Input
+                    id="cpf"
+                    value={formDataPF.cpf}
+                    onChange={(e) => setFormDataPF({...formDataPF, cpf: e.target.value})}
+                  />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="emailPF">E-mail *</Label>
-                    <Input
-                      id="emailPF"
-                      type="email"
-                      placeholder="email@exemplo.com"
-                      value={formDataPF.email}
-                      onChange={(e) => setFormDataPF({...formDataPF, email: e.target.value})}
-                    />
+                  <Label htmlFor="emailPF">E-mail *</Label>
+                  <Input
+                    id="emailPF"
+                    type="email"
+                    value={formDataPF.email}
+                    onChange={(e) => setFormDataPF({...formDataPF, email: e.target.value})}
+                  />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phonePF">Telefone *</Label>
-                    <Input
-                      id="phonePF"
-                      placeholder="(11) 99999-9999"
-                      value={formDataPF.phone}
-                      onChange={(e) => setFormDataPF({...formDataPF, phone: e.target.value})}
-                    />
+                  <Label htmlFor="phonePF">Telefone *</Label>
+                  <Input
+                    id="phonePF"
+                    value={formDataPF.phone}
+                    onChange={(e) => setFormDataPF({...formDataPF, phone: e.target.value})}
+                  />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="observationsPF">Observações</Label>
-                    <Textarea
-                      id="observationsPF"
-                      placeholder="Observações sobre o cliente..."
-                      value={formDataPF.observations}
-                      onChange={(e) => setFormDataPF({...formDataPF, observations: e.target.value})}
-                    />
+                  <Label htmlFor="observationsPF">Observações</Label>
+                  <Textarea
+                    id="observationsPF"
+                    value={formDataPF.observations}
+                    onChange={(e) => setFormDataPF({...formDataPF, observations: e.target.value})}
+                  />
                   </div>
                   <div className="space-y-2">
                     <Label>Status *</Label>
@@ -409,59 +404,53 @@ export default function Clients() {
               {clientType === 'PJ' && (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="operator">Operador *</Label>
-                    <Input
-                      id="operator"
-                      placeholder="Nome da Empresa"
-                      value={formDataPJ.operator}
-                      onChange={(e) => setFormDataPJ({...formDataPJ, operator: e.target.value})}
-                    />
+                  <Label htmlFor="operator">Operador *</Label>
+                  <Input
+                    id="operator"
+                    value={formDataPJ.operator}
+                    onChange={(e) => setFormDataPJ({...formDataPJ, operator: e.target.value})}
+                  />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="cnpj">CNPJ *</Label>
-                    <Input
-                      id="cnpj"
-                      placeholder="00.000.000/0001-00"
-                      value={formDataPJ.cnpj}
-                      onChange={(e) => setFormDataPJ({...formDataPJ, cnpj: e.target.value})}
-                    />
+                  <Label htmlFor="cnpj">CNPJ *</Label>
+                  <Input
+                    id="cnpj"
+                    value={formDataPJ.cnpj}
+                    onChange={(e) => setFormDataPJ({...formDataPJ, cnpj: e.target.value})}
+                  />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="commercialEmail">E-mail Comercial *</Label>
-                    <Input
-                      id="commercialEmail"
-                      type="email"
-                      placeholder="comercial@empresa.com"
-                      value={formDataPJ.commercialEmail}
-                      onChange={(e) => setFormDataPJ({...formDataPJ, commercialEmail: e.target.value})}
-                    />
+                  <Label htmlFor="commercialEmail">E-mail Comercial *</Label>
+                  <Input
+                    id="commercialEmail"
+                    type="email"
+                    value={formDataPJ.commercialEmail}
+                    onChange={(e) => setFormDataPJ({...formDataPJ, commercialEmail: e.target.value})}
+                  />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phonePJ">Telefone *</Label>
-                    <Input
-                      id="phonePJ"
-                      placeholder="(11) 3000-0000"
-                      value={formDataPJ.phone}
-                      onChange={(e) => setFormDataPJ({...formDataPJ, phone: e.target.value})}
-                    />
+                  <Label htmlFor="phonePJ">Telefone *</Label>
+                  <Input
+                    id="phonePJ"
+                    value={formDataPJ.phone}
+                    onChange={(e) => setFormDataPJ({...formDataPJ, phone: e.target.value})}
+                  />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="contactPerson">Contato Responsável *</Label>
-                    <Input
-                      id="contactPerson"
-                      placeholder="Nome do responsável"
-                      value={formDataPJ.contactPerson}
-                      onChange={(e) => setFormDataPJ({...formDataPJ, contactPerson: e.target.value})}
-                    />
+                  <Label htmlFor="contactPerson">Contato Responsável *</Label>
+                  <Input
+                    id="contactPerson"
+                    value={formDataPJ.contactPerson}
+                    onChange={(e) => setFormDataPJ({...formDataPJ, contactPerson: e.target.value})}
+                  />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="observationsPJ">Observações</Label>
-                    <Textarea
-                      id="observationsPJ"
-                      placeholder="Observações sobre o cliente..."
-                      value={formDataPJ.observations}
-                      onChange={(e) => setFormDataPJ({...formDataPJ, observations: e.target.value})}
-                    />
+                  <Label htmlFor="observationsPJ">Observações</Label>
+                  <Textarea
+                    id="observationsPJ"
+                    value={formDataPJ.observations}
+                    onChange={(e) => setFormDataPJ({...formDataPJ, observations: e.target.value})}
+                  />
                   </div>
                   <div className="space-y-2">
                     <Label>Status *</Label>
@@ -484,50 +473,45 @@ export default function Clients() {
               {clientType === 'INT' && (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="operatorINT">Operador *</Label>
-                    <Input
-                      id="operatorINT"
-                      placeholder="Nome da Empresa/Operador"
-                      value={formDataINT.operator}
-                      onChange={(e) => setFormDataINT({...formDataINT, operator: e.target.value})}
-                    />
+                  <Label htmlFor="operatorINT">Operador *</Label>
+                  <Input
+                    id="operatorINT"
+                    value={formDataINT.operator}
+                    onChange={(e) => setFormDataINT({...formDataINT, operator: e.target.value})}
+                  />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="country">País *</Label>
-                    <Input
-                      id="country"
-                      placeholder="Estados Unidos, Argentina, etc."
-                      value={formDataINT.country}
-                      onChange={(e) => setFormDataINT({...formDataINT, country: e.target.value})}
-                    />
+                  <Label htmlFor="country">País *</Label>
+                  <Input
+                    id="country"
+                    value={formDataINT.country}
+                    onChange={(e) => setFormDataINT({...formDataINT, country: e.target.value})}
+                  />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="emailINT">E-mail *</Label>
-                    <Input
-                      id="emailINT"
-                      type="email"
-                      placeholder="contact@company.com"
-                      value={formDataINT.email}
-                      onChange={(e) => setFormDataINT({...formDataINT, email: e.target.value})}
-                    />
+                  <Label htmlFor="emailINT">E-mail *</Label>
+                  <Input
+                    id="emailINT"
+                    type="email"
+                    value={formDataINT.email}
+                    onChange={(e) => setFormDataINT({...formDataINT, email: e.target.value})}
+                  />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phoneINT">Telefone *</Label>
-                    <Input
-                      id="phoneINT"
-                      placeholder="+1 555 123 4567"
-                      value={formDataINT.phone}
-                      onChange={(e) => setFormDataINT({...formDataINT, phone: e.target.value})}
-                    />
+                  <Label htmlFor="phoneINT">Telefone *</Label>
+                  <Input
+                    id="phoneINT"
+                    value={formDataINT.phone}
+                    onChange={(e) => setFormDataINT({...formDataINT, phone: e.target.value})}
+                  />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="observationsINT">Observações</Label>
-                    <Textarea
-                      id="observationsINT"
-                      placeholder="Observações sobre o cliente..."
-                      value={formDataINT.observations}
-                      onChange={(e) => setFormDataINT({...formDataINT, observations: e.target.value})}
-                    />
+                  <Label htmlFor="observationsINT">Observações</Label>
+                  <Textarea
+                    id="observationsINT"
+                    value={formDataINT.observations}
+                    onChange={(e) => setFormDataINT({...formDataINT, observations: e.target.value})}
+                  />
                   </div>
                   <div className="space-y-2">
                     <Label>Status *</Label>
@@ -718,7 +702,6 @@ export default function Clients() {
                   <Label htmlFor="edit-fullName">Nome Completo *</Label>
                   <Input
                     id="edit-fullName"
-                    placeholder="João Pedro Martins"
                     value={editFormDataPF.fullName}
                     onChange={(e) => setEditFormDataPF({...editFormDataPF, fullName: e.target.value})}
                   />
@@ -727,7 +710,6 @@ export default function Clients() {
                   <Label htmlFor="edit-cpf">CPF *</Label>
                   <Input
                     id="edit-cpf"
-                    placeholder="000.000.000-00"
                     value={editFormDataPF.cpf}
                     onChange={(e) => setEditFormDataPF({...editFormDataPF, cpf: e.target.value})}
                   />
@@ -737,7 +719,6 @@ export default function Clients() {
                   <Input
                     id="edit-emailPF"
                     type="email"
-                    placeholder="email@exemplo.com"
                     value={editFormDataPF.email}
                     onChange={(e) => setEditFormDataPF({...editFormDataPF, email: e.target.value})}
                   />
@@ -746,7 +727,6 @@ export default function Clients() {
                   <Label htmlFor="edit-phonePF">Telefone *</Label>
                   <Input
                     id="edit-phonePF"
-                    placeholder="(11) 99999-9999"
                     value={editFormDataPF.phone}
                     onChange={(e) => setEditFormDataPF({...editFormDataPF, phone: e.target.value})}
                   />
@@ -755,7 +735,6 @@ export default function Clients() {
                   <Label htmlFor="edit-observationsPF">Observações</Label>
                   <Textarea
                     id="edit-observationsPF"
-                    placeholder="Observações sobre o cliente..."
                     value={editFormDataPF.observations}
                     onChange={(e) => setEditFormDataPF({...editFormDataPF, observations: e.target.value})}
                   />
@@ -784,7 +763,6 @@ export default function Clients() {
                   <Label htmlFor="edit-operator">Operador *</Label>
                   <Input
                     id="edit-operator"
-                    placeholder="Nome da Empresa"
                     value={editFormDataPJ.operator}
                     onChange={(e) => setEditFormDataPJ({...editFormDataPJ, operator: e.target.value})}
                   />
@@ -793,7 +771,6 @@ export default function Clients() {
                   <Label htmlFor="edit-cnpj">CNPJ *</Label>
                   <Input
                     id="edit-cnpj"
-                    placeholder="00.000.000/0001-00"
                     value={editFormDataPJ.cnpj}
                     onChange={(e) => setEditFormDataPJ({...editFormDataPJ, cnpj: e.target.value})}
                   />
@@ -803,7 +780,6 @@ export default function Clients() {
                   <Input
                     id="edit-commercialEmail"
                     type="email"
-                    placeholder="comercial@empresa.com"
                     value={editFormDataPJ.commercialEmail}
                     onChange={(e) => setEditFormDataPJ({...editFormDataPJ, commercialEmail: e.target.value})}
                   />
@@ -812,7 +788,6 @@ export default function Clients() {
                   <Label htmlFor="edit-phonePJ">Telefone *</Label>
                   <Input
                     id="edit-phonePJ"
-                    placeholder="(11) 3000-0000"
                     value={editFormDataPJ.phone}
                     onChange={(e) => setEditFormDataPJ({...editFormDataPJ, phone: e.target.value})}
                   />
@@ -821,7 +796,6 @@ export default function Clients() {
                   <Label htmlFor="edit-contactPerson">Contato Responsável *</Label>
                   <Input
                     id="edit-contactPerson"
-                    placeholder="Nome do responsável"
                     value={editFormDataPJ.contactPerson}
                     onChange={(e) => setEditFormDataPJ({...editFormDataPJ, contactPerson: e.target.value})}
                   />
@@ -830,7 +804,6 @@ export default function Clients() {
                   <Label htmlFor="edit-observationsPJ">Observações</Label>
                   <Textarea
                     id="edit-observationsPJ"
-                    placeholder="Observações sobre o cliente..."
                     value={editFormDataPJ.observations}
                     onChange={(e) => setEditFormDataPJ({...editFormDataPJ, observations: e.target.value})}
                   />
@@ -859,7 +832,6 @@ export default function Clients() {
                   <Label htmlFor="edit-operatorINT">Operador *</Label>
                   <Input
                     id="edit-operatorINT"
-                    placeholder="Nome da Empresa/Operador"
                     value={editFormDataINT.operator}
                     onChange={(e) => setEditFormDataINT({...editFormDataINT, operator: e.target.value})}
                   />
@@ -868,7 +840,6 @@ export default function Clients() {
                   <Label htmlFor="edit-country">País *</Label>
                   <Input
                     id="edit-country"
-                    placeholder="Estados Unidos, Argentina, etc."
                     value={editFormDataINT.country}
                     onChange={(e) => setEditFormDataINT({...editFormDataINT, country: e.target.value})}
                   />
@@ -878,7 +849,6 @@ export default function Clients() {
                   <Input
                     id="edit-emailINT"
                     type="email"
-                    placeholder="contact@company.com"
                     value={editFormDataINT.email}
                     onChange={(e) => setEditFormDataINT({...editFormDataINT, email: e.target.value})}
                   />
@@ -887,7 +857,6 @@ export default function Clients() {
                   <Label htmlFor="edit-phoneINT">Telefone *</Label>
                   <Input
                     id="edit-phoneINT"
-                    placeholder="+1 555 123 4567"
                     value={editFormDataINT.phone}
                     onChange={(e) => setEditFormDataINT({...editFormDataINT, phone: e.target.value})}
                   />
@@ -896,7 +865,6 @@ export default function Clients() {
                   <Label htmlFor="edit-observationsINT">Observações</Label>
                   <Textarea
                     id="edit-observationsINT"
-                    placeholder="Observações sobre o cliente..."
                     value={editFormDataINT.observations}
                     onChange={(e) => setEditFormDataINT({...editFormDataINT, observations: e.target.value})}
                   />

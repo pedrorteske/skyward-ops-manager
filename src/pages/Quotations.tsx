@@ -432,7 +432,6 @@ export default function Quotations() {
               <div className="space-y-2">
                 <Label>Observações</Label>
                 <Textarea
-                  placeholder="Observações adicionais..."
                   value={formData.observations}
                   onChange={(e) => setFormData({ ...formData, observations: e.target.value })}
                   rows={3}
@@ -827,7 +826,6 @@ export default function Quotations() {
                 <div className="space-y-2">
                   <Label>Observações</Label>
                   <Textarea
-                    placeholder="Observações adicionais..."
                     value={editFormData.observations}
                     onChange={(e) => setEditFormData({ ...editFormData, observations: e.target.value })}
                     rows={3}
