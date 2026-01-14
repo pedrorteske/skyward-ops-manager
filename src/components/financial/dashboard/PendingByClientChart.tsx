@@ -45,9 +45,9 @@ export function PendingByClientChart({
   const maxAmount = Math.max(...sortedData.map(d => d.pendingAmount));
   const getBarColor = (amount: number) => {
     const intensity = amount / maxAmount;
-    if (intensity > 0.7) return 'hsl(var(--destructive))';
-    if (intensity > 0.4) return 'hsl(var(--warning))';
-    return 'hsl(var(--info))';
+    if (intensity > 0.7) return 'hsl(var(--chart-8))';
+    if (intensity > 0.4) return 'hsl(var(--chart-3))';
+    return 'hsl(var(--chart-6))';
   };
 
   return (

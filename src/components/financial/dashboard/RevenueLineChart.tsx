@@ -91,10 +91,10 @@ export function RevenueLineChart({
               <Line
                 type="monotone"
                 dataKey="revenue"
-                stroke="hsl(var(--primary))"
-                strokeWidth={2}
-                dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 4 }}
-                activeDot={{ r: 6, stroke: 'hsl(var(--primary))', strokeWidth: 2 }}
+                stroke="hsl(var(--chart-2))"
+                strokeWidth={3}
+                dot={{ fill: 'hsl(var(--chart-2))', strokeWidth: 2, r: 4 }}
+                activeDot={{ r: 6, stroke: 'hsl(var(--chart-2))', strokeWidth: 2 }}
                 name="Período Atual"
               />
               {showComparison && (

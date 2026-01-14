@@ -36,18 +36,28 @@
     --accent: 187 92% 45%;
     --accent-foreground: 222 47% 11%;
 
-    /* Status Colors */
-    --destructive: 0 84% 60%;
+    /* Status Colors - Saturação aumentada */
+    --destructive: 0 92% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 142 76% 36%;
+    --success: 142 90% 38%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
+    --warning: 38 95% 50%;
+    --warning-foreground: 0 0% 0%;
 
-    --info: 199 89% 48%;
+    --info: 199 95% 48%;
     --info-foreground: 0 0% 100%;
+
+    /* Paleta de Gráficos Vibrante */
+    --chart-1: 217 95% 55%;
+    --chart-2: 142 90% 42%;
+    --chart-3: 38 95% 50%;
+    --chart-4: 262 90% 58%;
+    --chart-5: 326 90% 55%;
+    --chart-6: 173 85% 45%;
+    --chart-7: 25 95% 55%;
+    --chart-8: 0 90% 55%;
 
     /* UI Elements */
     --border: 214 32% 91%;
@@ -106,18 +116,28 @@
     --accent: 217 91% 60%;
     --accent-foreground: 0 0% 100%;
 
-    /* Status Colors */
-    --destructive: 0 62% 50%;
+    /* Status Colors - Saturação aumentada */
+    --destructive: 0 85% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 142 76% 36%;
+    --success: 142 85% 42%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 92% 50%;
+    --warning: 38 90% 55%;
     --warning-foreground: 0 0% 0%;
 
-    --info: 199 89% 48%;
+    --info: 199 90% 55%;
     --info-foreground: 0 0% 100%;
+
+    /* Paleta de Gráficos Vibrante */
+    --chart-1: 217 95% 60%;
+    --chart-2: 142 90% 50%;
+    --chart-3: 38 95% 55%;
+    --chart-4: 262 90% 65%;
+    --chart-5: 326 90% 60%;
+    --chart-6: 173 85% 55%;
+    --chart-7: 25 95% 60%;
+    --chart-8: 0 90% 60%;
 
     /* UI Elements */
     --border: 217 33% 17%;

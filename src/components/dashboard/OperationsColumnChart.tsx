@@ -53,7 +53,7 @@ export function OperationsColumnChart({ data }: OperationsColumnChartProps) {
               />
               <Bar
                 dataKey="operations"
-                fill="hsl(var(--primary))"
+                fill="hsl(var(--chart-1))"
                 radius={[4, 4, 0, 0]}
                 name="Operações"
               />
