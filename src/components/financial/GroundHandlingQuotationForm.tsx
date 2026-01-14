@@ -13,12 +13,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Combobox } from '@/components/ui/combobox';
-import { Plus, Trash2, FileText, Copy, Check, Plane, User, MapPin, DollarSign, CreditCard, ClipboardList, Calculator } from 'lucide-react';
+import { Plus, Trash2, FileText, Copy, Check, Plane, User, MapPin, DollarSign, CreditCard, ClipboardList, Calculator, Download } from 'lucide-react';
 import { useClients } from '@/contexts/ClientsContext';
 import { useFinancial } from '@/contexts/FinancialContext';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { generateGroundHandlingPDF } from '@/lib/groundHandlingPdfGenerator';
 import {
   GroundHandlingClient,
   OperationInfo,
@@ -977,6 +978,45 @@ ${companyInfo.responsibleEmail}`;
                 >
                   <FileText className="w-4 h-4 mr-2" />
                   Proforma Invoice
+                </Button>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-2">
+                <h4 className="font-medium text-sm">Exportar:</h4>
+                <Button
+                  variant="secondary"
+                  className="w-full"
+                  onClick={() => {
+                    const quotationNumber = generateDocumentNumber('quotation');
+                    generateGroundHandlingPDF({
+                      quotationNumber,
+                      client: clientData,
+                      operation: operationData,
+                      serviceValue,
+                      currency,
+                      includedServices,
+                      additionalServices,
+                      applyAdminFee,
+                      adminFeePercentage,
+                      adminFeeText,
+                      taxObservation,
+                      payment: paymentData,
+                      summary: {
+                        serviceValue,
+                        additionalServicesTotal,
+                        adminFee: adminFeeAmount,
+                        grandTotal,
+                      },
+                      company: companyInfo,
+                      createdAt: new Date().toISOString(),
+                    });
+                    toast.success('PDF gerado com sucesso!');
+                  }}
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Gerar PDF
                 </Button>
               </div>
 
