@@ -13,6 +13,7 @@ import type { ClientPF, ClientPJ, ClientINT } from '@/types/aviation';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { generateFinancialPDF } from '@/lib/pdfGenerator';
+import { generateProformaPDF, generateInvoicePDF } from '@/lib/invoicePdfGenerator';
 
 interface DocumentDetailDialogProps {
   document: FinancialDocument | null;
@@ -108,8 +109,23 @@ export function DocumentDetailDialog({ document, open, onOpenChange }: DocumentD
       };
     }
 
-    generateFinancialPDF(document, clientInfoForPDF, flightInfoForPDF);
-    toast.success('PDF gerado com sucesso!');
+    try {
+      // Use specific PDF generator based on document type
+      switch (document.type) {
+        case 'proforma':
+          generateProformaPDF(document, clientInfoForPDF, flightInfoForPDF);
+          break;
+        case 'invoice':
+          generateInvoicePDF(document, clientInfoForPDF, flightInfoForPDF, undefined, document.validUntil);
+          break;
+        default:
+          generateFinancialPDF(document, clientInfoForPDF, flightInfoForPDF);
+      }
+      toast.success('PDF gerado com sucesso!');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error('Erro ao gerar PDF');
+    }
   };
 
   const handleSendEmail = () => {
