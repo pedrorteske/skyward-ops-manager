@@ -21,7 +21,7 @@ import { cn } from '@/lib/utils';
 type SortOrder = 'newest' | 'oldest';
 
 export default function Flights() {
-  const { flights, addFlight, updateFlight, deleteFlight } = useFlights();
+  const { flights, isLoading, addFlight, updateFlight, deleteFlight } = useFlights();
   const [activeTab, setActiveTab] = useState<string>('portal');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<FlightStatus | 'all'>('all');
@@ -79,16 +79,10 @@ export default function Flights() {
     return sortOrder === 'newest' ? dateB.getTime() - dateA.getTime() : dateA.getTime() - dateB.getTime();
   });
 
-  const handleCreateFlight = () => {
-    const newFlight: Flight = {
-      id: String(Date.now()),
+  const handleCreateFlight = async () => {
+    await addFlight({
       ...formData,
-      companyId: '1',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    
-    addFlight(newFlight);
+    });
     setIsNewFlightOpen(false);
     setFormData({
       aircraftPrefix: '',
@@ -128,20 +122,19 @@ export default function Flights() {
     }
   };
 
-  const handleUpdateFlight = () => {
+  const handleUpdateFlight = async () => {
     if (selectedFlight) {
-      updateFlight(selectedFlight.id, {
+      await updateFlight(selectedFlight.id, {
         ...editFormData,
-        updatedAt: new Date().toISOString(),
       });
       setIsEditMode(false);
       setSelectedFlight(null);
     }
   };
 
-  const handleDeleteFlight = () => {
+  const handleDeleteFlight = async () => {
     if (selectedFlight) {
-      deleteFlight(selectedFlight.id);
+      await deleteFlight(selectedFlight.id);
       setIsDeleteDialogOpen(false);
       setSelectedFlight(null);
     }

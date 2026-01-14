@@ -5,7 +5,6 @@ import { QuotationStatusBadge } from "@/components/quotations/QuotationStatusBad
 import { useQuotations } from "@/contexts/QuotationsContext";
 import { useClients } from "@/contexts/ClientsContext";
 import { useFlights } from "@/contexts/FlightsContext";
-import { getFlightById } from "@/data/mockData";
 import { Quotation, QuotationItem, QuotationStatus, quotationStatusLabels, Currency, Client } from "@/types/aviation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,7 +36,7 @@ const serviceOptions = [
 ];
 
 export default function Quotations() {
-  const { quotations, addQuotation, updateQuotation, deleteQuotation, updateQuotationStatus } = useQuotations();
+  const { quotations, isLoading, addQuotation, updateQuotation, deleteQuotation, updateQuotationStatus, generateQuotationNumber } = useQuotations();
   const { clients, getClientById } = useClients();
   const { flights } = useFlights();
   const [searchTerm, setSearchTerm] = useState("");
@@ -119,11 +118,10 @@ export default function Quotations() {
     return items.reduce((sum, item) => sum + item.total, 0);
   };
 
-  const handleCreateQuotation = () => {
+  const handleCreateQuotation = async () => {
     const total = calculateTotal();
-    const newQuotation: Quotation = {
-      id: String(Date.now()),
-      number: `COT-2026-${String(quotations.length + 1).padStart(4, "0")}`,
+    await addQuotation({
+      number: generateQuotationNumber(),
       clientId: formData.clientId,
       flightId: formData.flightId || undefined,
       items: items.filter((i) => i.description && i.quantity > 0),
@@ -132,16 +130,11 @@ export default function Quotations() {
       total: total,
       status: "created",
       observations: formData.observations || undefined,
-      companyId: "1",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
       validUntil: formData.validUntil,
-    };
+    });
 
-    addQuotation(newQuotation);
     setIsNewQuotationOpen(false);
     resetForm();
-    toast.success("Cotação criada com sucesso!");
   };
 
   const resetForm = () => {
@@ -206,11 +199,10 @@ export default function Quotations() {
     return editItems.reduce((sum, item) => sum + item.total, 0);
   };
 
-  const handleUpdateQuotation = () => {
+  const handleUpdateQuotation = async () => {
     if (selectedQuotation) {
       const total = calculateEditTotal();
-      const updatedQuotation: Quotation = {
-        ...selectedQuotation,
+      await updateQuotation(selectedQuotation.id, {
         clientId: editFormData.clientId,
         flightId: editFormData.flightId || undefined,
         items: editItems.filter((i) => i.description && i.quantity > 0),
@@ -219,22 +211,18 @@ export default function Quotations() {
         total: total,
         observations: editFormData.observations || undefined,
         validUntil: editFormData.validUntil,
-        updatedAt: new Date().toISOString(),
-      };
+      });
 
-      updateQuotation(selectedQuotation.id, updatedQuotation);
       setIsEditMode(false);
       setSelectedQuotation(null);
-      toast.success("Cotação atualizada com sucesso!");
     }
   };
 
-  const handleDeleteQuotation = () => {
+  const handleDeleteQuotation = async () => {
     if (selectedQuotation) {
-      deleteQuotation(selectedQuotation.id);
+      await deleteQuotation(selectedQuotation.id);
       setIsDeleteDialogOpen(false);
       setSelectedQuotation(null);
-      toast.success("Cotação excluída com sucesso!");
     }
   };
 
@@ -243,9 +231,9 @@ export default function Quotations() {
     setIsEditMode(false);
   };
 
-  const handleSendEmail = (quotation: Quotation) => {
+  const handleSendEmail = async (quotation: Quotation) => {
     toast.success("E-mail enviado com sucesso!");
-    updateQuotationStatus(quotation.id, "sent");
+    await updateQuotationStatus(quotation.id, "sent");
   };
 
   const handleDownloadPDF = (quotation: Quotation) => {
@@ -488,7 +476,7 @@ export default function Quotations() {
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {filteredQuotations.map((quotation) => {
           const client = getClientById(quotation.clientId);
-          const flight = quotation.flightId ? getFlightById(quotation.flightId) : null;
+          const flight = quotation.flightId ? flights.find(f => f.id === quotation.flightId) : null;
           const clientName = client?.type === "PF" ? client.fullName : client?.operator;
 
           return (
