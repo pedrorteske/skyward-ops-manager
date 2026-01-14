@@ -360,19 +360,19 @@ ${companyInfo.responsibleEmail}`;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[95vh] p-0 overflow-hidden">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b">
+      <DialogContent className="max-w-5xl h-[90vh] p-0 flex flex-col">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b shrink-0">
           <DialogTitle className="flex items-center gap-2 text-xl">
             <Plane className="w-5 h-5 text-primary" />
             Formulário de Cotação - Operações de Pista
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 min-h-0">
           {/* Main Form Area */}
-          <div className="flex-1 overflow-hidden">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-              <div className="px-6 pt-4 border-b bg-muted/30">
+          <div className="flex-1 flex flex-col min-h-0">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
+              <div className="px-6 pt-4 border-b bg-muted/30 shrink-0">
                 <TabsList className="grid grid-cols-6 w-full">
                   <TabsTrigger value="client" className="flex items-center gap-1 text-xs">
                     <User className="w-3 h-3" />
@@ -401,7 +401,8 @@ ${companyInfo.responsibleEmail}`;
                 </TabsList>
               </div>
 
-              <ScrollArea className="flex-1 px-6 py-4">
+              <ScrollArea className="flex-1 min-h-0">
+                <div className="px-6 py-4">
                 {/* Client Tab */}
                 <TabsContent value="client" className="mt-0 space-y-4">
                   <Card>
@@ -921,6 +922,7 @@ ${companyInfo.responsibleEmail}`;
                     </CardContent>
                   </Card>
                 </TabsContent>
+                </div>
               </ScrollArea>
             </Tabs>
           </div>
