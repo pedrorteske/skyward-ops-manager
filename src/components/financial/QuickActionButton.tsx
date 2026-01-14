@@ -6,7 +6,7 @@ interface QuickActionButtonProps {
   title: string;
   description: string;
   onClick: () => void;
-  variant?: 'primary' | 'info' | 'success';
+  variant?: 'primary' | 'info' | 'success' | 'secondary';
 }
 
 const variantStyles = {
@@ -14,6 +14,12 @@ const variantStyles = {
     bg: 'bg-gradient-to-br from-primary to-primary/80',
     hover: 'hover:from-primary/90 hover:to-primary/70',
     shadow: 'hover:shadow-primary/25',
+    iconBg: 'bg-white/20',
+  },
+  secondary: {
+    bg: 'bg-gradient-to-br from-secondary to-secondary/80',
+    hover: 'hover:from-secondary/90 hover:to-secondary/70',
+    shadow: 'hover:shadow-secondary/25',
     iconBg: 'bg-white/20',
   },
   info: {
