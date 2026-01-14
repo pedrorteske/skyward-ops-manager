@@ -16,6 +16,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { ClientsDashboard } from '@/components/clients/ClientsDashboard';
+import { PhoneInput } from '@/components/ui/phone-input';
 
 export default function Clients() {
   const { clients, addClient, updateClient, deleteClient } = useClients();
@@ -369,10 +370,11 @@ export default function Clients() {
                   </div>
                   <div className="space-y-2">
                   <Label htmlFor="phonePF">Telefone *</Label>
-                  <Input
+                  <PhoneInput
                     id="phonePF"
                     value={formDataPF.phone}
-                    onChange={(e) => setFormDataPF({...formDataPF, phone: e.target.value})}
+                    onChange={(value) => setFormDataPF({...formDataPF, phone: value})}
+                    defaultCountry="BR"
                   />
                   </div>
                   <div className="space-y-2">
@@ -430,10 +432,11 @@ export default function Clients() {
                   </div>
                   <div className="space-y-2">
                   <Label htmlFor="phonePJ">Telefone *</Label>
-                  <Input
+                  <PhoneInput
                     id="phonePJ"
                     value={formDataPJ.phone}
-                    onChange={(e) => setFormDataPJ({...formDataPJ, phone: e.target.value})}
+                    onChange={(value) => setFormDataPJ({...formDataPJ, phone: value})}
+                    defaultCountry="BR"
                   />
                   </div>
                   <div className="space-y-2">
@@ -499,10 +502,11 @@ export default function Clients() {
                   </div>
                   <div className="space-y-2">
                   <Label htmlFor="phoneINT">Telefone *</Label>
-                  <Input
+                  <PhoneInput
                     id="phoneINT"
                     value={formDataINT.phone}
-                    onChange={(e) => setFormDataINT({...formDataINT, phone: e.target.value})}
+                    onChange={(value) => setFormDataINT({...formDataINT, phone: value})}
+                    defaultCountry="US"
                   />
                   </div>
                   <div className="space-y-2">
@@ -725,10 +729,11 @@ export default function Clients() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-phonePF">Telefone *</Label>
-                  <Input
+                  <PhoneInput
                     id="edit-phonePF"
                     value={editFormDataPF.phone}
-                    onChange={(e) => setEditFormDataPF({...editFormDataPF, phone: e.target.value})}
+                    onChange={(value) => setEditFormDataPF({...editFormDataPF, phone: value})}
+                    defaultCountry="BR"
                   />
                 </div>
                 <div className="space-y-2">
@@ -786,10 +791,11 @@ export default function Clients() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-phonePJ">Telefone *</Label>
-                  <Input
+                  <PhoneInput
                     id="edit-phonePJ"
                     value={editFormDataPJ.phone}
-                    onChange={(e) => setEditFormDataPJ({...editFormDataPJ, phone: e.target.value})}
+                    onChange={(value) => setEditFormDataPJ({...editFormDataPJ, phone: value})}
+                    defaultCountry="BR"
                   />
                 </div>
                 <div className="space-y-2">
@@ -855,10 +861,11 @@ export default function Clients() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-phoneINT">Telefone *</Label>
-                  <Input
+                  <PhoneInput
                     id="edit-phoneINT"
                     value={editFormDataINT.phone}
-                    onChange={(e) => setEditFormDataINT({...editFormDataINT, phone: e.target.value})}
+                    onChange={(value) => setEditFormDataINT({...editFormDataINT, phone: value})}
+                    defaultCountry="US"
                   />
                 </div>
                 <div className="space-y-2">
