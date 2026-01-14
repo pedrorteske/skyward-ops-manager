@@ -19,7 +19,7 @@ import { ClientsDashboard } from '@/components/clients/ClientsDashboard';
 import { PhoneInput } from '@/components/ui/phone-input';
 
 export default function Clients() {
-  const { clients, addClient, updateClient, deleteClient } = useClients();
+  const { clients, isLoading, addClient, updateClient, deleteClient } = useClients();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<ClientType | 'all'>('all');
   const [filterStatus, setFilterStatus] = useState<'active' | 'inactive' | 'all'>('all');
@@ -105,42 +105,26 @@ export default function Clients() {
     return matchesSearch && matchesType && matchesStatus;
   });
 
-  const handleCreateClient = () => {
-    let newClient: Client;
-    
+  const handleCreateClient = async () => {
     if (clientType === 'PF') {
-      newClient = {
-        id: String(Date.now()),
+      await addClient({
         type: 'PF',
         ...formDataPF,
-        companyId: '1',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      } as ClientPF;
+      } as Omit<ClientPF, 'id' | 'companyId' | 'createdAt' | 'updatedAt'>);
     } else if (clientType === 'PJ') {
-      newClient = {
-        id: String(Date.now()),
+      await addClient({
         type: 'PJ',
         ...formDataPJ,
-        companyId: '1',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      } as ClientPJ;
+      } as Omit<ClientPJ, 'id' | 'companyId' | 'createdAt' | 'updatedAt'>);
     } else {
-      newClient = {
-        id: String(Date.now()),
+      await addClient({
         type: 'INT',
         ...formDataINT,
-        companyId: '1',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      } as ClientINT;
+      } as Omit<ClientINT, 'id' | 'companyId' | 'createdAt' | 'updatedAt'>);
     }
     
-    addClient(newClient);
     setIsNewClientOpen(false);
     resetForm();
-    toast.success('Cliente cadastrado com sucesso!');
   };
 
   const resetForm = () => {
@@ -211,38 +195,28 @@ export default function Clients() {
     setIsEditDialogOpen(true);
   };
 
-  const handleUpdateClient = () => {
+  const handleUpdateClient = async () => {
     if (!selectedClient) return;
 
-    let updatedClient: Client;
-    
     if (editClientType === 'PF') {
-      updatedClient = {
-        ...selectedClient,
+      await updateClient(selectedClient.id, {
         type: 'PF',
         ...editFormDataPF,
-        updatedAt: new Date().toISOString(),
-      } as ClientPF;
+      } as Omit<ClientPF, 'id' | 'companyId' | 'createdAt' | 'updatedAt'>);
     } else if (editClientType === 'PJ') {
-      updatedClient = {
-        ...selectedClient,
+      await updateClient(selectedClient.id, {
         type: 'PJ',
         ...editFormDataPJ,
-        updatedAt: new Date().toISOString(),
-      } as ClientPJ;
+      } as Omit<ClientPJ, 'id' | 'companyId' | 'createdAt' | 'updatedAt'>);
     } else {
-      updatedClient = {
-        ...selectedClient,
+      await updateClient(selectedClient.id, {
         type: 'INT',
         ...editFormDataINT,
-        updatedAt: new Date().toISOString(),
-      } as ClientINT;
+      } as Omit<ClientINT, 'id' | 'companyId' | 'createdAt' | 'updatedAt'>);
     }
 
-    updateClient(selectedClient.id, updatedClient);
     setIsEditDialogOpen(false);
     setSelectedClient(null);
-    toast.success('Cliente atualizado com sucesso!');
   };
 
   const handleDeleteClick = (client: Client) => {
@@ -250,12 +224,11 @@ export default function Clients() {
     setIsDeleteDialogOpen(true);
   };
 
-  const handleDeleteClient = () => {
+  const handleDeleteClient = async () => {
     if (selectedClient) {
-      deleteClient(selectedClient.id);
+      await deleteClient(selectedClient.id);
       setIsDeleteDialogOpen(false);
       setSelectedClient(null);
-      toast.success('Cliente excluído com sucesso!');
     }
   };
 

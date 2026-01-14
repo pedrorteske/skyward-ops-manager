@@ -1,44 +1,250 @@
-import React, { createContext, useContext, useState, type ReactNode } from 'react';
-import type { FinancialDocument, FinancialDocumentStatus, FinancialDocumentType } from '@/types/financial';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import type { FinancialDocument, FinancialDocumentStatus, FinancialDocumentType, FinancialItem, Currency } from '@/types/financial';
+import { supabase } from '@/integrations/supabase/client';
+import { useCompanyId } from '@/hooks/useCompanyId';
+import { useToast } from '@/hooks/use-toast';
 
 interface FinancialContextType {
   documents: FinancialDocument[];
-  addDocument: (document: FinancialDocument) => void;
-  updateDocument: (id: string, document: FinancialDocument) => void;
-  deleteDocument: (id: string) => void;
-  updateDocumentStatus: (id: string, status: FinancialDocumentStatus) => void;
+  isLoading: boolean;
+  addDocument: (document: Omit<FinancialDocument, 'id' | 'companyId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  updateDocument: (id: string, document: Omit<FinancialDocument, 'id' | 'companyId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  deleteDocument: (id: string) => Promise<void>;
+  updateDocumentStatus: (id: string, status: FinancialDocumentStatus) => Promise<void>;
   getDocumentById: (id: string) => FinancialDocument | undefined;
   getDocumentsByType: (type: FinancialDocumentType) => FinancialDocument[];
   generateDocumentNumber: (type: FinancialDocumentType) => string;
+  refreshDocuments: () => Promise<void>;
 }
 
 const FinancialContext = createContext<FinancialContextType | undefined>(undefined);
 
-// Empty initial data for production
-const initialDocuments: FinancialDocument[] = [];
+// Map database status to frontend status
+const mapDbStatusToFrontend = (status: string): FinancialDocumentStatus => {
+  const statusMap: Record<string, FinancialDocumentStatus> = {
+    draft: 'created',
+    sent: 'sent',
+    approved: 'approved',
+    rejected: 'cancelled',
+    paid: 'paid',
+    cancelled: 'cancelled',
+  };
+  return statusMap[status] || 'created';
+};
+
+// Map frontend status to database status
+const mapFrontendStatusToDb = (status: FinancialDocumentStatus): string => {
+  const statusMap: Record<FinancialDocumentStatus, string> = {
+    created: 'draft',
+    sent: 'sent',
+    approved: 'approved',
+    paid: 'paid',
+    cancelled: 'cancelled',
+  };
+  return statusMap[status] || 'draft';
+};
+
+// Helper to map database row to FinancialDocument type
+const mapDbToDocument = (row: any): FinancialDocument => ({
+  id: row.id,
+  number: row.number,
+  type: row.type as FinancialDocumentType,
+  clientId: row.client_id,
+  flightId: row.flight_id,
+  items: row.items as FinancialItem[],
+  currency: row.currency as Currency,
+  subtotal: parseFloat(row.subtotal),
+  total: parseFloat(row.total),
+  status: mapDbStatusToFrontend(row.status),
+  observations: row.observations,
+  companyId: row.company_id,
+  createdAt: row.created_at,
+  updatedAt: row.updated_at,
+  validUntil: row.due_date,
+});
 
 export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [documents, setDocuments] = useState<FinancialDocument[]>(initialDocuments);
+  const [documents, setDocuments] = useState<FinancialDocument[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { companyId, isLoading: companyLoading } = useCompanyId();
+  const { toast } = useToast();
 
-  const addDocument = (document: FinancialDocument) => {
-    setDocuments(prev => [document, ...prev]);
+  const fetchDocuments = useCallback(async () => {
+    if (!companyId) {
+      setDocuments([]);
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('financial_documents')
+        .select('*')
+        .eq('company_id', companyId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching financial documents:', error);
+        toast({
+          title: 'Erro ao carregar documentos',
+          description: error.message,
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      setDocuments(data?.map(mapDbToDocument) || []);
+    } catch (err) {
+      console.error('Error in fetchDocuments:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [companyId, toast]);
+
+  useEffect(() => {
+    if (!companyLoading) {
+      fetchDocuments();
+    }
+  }, [companyLoading, fetchDocuments]);
+
+  const generateDocumentNumber = (type: FinancialDocumentType): string => {
+    const prefixes = { quotation: 'COT', proforma: 'PRO', invoice: 'INV' };
+    const year = new Date().getFullYear();
+    const typeDocuments = documents.filter(doc => doc.type === type);
+    const nextNumber = String(typeDocuments.length + 1).padStart(3, '0');
+    return `${prefixes[type]}-${year}-${nextNumber}`;
   };
 
-  const updateDocument = (id: string, updatedDocument: FinancialDocument) => {
+  const addDocument = async (document: Omit<FinancialDocument, 'id' | 'companyId' | 'createdAt' | 'updatedAt'>) => {
+    if (!companyId) {
+      toast({
+        title: 'Erro',
+        description: 'Empresa não encontrada',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from('financial_documents')
+      .insert({
+        company_id: companyId,
+        client_id: document.clientId,
+        flight_id: document.flightId || null,
+        type: document.type,
+        number: document.number,
+        items: document.items as unknown as any,
+        currency: document.currency,
+        subtotal: document.subtotal,
+        taxes: 0,
+        total: document.total,
+        status: mapFrontendStatusToDb(document.status) as any,
+        observations: document.observations,
+        due_date: document.validUntil,
+      } as any)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error adding financial document:', error);
+      toast({
+        title: 'Erro ao adicionar documento',
+        description: error.message,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setDocuments(prev => [mapDbToDocument(data), ...prev]);
+    toast({
+      title: 'Documento adicionado',
+      description: 'O documento foi adicionado com sucesso.',
+    });
+  };
+
+  const updateDocument = async (id: string, document: Omit<FinancialDocument, 'id' | 'companyId' | 'createdAt' | 'updatedAt'>) => {
+    const { data, error } = await supabase
+      .from('financial_documents')
+      .update({
+        client_id: document.clientId,
+        flight_id: document.flightId || null,
+        type: document.type,
+        number: document.number,
+        items: document.items as unknown as any,
+        currency: document.currency,
+        subtotal: document.subtotal,
+        total: document.total,
+        status: mapFrontendStatusToDb(document.status) as any,
+        observations: document.observations,
+        due_date: document.validUntil,
+      } as any)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating financial document:', error);
+      toast({
+        title: 'Erro ao atualizar documento',
+        description: error.message,
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setDocuments(prev =>
-      prev.map(doc => (doc.id === id ? updatedDocument : doc))
+      prev.map(doc => (doc.id === id ? mapDbToDocument(data) : doc))
     );
+    toast({
+      title: 'Documento atualizado',
+      description: 'O documento foi atualizado com sucesso.',
+    });
   };
 
-  const deleteDocument = (id: string) => {
+  const deleteDocument = async (id: string) => {
+    const { error } = await supabase
+      .from('financial_documents')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error deleting financial document:', error);
+      toast({
+        title: 'Erro ao excluir documento',
+        description: error.message,
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setDocuments(prev => prev.filter(doc => doc.id !== id));
+    toast({
+      title: 'Documento excluído',
+      description: 'O documento foi excluído com sucesso.',
+    });
   };
 
-  const updateDocumentStatus = (id: string, status: FinancialDocumentStatus) => {
+  const updateDocumentStatus = async (id: string, status: FinancialDocumentStatus) => {
+    const { data, error } = await supabase
+      .from('financial_documents')
+      .update({ status: mapFrontendStatusToDb(status) as any })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating document status:', error);
+      toast({
+        title: 'Erro ao atualizar status',
+        description: error.message,
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setDocuments(prev =>
-      prev.map(doc =>
-        doc.id === id ? { ...doc, status, updatedAt: new Date().toISOString() } : doc
-      )
+      prev.map(doc => (doc.id === id ? mapDbToDocument(data) : doc))
     );
   };
 
@@ -50,18 +256,11 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
     return documents.filter(doc => doc.type === type);
   };
 
-  const generateDocumentNumber = (type: FinancialDocumentType): string => {
-    const prefixes = { quotation: 'COT', proforma: 'PRO', invoice: 'INV' };
-    const year = new Date().getFullYear();
-    const typeDocuments = documents.filter(doc => doc.type === type);
-    const nextNumber = String(typeDocuments.length + 1).padStart(3, '0');
-    return `${prefixes[type]}-${year}-${nextNumber}`;
-  };
-
   return (
     <FinancialContext.Provider
       value={{
         documents,
+        isLoading,
         addDocument,
         updateDocument,
         deleteDocument,
@@ -69,6 +268,7 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
         getDocumentById,
         getDocumentsByType,
         generateDocumentNumber,
+        refreshDocuments: fetchDocuments,
       }}
     >
       {children}
