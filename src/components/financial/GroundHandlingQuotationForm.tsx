@@ -449,7 +449,6 @@ ${companyInfo.responsibleEmail}`;
                           <Input
                             value={clientData.operator}
                             onChange={(e) => setClientData({ ...clientData, operator: e.target.value })}
-                            placeholder="Nome do operador"
                           />
                         </div>
                         {clientData.type === 'PJ' && (
@@ -458,7 +457,6 @@ ${companyInfo.responsibleEmail}`;
                             <Input
                               value={clientData.cnpj}
                               onChange={(e) => setClientData({ ...clientData, cnpj: e.target.value })}
-                              placeholder="00.000.000/0000-00"
                             />
                           </div>
                         )}
@@ -471,7 +469,6 @@ ${companyInfo.responsibleEmail}`;
                             type="email"
                             value={clientData.email}
                             onChange={(e) => setClientData({ ...clientData, email: e.target.value })}
-                            placeholder="email@exemplo.com"
                           />
                         </div>
                       </div>
@@ -481,7 +478,6 @@ ${companyInfo.responsibleEmail}`;
                         <Textarea
                           value={clientData.observations}
                           onChange={(e) => setClientData({ ...clientData, observations: e.target.value })}
-                          placeholder="Observações sobre o cliente..."
                           rows={2}
                         />
                       </div>
@@ -505,7 +501,6 @@ ${companyInfo.responsibleEmail}`;
                           <Input
                             value={operationData.airport}
                             onChange={(e) => setOperationData({ ...operationData, airport: e.target.value })}
-                            placeholder="SBGR - Guarulhos"
                           />
                         </div>
                         <div className="space-y-2">
@@ -524,7 +519,6 @@ ${companyInfo.responsibleEmail}`;
                           <Input
                             value={operationData.aircraftType}
                             onChange={(e) => setOperationData({ ...operationData, aircraftType: e.target.value })}
-                            placeholder="Ex: Phenom 300, Citation XLS"
                           />
                         </div>
                         <div className="space-y-2">
@@ -532,7 +526,6 @@ ${companyInfo.responsibleEmail}`;
                           <Input
                             value={operationData.aircraftPrefix}
                             onChange={(e) => setOperationData({ ...operationData, aircraftPrefix: e.target.value })}
-                            placeholder="Ex: PR-ABC"
                           />
                         </div>
                       </div>
@@ -577,7 +570,6 @@ ${companyInfo.responsibleEmail}`;
                         <Textarea
                           value={operationData.observations}
                           onChange={(e) => setOperationData({ ...operationData, observations: e.target.value })}
-                          placeholder="Observações sobre a operação..."
                           rows={2}
                         />
                       </div>
@@ -605,7 +597,6 @@ ${companyInfo.responsibleEmail}`;
                             step="0.01"
                             value={serviceValue || ''}
                             onChange={(e) => setServiceValue(Number(e.target.value))}
-                            placeholder="0,00"
                           />
                         </div>
                         <div className="space-y-2">
@@ -688,7 +679,6 @@ ${companyInfo.responsibleEmail}`;
                                   <Input
                                     value={service.name}
                                     onChange={(e) => updateAdditionalService(service.id, 'name', e.target.value)}
-                                    placeholder="Nome do serviço"
                                     className="h-8"
                                   />
                                 </TableCell>
@@ -825,7 +815,6 @@ ${companyInfo.responsibleEmail}`;
                         <Textarea
                           value={paymentData.pixData}
                           onChange={(e) => setPaymentData({ ...paymentData, pixData: e.target.value })}
-                          placeholder="Chave PIX, conta bancária, etc."
                           rows={3}
                         />
                       </div>
@@ -835,7 +824,6 @@ ${companyInfo.responsibleEmail}`;
                         <Textarea
                           value={paymentData.observations}
                           onChange={(e) => setPaymentData({ ...paymentData, observations: e.target.value })}
-                          placeholder="Observações adicionais sobre o pagamento..."
                           rows={2}
                         />
                       </div>
@@ -877,7 +865,6 @@ ${companyInfo.responsibleEmail}`;
                           <Input
                             value={companyInfo.responsiblePhone}
                             onChange={(e) => setCompanyInfo({ ...companyInfo, responsiblePhone: e.target.value })}
-                            placeholder="+55 11 99999-9999"
                           />
                         </div>
                         <div className="space-y-2">

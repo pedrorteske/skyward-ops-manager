@@ -384,7 +384,6 @@ export function DocumentFormDialog({
           <div className="space-y-2">
             <Label>Observações</Label>
             <Textarea
-              placeholder="Observações adicionais..."
               value={formData.observations}
               onChange={(e) => setFormData({ ...formData, observations: e.target.value })}
               rows={3}
