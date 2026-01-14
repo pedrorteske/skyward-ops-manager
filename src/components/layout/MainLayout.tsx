@@ -10,7 +10,8 @@ import {
   Menu,
   X,
   Building2,
-  Wallet
+  Wallet,
+  Home
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -22,7 +23,8 @@ interface MainLayoutProps {
 }
 
 const navItems = [
-  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/', label: 'Home', icon: Home },
+  { href: '/dashboard', label: 'Dashboard Analítico', icon: LayoutDashboard },
   { href: '/flights', label: 'Portal dos Voos', icon: Plane },
   { href: '/clients', label: 'Clientes', icon: Users },
   { href: '/quotations', label: 'Cotações', icon: FileText },

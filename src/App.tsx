@@ -8,6 +8,7 @@ import { FlightsProvider } from "@/contexts/FlightsContext";
 import { ClientsProvider } from "@/contexts/ClientsContext";
 import { QuotationsProvider } from "@/contexts/QuotationsContext";
 import { FinancialProvider } from "@/contexts/FinancialContext";
+import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Flights from "./pages/Flights";
 import Clients from "./pages/Clients";
@@ -30,8 +31,9 @@ const App = () => (
                 <Toaster />
                 <Sonner />
                 <BrowserRouter>
-                  <Routes>
-                    <Route path="/" element={<Dashboard />} />
+                <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/flights" element={<Flights />} />
                     <Route path="/clients" element={<Clients />} />
                     <Route path="/quotations" element={<Quotations />} />
