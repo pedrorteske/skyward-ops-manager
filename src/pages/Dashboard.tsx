@@ -24,21 +24,21 @@ import { Link } from 'react-router-dom';
 import { format, parseISO, isWithinInterval, startOfMonth, endOfMonth } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-// Extended flight types for ANAC classification
+// Extended flight types for ANAC classification - Cores saturadas
 const flightTypeColors: Record<string, string> = {
-  S: 'hsl(var(--primary))',
-  N: 'hsl(var(--info))',
-  G: 'hsl(var(--success))',
-  M: 'hsl(var(--warning))',
-  executive: 'hsl(217, 91%, 60%)',
-  taxi: 'hsl(142, 71%, 45%)',
-  commercial_regular: 'hsl(262, 83%, 58%)',
-  commercial_non_regular: 'hsl(326, 78%, 55%)',
-  cargo: 'hsl(25, 95%, 53%)',
-  aeromedical: 'hsl(0, 84%, 60%)',
-  domestic: 'hsl(199, 89%, 48%)',
-  international: 'hsl(45, 93%, 47%)',
-  instruction: 'hsl(173, 58%, 39%)',
+  S: 'hsl(217, 95%, 55%)',
+  N: 'hsl(199, 95%, 50%)',
+  G: 'hsl(142, 90%, 42%)',
+  M: 'hsl(38, 95%, 50%)',
+  executive: 'hsl(262, 90%, 58%)',
+  taxi: 'hsl(142, 90%, 45%)',
+  commercial_regular: 'hsl(280, 90%, 55%)',
+  commercial_non_regular: 'hsl(326, 90%, 55%)',
+  cargo: 'hsl(25, 95%, 55%)',
+  aeromedical: 'hsl(0, 90%, 55%)',
+  domestic: 'hsl(199, 95%, 50%)',
+  international: 'hsl(45, 95%, 50%)',
+  instruction: 'hsl(173, 85%, 45%)',
 };
 
 export default function Dashboard() {

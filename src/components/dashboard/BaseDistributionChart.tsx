@@ -60,7 +60,7 @@ export function BaseDistributionChart({ data }: BaseDistributionChartProps) {
               />
               <Bar
                 dataKey="operations"
-                fill="hsl(var(--info))"
+                fill="hsl(var(--chart-6))"
                 radius={[0, 4, 4, 0]}
                 name="Operações"
               />
