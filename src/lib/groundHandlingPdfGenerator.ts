@@ -1,12 +1,23 @@
-import jsPDF from 'jspdf';
-import type { 
-  GroundHandlingQuotation, 
-  IncludedService, 
-  AdditionalService,
-  chargeUnitLabels 
-} from '@/types/groundHandling';
+// Ground Handling Quotation PDF Generator
+// Uses the standardized PDF core module with specific sections for ground handling
 
-interface GroundHandlingPDFData {
+import jsPDF from 'jspdf';
+import type { IncludedService, AdditionalService } from '@/types/groundHandling';
+import { companyConfig, getFullAddress } from '@/config/companyConfig';
+import {
+  createPDF,
+  addText,
+  drawLine,
+  drawRoundedRect,
+  formatCurrency,
+  checkPageBreak,
+  drawHeader,
+  drawFooter,
+  defaultColors,
+} from './pdf/pdfCore';
+import { documentColorSchemes } from './pdf/types';
+
+export interface GroundHandlingPDFData {
   quotationNumber: string;
   client: {
     name: string;
@@ -68,210 +79,141 @@ const paymentMethodLabelsMap: Record<string, string> = {
 };
 
 export function generateGroundHandlingPDF(data: GroundHandlingPDFData): void {
-  const pdf = new jsPDF('p', 'mm', 'a4');
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = pdf.internal.pageSize.getHeight();
-  const margin = 15;
-  const contentWidth = pageWidth - margin * 2;
-  let yPosition = margin;
-
-  // Colors
-  const primaryColor: [number, number, number] = [30, 64, 175]; // Deep blue
-  const accentColor: [number, number, number] = [59, 130, 246]; // Lighter blue
-  const successColor: [number, number, number] = [34, 197, 94]; // Green
-  const textColor: [number, number, number] = [30, 41, 59];
-  const mutedColor: [number, number, number] = [100, 116, 139];
-  const borderColor: [number, number, number] = [226, 232, 240];
-  const lightBg: [number, number, number] = [248, 250, 252];
-
-  // Helper function to add text
-  const addText = (
-    text: string,
-    x: number,
-    y: number,
-    options?: {
-      fontSize?: number;
-      fontStyle?: 'normal' | 'bold' | 'italic';
-      color?: [number, number, number];
-      align?: 'left' | 'center' | 'right';
-      maxWidth?: number;
-    }
-  ) => {
-    const { fontSize = 10, fontStyle = 'normal', color = textColor, align = 'left', maxWidth } = options || {};
-    pdf.setFontSize(fontSize);
-    pdf.setFont('helvetica', fontStyle);
-    pdf.setTextColor(...color);
-    if (maxWidth) {
-      const lines = pdf.splitTextToSize(text, maxWidth);
-      pdf.text(lines, x, y, { align });
-      return lines.length;
-    }
-    pdf.text(text, x, y, { align });
-    return 1;
-  };
-
-  // Helper function to draw a line
-  const drawLine = (y: number, color: [number, number, number] = borderColor, width: number = 0.3) => {
-    pdf.setDrawColor(...color);
-    pdf.setLineWidth(width);
-    pdf.line(margin, y, pageWidth - margin, y);
-  };
-
-  // Helper function to draw rounded rect
-  const drawRoundedRect = (x: number, y: number, w: number, h: number, r: number, fill: [number, number, number]) => {
-    pdf.setFillColor(...fill);
-    pdf.roundedRect(x, y, w, h, r, r, 'F');
-  };
-
-  // Format currency helper
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: data.currency,
-    }).format(value);
-  };
-
-  // ===== HEADER =====
-  // Header background with gradient effect
-  pdf.setFillColor(...primaryColor);
-  pdf.rect(0, 0, pageWidth, 50, 'F');
+  const { pdf, config } = createPDF();
   
-  // Add accent stripe
-  pdf.setFillColor(...accentColor);
-  pdf.rect(0, 45, pageWidth, 5, 'F');
+  // Get color scheme for ground handling
+  const colorScheme = documentColorSchemes.ground_handling;
+  const primaryColor = colorScheme.primary;
+  const accentColor = colorScheme.accent;
+  const successColor = defaultColors.success;
 
-  // Logo placeholder / Company name
-  addText(data.company.name.toUpperCase(), margin, 20, {
-    fontSize: 20,
-    fontStyle: 'bold',
-    color: [255, 255, 255],
-  });
-  
-  addText('Ground Handling Services', margin, 28, {
-    fontSize: 10,
-    color: [200, 220, 255],
-  });
+  // Use provided company data or fallback to config
+  const pdfCompany = {
+    name: data.company.name || companyConfig.name,
+    cnpj: companyConfig.cnpj,
+    address: getFullAddress(),
+    phone: data.company.responsiblePhone || companyConfig.phone,
+    email: data.company.responsibleEmail || companyConfig.email,
+    responsibleName: data.company.responsibleName || companyConfig.responsibleName,
+    responsibleRole: data.company.responsibleRole || companyConfig.responsibleRole,
+  };
 
-  // Document type and number
-  addText('COTAÇÃO DE SERVIÇOS', pageWidth - margin, 18, {
-    fontSize: 14,
-    fontStyle: 'bold',
-    color: [255, 255, 255],
-    align: 'right',
+  // Draw header
+  let yPosition = drawHeader(pdf, config, {
+    companyName: pdfCompany.name,
+    subtitle: 'Ground Handling Services',
+    documentTitle: 'Cotação de Serviços',
+    documentNumber: data.quotationNumber,
+    createdAt: data.createdAt,
+    primaryColor,
+    accentColor,
   });
-  
-  addText(`Nº ${data.quotationNumber}`, pageWidth - margin, 26, {
-    fontSize: 11,
-    color: [200, 220, 255],
-    align: 'right',
-  });
-
-  // Date
-  addText(`Emissão: ${new Date(data.createdAt).toLocaleDateString('pt-BR')}`, pageWidth - margin, 40, {
-    fontSize: 9,
-    color: [200, 220, 255],
-    align: 'right',
-  });
-
-  yPosition = 60;
 
   // ===== CLIENT & OPERATION INFO =====
-  // Two columns layout
-  const colWidth = (contentWidth - 10) / 2;
+  const colWidth = (config.contentWidth - 10) / 2;
   
   // Client box
-  drawRoundedRect(margin, yPosition, colWidth, 55, 3, lightBg);
+  drawRoundedRect(pdf, config.margin, yPosition, colWidth, 55, 3, config.colors.lightBg);
   
-  addText('DADOS DO CLIENTE', margin + 5, yPosition + 8, {
+  addText(pdf, 'DADOS DO CLIENTE', config.margin + 5, yPosition + 8, {
     fontSize: 9,
     fontStyle: 'bold',
     color: primaryColor,
   });
   
-  addText(data.client.name || 'Cliente não informado', margin + 5, yPosition + 16, {
+  addText(pdf, data.client.name || 'Cliente não informado', config.margin + 5, yPosition + 16, {
     fontSize: 11,
     fontStyle: 'bold',
   });
   
+  let clientY = yPosition + 23;
+  
   if (data.client.operator) {
-    addText(`Operador: ${data.client.operator}`, margin + 5, yPosition + 23, {
+    addText(pdf, `Operador: ${data.client.operator}`, config.margin + 5, clientY, {
       fontSize: 9,
-      color: mutedColor,
+      color: config.colors.muted,
     });
+    clientY += 6;
   }
   
   if (data.client.cnpj) {
-    addText(`CNPJ: ${data.client.cnpj}`, margin + 5, yPosition + 29, {
+    addText(pdf, `CNPJ: ${data.client.cnpj}`, config.margin + 5, clientY, {
       fontSize: 9,
-      color: mutedColor,
+      color: config.colors.muted,
     });
+    clientY += 6;
   }
   
   if (data.client.email) {
-    addText(`Email: ${data.client.email}`, margin + 5, yPosition + 35, {
+    addText(pdf, `Email: ${data.client.email}`, config.margin + 5, clientY, {
       fontSize: 9,
-      color: mutedColor,
+      color: config.colors.muted,
     });
   }
 
   // Operation box
-  const opBoxX = margin + colWidth + 10;
-  drawRoundedRect(opBoxX, yPosition, colWidth, 55, 3, lightBg);
+  const opBoxX = config.margin + colWidth + 10;
+  drawRoundedRect(pdf, opBoxX, yPosition, colWidth, 55, 3, config.colors.lightBg);
   
-  addText('DADOS DA OPERAÇÃO', opBoxX + 5, yPosition + 8, {
+  addText(pdf, 'DADOS DA OPERAÇÃO', opBoxX + 5, yPosition + 8, {
     fontSize: 9,
     fontStyle: 'bold',
     color: primaryColor,
   });
   
-  addText(data.operation.airport || 'Aeroporto não informado', opBoxX + 5, yPosition + 16, {
+  addText(pdf, data.operation.airport || 'Aeroporto não informado', opBoxX + 5, yPosition + 16, {
     fontSize: 11,
     fontStyle: 'bold',
   });
   
+  let opY = yPosition + 23;
+  
   if (data.operation.operationDate) {
-    addText(`Data: ${new Date(data.operation.operationDate).toLocaleDateString('pt-BR')}`, opBoxX + 5, yPosition + 23, {
+    addText(pdf, `Data: ${new Date(data.operation.operationDate).toLocaleDateString('pt-BR')}`, opBoxX + 5, opY, {
       fontSize: 9,
-      color: mutedColor,
+      color: config.colors.muted,
     });
+    opY += 6;
   }
   
-  addText(`Aeronave: ${data.operation.aircraftType} - ${data.operation.aircraftPrefix}`, opBoxX + 5, yPosition + 29, {
+  addText(pdf, `Aeronave: ${data.operation.aircraftType} - ${data.operation.aircraftPrefix}`, opBoxX + 5, opY, {
     fontSize: 9,
-    color: mutedColor,
+    color: config.colors.muted,
   });
+  opY += 6;
   
   if (data.operation.eta || data.operation.etd) {
-    addText(`ETA: ${data.operation.eta || '-'} | ETD: ${data.operation.etd || '-'}`, opBoxX + 5, yPosition + 35, {
+    addText(pdf, `ETA: ${data.operation.eta || '-'} | ETD: ${data.operation.etd || '-'}`, opBoxX + 5, opY, {
       fontSize: 9,
-      color: mutedColor,
+      color: config.colors.muted,
     });
+    opY += 6;
   }
   
   if (data.operation.flightType) {
-    addText(`Tipo: ${data.operation.flightType}`, opBoxX + 5, yPosition + 41, {
+    addText(pdf, `Tipo: ${data.operation.flightType}`, opBoxX + 5, opY, {
       fontSize: 9,
-      color: mutedColor,
+      color: config.colors.muted,
     });
   }
 
   yPosition += 65;
 
   // ===== SERVICE VALUE HIGHLIGHT =====
-  drawRoundedRect(margin, yPosition, contentWidth, 25, 3, primaryColor);
+  drawRoundedRect(pdf, config.margin, yPosition, config.contentWidth, 25, 3, primaryColor);
   
-  addText('VALOR DO ATENDIMENTO', margin + 10, yPosition + 10, {
+  addText(pdf, 'VALOR DO ATENDIMENTO', config.margin + 10, yPosition + 10, {
     fontSize: 10,
     color: [200, 220, 255],
   });
   
-  addText(formatCurrency(data.serviceValue), margin + 10, yPosition + 19, {
+  addText(pdf, formatCurrency(data.serviceValue, data.currency), config.margin + 10, yPosition + 19, {
     fontSize: 16,
     fontStyle: 'bold',
-    color: [255, 255, 255],
+    color: config.colors.white,
   });
   
-  addText('(impostos não incluídos)', pageWidth - margin - 10, yPosition + 15, {
+  addText(pdf, '(impostos não incluídos)', config.pageWidth - config.margin - 10, yPosition + 15, {
     fontSize: 9,
     color: [200, 220, 255],
     align: 'right',
@@ -282,37 +224,37 @@ export function generateGroundHandlingPDF(data: GroundHandlingPDFData): void {
   // ===== INCLUDED SERVICES =====
   const checkedServices = data.includedServices.filter(s => s.checked);
   
-  addText('SERVIÇOS INCLUSOS NO ATENDIMENTO', margin, yPosition, {
+  addText(pdf, 'SERVIÇOS INCLUSOS NO ATENDIMENTO', config.margin, yPosition, {
     fontSize: 10,
     fontStyle: 'bold',
     color: primaryColor,
   });
   
   yPosition += 6;
-  drawLine(yPosition, accentColor, 0.5);
+  drawLine(pdf, config, yPosition, accentColor, 0.5);
   yPosition += 6;
 
   if (checkedServices.length > 0) {
     checkedServices.forEach((service) => {
-      // Checkmark icon simulation
+      // Checkmark icon
       pdf.setFillColor(...successColor);
-      pdf.circle(margin + 3, yPosition - 1, 2, 'F');
+      pdf.circle(config.margin + 3, yPosition - 1, 2, 'F');
       
-      addText('✓', margin + 1.5, yPosition + 0.5, {
+      addText(pdf, '✓', config.margin + 1.5, yPosition + 0.5, {
         fontSize: 7,
         fontStyle: 'bold',
-        color: [255, 255, 255],
+        color: config.colors.white,
       });
       
-      addText(service.name, margin + 10, yPosition, {
+      addText(pdf, service.name, config.margin + 10, yPosition, {
         fontSize: 9,
       });
       yPosition += 6;
     });
   } else {
-    addText('Nenhum serviço incluso selecionado', margin + 10, yPosition, {
+    addText(pdf, 'Nenhum serviço incluso selecionado', config.margin + 10, yPosition, {
       fontSize: 9,
-      color: mutedColor,
+      color: config.colors.muted,
     });
     yPosition += 6;
   }
@@ -322,48 +264,50 @@ export function generateGroundHandlingPDF(data: GroundHandlingPDFData): void {
   // ===== ADDITIONAL SERVICES =====
   const activeAdditionalServices = data.additionalServices.filter(s => s.unitPrice > 0);
   
-  addText('SERVIÇOS ADICIONAIS (NÃO INCLUSOS)', margin, yPosition, {
+  addText(pdf, 'SERVIÇOS ADICIONAIS (NÃO INCLUSOS)', config.margin, yPosition, {
     fontSize: 10,
     fontStyle: 'bold',
     color: primaryColor,
   });
   
   yPosition += 6;
-  drawLine(yPosition, accentColor, 0.5);
+  drawLine(pdf, config, yPosition, accentColor, 0.5);
   yPosition += 6;
 
   if (activeAdditionalServices.length > 0) {
     // Table header
-    pdf.setFillColor(...lightBg);
-    pdf.rect(margin, yPosition - 3, contentWidth, 8, 'F');
+    pdf.setFillColor(...config.colors.lightBg);
+    pdf.rect(config.margin, yPosition - 3, config.contentWidth, 8, 'F');
     
-    addText('Serviço', margin + 5, yPosition + 2, { fontSize: 8, fontStyle: 'bold', color: mutedColor });
-    addText('Valor Unit.', margin + contentWidth * 0.5, yPosition + 2, { fontSize: 8, fontStyle: 'bold', color: mutedColor, align: 'center' });
-    addText('Cobrança', margin + contentWidth * 0.75, yPosition + 2, { fontSize: 8, fontStyle: 'bold', color: mutedColor, align: 'center' });
+    addText(pdf, 'Serviço', config.margin + 5, yPosition + 2, { fontSize: 8, fontStyle: 'bold', color: config.colors.muted });
+    addText(pdf, 'Valor Unit.', config.margin + config.contentWidth * 0.5, yPosition + 2, { fontSize: 8, fontStyle: 'bold', color: config.colors.muted, align: 'center' });
+    addText(pdf, 'Cobrança', config.margin + config.contentWidth * 0.75, yPosition + 2, { fontSize: 8, fontStyle: 'bold', color: config.colors.muted, align: 'center' });
     
     yPosition += 8;
     
     activeAdditionalServices.forEach((service, index) => {
+      yPosition = checkPageBreak(pdf, config, yPosition, 12);
+
       if (index % 2 === 0) {
         pdf.setFillColor(252, 252, 253);
-        pdf.rect(margin, yPosition - 3, contentWidth, 7, 'F');
+        pdf.rect(config.margin, yPosition - 3, config.contentWidth, 7, 'F');
       }
       
-      addText(service.name, margin + 5, yPosition + 1, { fontSize: 9 });
-      addText(formatCurrency(service.unitPrice), margin + contentWidth * 0.5, yPosition + 1, { fontSize: 9, align: 'center' });
-      addText(chargeUnitLabelsMap[service.chargeUnit] || service.chargeUnit, margin + contentWidth * 0.75, yPosition + 1, { fontSize: 8, color: mutedColor, align: 'center' });
+      addText(pdf, service.name, config.margin + 5, yPosition + 1, { fontSize: 9 });
+      addText(pdf, formatCurrency(service.unitPrice, data.currency), config.margin + config.contentWidth * 0.5, yPosition + 1, { fontSize: 9, align: 'center' });
+      addText(pdf, chargeUnitLabelsMap[service.chargeUnit] || service.chargeUnit, config.margin + config.contentWidth * 0.75, yPosition + 1, { fontSize: 8, color: config.colors.muted, align: 'center' });
       
       if (service.unavailableNote) {
         yPosition += 5;
-        addText(`* ${service.unavailableNote}`, margin + 8, yPosition + 1, { fontSize: 7, color: mutedColor });
+        addText(pdf, `* ${service.unavailableNote}`, config.margin + 8, yPosition + 1, { fontSize: 7, color: config.colors.muted });
       }
       
       yPosition += 7;
     });
   } else {
-    addText('Não há serviços adicionais nesta cotação', margin + 5, yPosition, {
+    addText(pdf, 'Não há serviços adicionais nesta cotação', config.margin + 5, yPosition, {
       fontSize: 9,
-      color: mutedColor,
+      color: config.colors.muted,
     });
     yPosition += 6;
   }
@@ -371,68 +315,65 @@ export function generateGroundHandlingPDF(data: GroundHandlingPDFData): void {
   yPosition += 10;
 
   // Check if we need a new page
-  if (yPosition > pageHeight - 100) {
-    pdf.addPage();
-    yPosition = margin;
-  }
+  yPosition = checkPageBreak(pdf, config, yPosition, 60);
 
   // ===== FINANCIAL SUMMARY =====
-  drawRoundedRect(margin, yPosition, contentWidth, 45, 3, lightBg);
+  drawRoundedRect(pdf, config.margin, yPosition, config.contentWidth, 45, 3, config.colors.lightBg);
   
-  addText('RESUMO FINANCEIRO', margin + 5, yPosition + 8, {
+  addText(pdf, 'RESUMO FINANCEIRO', config.margin + 5, yPosition + 8, {
     fontSize: 10,
     fontStyle: 'bold',
     color: primaryColor,
   });
   
   const summaryStartY = yPosition + 15;
-  const summaryCol1 = margin + 10;
-  const summaryCol2 = pageWidth - margin - 10;
+  const summaryCol1 = config.margin + 10;
+  const summaryCol2 = config.pageWidth - config.margin - 10;
   
-  addText('Valor do Atendimento:', summaryCol1, summaryStartY, { fontSize: 9, color: mutedColor });
-  addText(formatCurrency(data.summary.serviceValue), summaryCol2, summaryStartY, { fontSize: 9, align: 'right' });
+  addText(pdf, 'Valor do Atendimento:', summaryCol1, summaryStartY, { fontSize: 9, color: config.colors.muted });
+  addText(pdf, formatCurrency(data.summary.serviceValue, data.currency), summaryCol2, summaryStartY, { fontSize: 9, align: 'right' });
   
-  addText('Serviços Adicionais:', summaryCol1, summaryStartY + 6, { fontSize: 9, color: mutedColor });
-  addText(formatCurrency(data.summary.additionalServicesTotal), summaryCol2, summaryStartY + 6, { fontSize: 9, align: 'right' });
+  addText(pdf, 'Serviços Adicionais:', summaryCol1, summaryStartY + 6, { fontSize: 9, color: config.colors.muted });
+  addText(pdf, formatCurrency(data.summary.additionalServicesTotal, data.currency), summaryCol2, summaryStartY + 6, { fontSize: 9, align: 'right' });
   
   if (data.applyAdminFee) {
-    addText(`Taxa Administrativa (${data.adminFeePercentage}%):`, summaryCol1, summaryStartY + 12, { fontSize: 9, color: mutedColor });
-    addText(formatCurrency(data.summary.adminFee), summaryCol2, summaryStartY + 12, { fontSize: 9, align: 'right' });
+    addText(pdf, `Taxa Administrativa (${data.adminFeePercentage}%):`, summaryCol1, summaryStartY + 12, { fontSize: 9, color: config.colors.muted });
+    addText(pdf, formatCurrency(data.summary.adminFee, data.currency), summaryCol2, summaryStartY + 12, { fontSize: 9, align: 'right' });
   }
   
-  drawLine(summaryStartY + 18, borderColor);
+  drawLine(pdf, { ...config, margin: summaryCol1 - 5, pageWidth: summaryCol2 + 5 }, summaryStartY + 18, config.colors.border);
   
-  addText('TOTAL GERAL:', summaryCol1, summaryStartY + 26, { fontSize: 11, fontStyle: 'bold' });
-  addText(formatCurrency(data.summary.grandTotal), summaryCol2, summaryStartY + 26, { fontSize: 12, fontStyle: 'bold', color: primaryColor, align: 'right' });
+  addText(pdf, 'TOTAL GERAL:', summaryCol1, summaryStartY + 26, { fontSize: 11, fontStyle: 'bold' });
+  addText(pdf, formatCurrency(data.summary.grandTotal, data.currency), summaryCol2, summaryStartY + 26, { fontSize: 12, fontStyle: 'bold', color: primaryColor, align: 'right' });
 
   yPosition += 55;
 
   // ===== OBSERVATIONS =====
   if (data.adminFeeText || data.taxObservation) {
-    addText('OBSERVAÇÕES', margin, yPosition, {
+    addText(pdf, 'OBSERVAÇÕES', config.margin, yPosition, {
       fontSize: 10,
       fontStyle: 'bold',
       color: primaryColor,
     });
     
     yPosition += 6;
-    drawLine(yPosition, accentColor, 0.5);
+    drawLine(pdf, config, yPosition, accentColor, 0.5);
     yPosition += 6;
     
     if (data.adminFeeText) {
-      addText(`• ${data.adminFeeText}`, margin + 3, yPosition, {
+      addText(pdf, `• ${data.adminFeeText}`, config.margin + 3, yPosition, {
         fontSize: 8,
-        color: mutedColor,
-        maxWidth: contentWidth - 10,
+        color: config.colors.muted,
+        maxWidth: config.contentWidth - 10,
       });
       yPosition += 10;
     }
     
     if (data.taxObservation) {
-      addText(`• ${data.taxObservation}`, margin + 3, yPosition, {
+      addText(pdf, `• ${data.taxObservation}`, config.margin + 3, yPosition, {
         fontSize: 8,
-        color: mutedColor,
-        maxWidth: contentWidth - 10,
+        color: config.colors.muted,
+        maxWidth: config.contentWidth - 10,
       });
       yPosition += 10;
     }
@@ -442,64 +383,30 @@ export function generateGroundHandlingPDF(data: GroundHandlingPDFData): void {
 
   // ===== PAYMENT INFO =====
   if (data.payment.pixData) {
-    addText('DADOS PARA PAGAMENTO', margin, yPosition, {
+    addText(pdf, 'DADOS PARA PAGAMENTO', config.margin, yPosition, {
       fontSize: 10,
       fontStyle: 'bold',
       color: primaryColor,
     });
     
     yPosition += 6;
-    drawLine(yPosition, accentColor, 0.5);
+    drawLine(pdf, config, yPosition, accentColor, 0.5);
     yPosition += 6;
     
-    addText(`Forma: ${paymentMethodLabelsMap[data.payment.method] || data.payment.method}`, margin + 3, yPosition, {
+    addText(pdf, `Forma: ${paymentMethodLabelsMap[data.payment.method] || data.payment.method}`, config.margin + 3, yPosition, {
       fontSize: 9,
     });
     yPosition += 6;
     
-    addText(`PIX / Dados bancários: ${data.payment.pixData}`, margin + 3, yPosition, {
+    addText(pdf, `PIX / Dados bancários: ${data.payment.pixData}`, config.margin + 3, yPosition, {
       fontSize: 9,
     });
-    yPosition += 10;
   }
 
   // ===== FOOTER =====
-  const footerY = pageHeight - 35;
-  
-  drawLine(footerY - 5, borderColor);
-  
-  // Contact info
-  addText(data.company.name, margin, footerY, { fontSize: 9, fontStyle: 'bold', color: primaryColor });
-  addText(data.company.responsibleName, margin, footerY + 5, { fontSize: 8, color: mutedColor });
-  addText(data.company.responsibleRole, margin, footerY + 10, { fontSize: 8, color: mutedColor });
-  
-  if (data.company.responsiblePhone) {
-    addText(`Tel: ${data.company.responsiblePhone}`, pageWidth / 2, footerY + 5, { fontSize: 8, color: mutedColor, align: 'center' });
-  }
-  if (data.company.responsibleEmail) {
-    addText(data.company.responsibleEmail, pageWidth / 2, footerY + 10, { fontSize: 8, color: mutedColor, align: 'center' });
-  }
-  
-  addText(`Documento gerado em ${new Date().toLocaleString('pt-BR')}`, pageWidth - margin, footerY + 5, {
-    fontSize: 7,
-    color: mutedColor,
-    align: 'right',
-  });
-
-  // Validity notice
-  pdf.setFillColor(255, 251, 235);
-  pdf.rect(margin, footerY + 15, contentWidth, 12, 'F');
-  pdf.setDrawColor(245, 158, 11);
-  pdf.setLineWidth(0.3);
-  pdf.rect(margin, footerY + 15, contentWidth, 12, 'S');
-  
-  addText('⚠ Esta cotação é válida por 7 dias a partir da data de emissão. Valores sujeitos a alteração após este período.', pageWidth / 2, footerY + 22, {
-    fontSize: 8,
-    color: [180, 83, 9],
-    align: 'center',
-  });
+  drawFooter(pdf, config, pdfCompany, primaryColor, true, 7);
 
   // Save the PDF
-  const fileName = `cotacao_ground_handling_${data.quotationNumber.replace(/\//g, '-')}_${new Date().toISOString().split('T')[0]}.pdf`;
+  const fileName = `ground_handling_${data.quotationNumber.replace(/\//g, '-')}.pdf`;
   pdf.save(fileName);
 }
