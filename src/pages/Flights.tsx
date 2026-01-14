@@ -191,7 +191,6 @@ export default function Flights() {
                   <Label htmlFor="prefix">Prefixo da Aeronave *</Label>
                   <Input
                     id="prefix"
-                    placeholder="PR-ABC"
                     value={formData.aircraftPrefix}
                     onChange={(e) => setFormData({...formData, aircraftPrefix: e.target.value.toUpperCase()})}
                     className="font-mono uppercase"
@@ -201,7 +200,6 @@ export default function Flights() {
                   <Label htmlFor="model">Modelo da Aeronave *</Label>
                   <Input
                     id="model"
-                    placeholder="Embraer Phenom 300"
                     value={formData.aircraftModel}
                     onChange={(e) => setFormData({...formData, aircraftModel: e.target.value})}
                   />
@@ -234,7 +232,6 @@ export default function Flights() {
                   <Label htmlFor="origin">Origem (ICAO) *</Label>
                   <Input
                     id="origin"
-                    placeholder="SBGR"
                     maxLength={4}
                     value={formData.origin}
                     onChange={(e) => setFormData({...formData, origin: e.target.value.toUpperCase()})}
@@ -245,7 +242,6 @@ export default function Flights() {
                   <Label htmlFor="destination">Destino (ICAO) *</Label>
                   <Input
                     id="destination"
-                    placeholder="SBRJ"
                     maxLength={4}
                     value={formData.destination}
                     onChange={(e) => setFormData({...formData, destination: e.target.value.toUpperCase()})}
@@ -321,7 +317,6 @@ export default function Flights() {
                 <Label htmlFor="observations">Observações Operacionais</Label>
                 <Textarea
                   id="observations"
-                  placeholder="Informações adicionais sobre o voo..."
                   value={formData.observations}
                   onChange={(e) => setFormData({...formData, observations: e.target.value})}
                   rows={3}
@@ -533,7 +528,6 @@ export default function Flights() {
                     <Label htmlFor="edit-prefix">Prefixo da Aeronave *</Label>
                     <Input
                       id="edit-prefix"
-                      placeholder="PR-ABC"
                       value={editFormData.aircraftPrefix}
                       onChange={(e) => setEditFormData({...editFormData, aircraftPrefix: e.target.value.toUpperCase()})}
                       className="font-mono uppercase"
@@ -543,7 +537,6 @@ export default function Flights() {
                     <Label htmlFor="edit-model">Modelo da Aeronave *</Label>
                     <Input
                       id="edit-model"
-                      placeholder="Embraer Phenom 300"
                       value={editFormData.aircraftModel}
                       onChange={(e) => setEditFormData({...editFormData, aircraftModel: e.target.value})}
                     />
@@ -576,7 +569,6 @@ export default function Flights() {
                     <Label htmlFor="edit-origin">Origem (ICAO) *</Label>
                     <Input
                       id="edit-origin"
-                      placeholder="SBGR"
                       maxLength={4}
                       value={editFormData.origin}
                       onChange={(e) => setEditFormData({...editFormData, origin: e.target.value.toUpperCase()})}
@@ -587,7 +579,6 @@ export default function Flights() {
                     <Label htmlFor="edit-destination">Destino (ICAO) *</Label>
                     <Input
                       id="edit-destination"
-                      placeholder="SBRJ"
                       maxLength={4}
                       value={editFormData.destination}
                       onChange={(e) => setEditFormData({...editFormData, destination: e.target.value.toUpperCase()})}
@@ -663,7 +654,6 @@ export default function Flights() {
                   <Label htmlFor="edit-observations">Observações Operacionais</Label>
                   <Textarea
                     id="edit-observations"
-                    placeholder="Informações adicionais sobre o voo..."
                     value={editFormData.observations}
                     onChange={(e) => setEditFormData({...editFormData, observations: e.target.value})}
                     rows={3}
