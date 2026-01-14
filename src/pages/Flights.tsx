@@ -37,6 +37,7 @@ export default function Flights() {
     flightType: 'G' as FlightType,
     origin: '',
     destination: '',
+    base: '',
     arrivalDate: '',
     arrivalTime: '',
     departureDate: '',
@@ -52,6 +53,7 @@ export default function Flights() {
     flightType: 'G' as FlightType,
     origin: '',
     destination: '',
+    base: '',
     arrivalDate: '',
     arrivalTime: '',
     departureDate: '',
@@ -90,6 +92,7 @@ export default function Flights() {
       flightType: 'G',
       origin: '',
       destination: '',
+      base: '',
       arrivalDate: '',
       arrivalTime: '',
       departureDate: '',
@@ -111,6 +114,7 @@ export default function Flights() {
         flightType: selectedFlight.flightType,
         origin: selectedFlight.origin,
         destination: selectedFlight.destination,
+        base: selectedFlight.base || '',
         arrivalDate: selectedFlight.arrivalDate,
         arrivalTime: selectedFlight.arrivalTime,
         departureDate: selectedFlight.departureDate,
@@ -241,6 +245,19 @@ export default function Flights() {
                     className="font-mono uppercase"
                   />
                 </div>
+              </div>
+
+              {/* Base */}
+              <div className="space-y-2">
+                <Label htmlFor="base">Base de Atendimento (ICAO)</Label>
+                <Input
+                  id="base"
+                  maxLength={4}
+                  placeholder="Ex: SBSP"
+                  value={formData.base}
+                  onChange={(e) => setFormData({...formData, base: e.target.value.toUpperCase()})}
+                  className="font-mono uppercase"
+                />
               </div>
 
               {/* Arrival */}
@@ -578,6 +595,19 @@ export default function Flights() {
                       className="font-mono uppercase"
                     />
                   </div>
+                </div>
+
+                {/* Base */}
+                <div className="space-y-2">
+                  <Label htmlFor="edit-base">Base de Atendimento (ICAO)</Label>
+                  <Input
+                    id="edit-base"
+                    maxLength={4}
+                    placeholder="Ex: SBSP"
+                    value={editFormData.base}
+                    onChange={(e) => setEditFormData({...editFormData, base: e.target.value.toUpperCase()})}
+                    className="font-mono uppercase"
+                  />
                 </div>
 
                 {/* Arrival */}

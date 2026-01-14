@@ -27,6 +27,7 @@ export interface Flight {
   flightType: FlightType;
   origin: string;
   destination: string;
+  base?: string;
   arrivalDate: string;
   arrivalTime: string;
   departureDate: string;

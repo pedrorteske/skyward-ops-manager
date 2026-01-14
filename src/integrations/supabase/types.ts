@@ -206,6 +206,7 @@ export type Database = {
           aircraft_prefix: string
           arrival_date: string
           arrival_time: string
+          base: string | null
           company_id: string
           created_at: string
           departure_date: string
@@ -223,6 +224,7 @@ export type Database = {
           aircraft_prefix: string
           arrival_date: string
           arrival_time: string
+          base?: string | null
           company_id: string
           created_at?: string
           departure_date: string
@@ -240,6 +242,7 @@ export type Database = {
           aircraft_prefix?: string
           arrival_date?: string
           arrival_time?: string
+          base?: string | null
           company_id?: string
           created_at?: string
           departure_date?: string
