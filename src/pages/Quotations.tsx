@@ -19,6 +19,7 @@ import { Plus, Search, FileText, Trash2, Mail, Download, Clock, Plane, Pencil } 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { generateQuotationPDF } from "@/lib/quotationPdfGenerator";
 
 const serviceOptions = [
   "Handling de chegada",
@@ -248,11 +249,16 @@ export default function Quotations() {
   };
 
   const handleDownloadPDF = (quotation: Quotation) => {
-    toast.info("Gerando PDF...");
-    // In a real app, this would generate and download a PDF
-    setTimeout(() => {
+    const client = getClientById(quotation.clientId);
+    const flight = quotation.flightId ? flights.find(f => f.id === quotation.flightId) : undefined;
+    
+    try {
+      generateQuotationPDF({ quotation, client, flight });
       toast.success("PDF gerado com sucesso!");
-    }, 1000);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error("Erro ao gerar PDF");
+    }
   };
 
   const formatCurrency = (value: number, currency: Currency) => {
