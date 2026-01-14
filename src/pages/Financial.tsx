@@ -7,11 +7,12 @@ import { QuickActionButton } from '@/components/financial/QuickActionButton';
 import { FinancialStatusBadge } from '@/components/financial/FinancialStatusBadge';
 import { DocumentFormDialog } from '@/components/financial/DocumentFormDialog';
 import { DocumentDetailDialog } from '@/components/financial/DocumentDetailDialog';
+import { GroundHandlingQuotationForm } from '@/components/financial/GroundHandlingQuotationForm';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { FileText, Receipt, FileCheck, Search, DollarSign, TrendingUp, Clock } from 'lucide-react';
+import { FileText, Receipt, FileCheck, Search, DollarSign, TrendingUp, Clock, Plane } from 'lucide-react';
 import { FinancialDocument, FinancialDocumentType, FinancialDocumentStatus, documentTypeLabels } from '@/types/financial';
 import { ClientPF, ClientPJ, ClientINT } from '@/types/aviation';
 import { cn } from '@/lib/utils';
@@ -26,6 +27,7 @@ export default function Financial() {
   const [formDocumentType, setFormDocumentType] = useState<FinancialDocumentType>('quotation');
   const [selectedDocument, setSelectedDocument] = useState<FinancialDocument | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+  const [isGroundHandlingFormOpen, setIsGroundHandlingFormOpen] = useState(false);
 
   const getClientName = (doc: FinancialDocument) => {
     // If there's a clientName (free text), use it
@@ -92,10 +94,17 @@ export default function Financial() {
       {/* Quick Action Buttons */}
       <div className="flex flex-wrap gap-4 mb-8">
         <QuickActionButton
+          icon={Plane}
+          title="Cotação de Pista"
+          description="Formulário completo de handling"
+          variant="primary"
+          onClick={() => setIsGroundHandlingFormOpen(true)}
+        />
+        <QuickActionButton
           icon={FileText}
           title="Nova Cotação"
           description="Criar proposta comercial"
-          variant="primary"
+          variant="secondary"
           onClick={() => handleQuickAction('quotation')}
         />
         <QuickActionButton
@@ -264,6 +273,12 @@ export default function Financial() {
         document={selectedDocument}
         open={isDetailDialogOpen}
         onOpenChange={setIsDetailDialogOpen}
+      />
+
+      {/* Ground Handling Quotation Form */}
+      <GroundHandlingQuotationForm
+        open={isGroundHandlingFormOpen}
+        onOpenChange={setIsGroundHandlingFormOpen}
       />
     </MainLayout>
   );
