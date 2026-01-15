@@ -4,7 +4,7 @@ import { ptBR } from 'date-fns/locale';
 import { Plane, Clock, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { CircularKPICard } from '@/components/home/CircularKPICard';
+import { CircularOutlineKPI } from '@/components/dashboard/CircularOutlineKPI';
 import { UpcomingFlightsCard } from '@/components/home/UpcomingFlightsCard';
 import { ResourceTimeline } from '@/components/dashboard/ResourceTimeline';
 import { Button } from '@/components/ui/button';
@@ -72,20 +72,21 @@ export default function Home() {
         <ResourceTimeline flights={flights} />
       </div>
 
-      {/* Circular KPI Cards */}
+      {/* Circular KPI Cards - Outline Style */}
       <div className="flex flex-wrap justify-center gap-6 mb-8">
-        <CircularKPICard
+        <CircularOutlineKPI
           title="Voos Hoje"
           value={kpis.flightsToday}
           icon={Plane}
-          href="/flights"
+          description="Operações do dia"
+          variant="success"
         />
-        <CircularKPICard
+        <CircularOutlineKPI
           title="Próximas Chegadas"
           value={kpis.upcomingArrivals}
-          subtitle="Próximas 24h"
           icon={Clock}
-          href="/flights"
+          description="Próximas 24h"
+          variant="success"
         />
       </div>
 

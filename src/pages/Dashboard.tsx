@@ -6,6 +6,7 @@ import { DashboardFilters, DashboardFiltersState } from '@/components/dashboard/
 import { OperationsColumnChart } from '@/components/dashboard/OperationsColumnChart';
 import { FlightTypePieChart } from '@/components/dashboard/FlightTypePieChart';
 import { AircraftRankingChart } from '@/components/dashboard/AircraftRankingChart';
+import { BaseRankingChart } from '@/components/dashboard/BaseRankingChart';
 import { useFlights } from '@/contexts/FlightsContext';
 import { Flight, FlightType, flightTypeLabels } from '@/types/aviation';
 import {
@@ -208,6 +209,26 @@ export default function Dashboard() {
       .slice(0, 8);
   }, [filteredFlights]);
 
+  // Base ranking (grouped by base/airport)
+  const baseData = useMemo(() => {
+    const baseMap = new Map<string, number>();
+
+    filteredFlights.forEach((flight) => {
+      const base = flight.base;
+      if (base) {
+        baseMap.set(base, (baseMap.get(base) || 0) + 1);
+      }
+    });
+
+    return Array.from(baseMap.entries())
+      .map(([base, operations]) => ({
+        base,
+        operations,
+      }))
+      .sort((a, b) => b.operations - a.operations)
+      .slice(0, 8);
+  }, [filteredFlights]);
+
   return (
     <MainLayout>
       <PageHeader
@@ -281,13 +302,16 @@ export default function Dashboard() {
           data={flightTypeData}
           onClick={() => navigate('/dashboard/chart/flight-type')}
         />
-        <div className="lg:col-span-2">
-          <AircraftRankingChart 
-            data={aircraftData}
-            onClick={() => navigate('/dashboard/chart/aircraft-ranking')}
-            title="Modelos de Aeronaves Atendidas"
-          />
-        </div>
+        <AircraftRankingChart 
+          data={aircraftData}
+          onClick={() => navigate('/dashboard/chart/aircraft-ranking')}
+          title="Modelos de Aeronaves Atendidas"
+        />
+        <BaseRankingChart 
+          data={baseData}
+          onClick={() => navigate('/dashboard/chart/base-ranking')}
+          title="Atendimentos por Base"
+        />
       </div>
     </MainLayout>
   );
