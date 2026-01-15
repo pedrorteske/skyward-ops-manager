@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Trophy } from 'lucide-react';
 import { useFlights } from '@/contexts/FlightsContext';
 import { FlightType, flightTypeLabels } from '@/types/aviation';
 import { format, parseISO } from 'date-fns';
@@ -21,6 +21,14 @@ import {
   Cell,
   Legend,
 } from 'recharts';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 const flightTypeColors: Record<string, string> = {
   S: 'hsl(217, 95%, 55%)',
@@ -34,6 +42,21 @@ const chartTitles: Record<string, string> = {
   'operations-base': 'Operações por Base',
   'flight-type': 'Distribuição por Tipo de Voo',
   'aircraft-ranking': 'Ranking de Modelos de Aeronaves',
+  'aircraft-list': 'Lista Completa - Modelos de Aeronaves',
+  'base-list': 'Lista Completa - Bases/Aeroportos',
+};
+
+const getMedalColor = (position: number) => {
+  switch (position) {
+    case 1:
+      return 'text-yellow-500';
+    case 2:
+      return 'text-gray-400';
+    case 3:
+      return 'text-amber-600';
+    default:
+      return 'text-muted-foreground';
+  }
 };
 
 export default function ChartDetail() {
@@ -315,6 +338,80 @@ export default function ChartDetail() {
           </ResponsiveContainer>
         );
 
+      case 'aircraft-list':
+        return (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-16">#</TableHead>
+                <TableHead>Modelo</TableHead>
+                <TableHead className="text-right">Operações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {aircraftData.map((item, index) => (
+                <TableRow key={item.model}>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      {index + 1 <= 3 ? (
+                        <Trophy className={`w-4 h-4 ${getMedalColor(index + 1)}`} />
+                      ) : (
+                        <span className="text-muted-foreground text-sm">{index + 1}</span>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="font-semibold text-primary">{item.model}</TableCell>
+                  <TableCell className="text-right font-semibold">{item.operations}</TableCell>
+                </TableRow>
+              ))}
+              {aircraftData.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
+                    Nenhum dado disponível
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        );
+
+      case 'base-list':
+        return (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-16">#</TableHead>
+                <TableHead>ICAO</TableHead>
+                <TableHead className="text-right">Operações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {baseData.map((item, index) => (
+                <TableRow key={item.base}>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      {index + 1 <= 3 ? (
+                        <Trophy className={`w-4 h-4 ${getMedalColor(index + 1)}`} />
+                      ) : (
+                        <span className="text-muted-foreground text-sm">{index + 1}</span>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="font-mono font-semibold text-info">{item.base}</TableCell>
+                  <TableCell className="text-right font-semibold">{item.operations}</TableCell>
+                </TableRow>
+              ))}
+              {baseData.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
+                    Nenhum dado disponível
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        );
+
       default:
         return <div className="flex items-center justify-center h-full text-muted-foreground">Gráfico não encontrado</div>;
     }
@@ -332,7 +429,7 @@ export default function ChartDetail() {
 
       <Card className="w-full">
         <CardContent className="p-6">
-          <div className="h-[600px]">
+          <div className={chartType === 'aircraft-list' || chartType === 'base-list' ? '' : 'h-[600px]'}>
             {renderChart()}
           </div>
         </CardContent>
