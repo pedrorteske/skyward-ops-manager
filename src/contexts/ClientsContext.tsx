@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useCompanyId } from '@/hooks/useCompanyId';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
+import { getUserFriendlyError } from '@/lib/errorHandler';
 
 interface ClientsContextType {
   clients: Client[];
@@ -86,7 +87,7 @@ export const ClientsProvider: React.FC<{ children: ReactNode }> = ({ children })
         logger.error('Error fetching clients:', error);
         toast({
           title: 'Erro ao carregar clientes',
-          description: error.message,
+          description: getUserFriendlyError(error),
           variant: 'destructive',
         });
         return;
@@ -154,7 +155,7 @@ export const ClientsProvider: React.FC<{ children: ReactNode }> = ({ children })
       logger.error('Error adding client:', error);
       toast({
         title: 'Erro ao adicionar cliente',
-        description: error.message,
+        description: getUserFriendlyError(error),
         variant: 'destructive',
       });
       return;
@@ -216,7 +217,7 @@ export const ClientsProvider: React.FC<{ children: ReactNode }> = ({ children })
       logger.error('Error updating client:', error);
       toast({
         title: 'Erro ao atualizar cliente',
-        description: error.message,
+        description: getUserFriendlyError(error),
         variant: 'destructive',
       });
       return;
@@ -241,7 +242,7 @@ export const ClientsProvider: React.FC<{ children: ReactNode }> = ({ children })
       logger.error('Error deleting client:', error);
       toast({
         title: 'Erro ao excluir cliente',
-        description: error.message,
+        description: getUserFriendlyError(error),
         variant: 'destructive',
       });
       return;
