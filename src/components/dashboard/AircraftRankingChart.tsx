@@ -8,6 +8,8 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Maximize2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface AircraftData {
   model: string;
@@ -16,15 +18,27 @@ interface AircraftData {
 
 interface AircraftRankingChartProps {
   data: AircraftData[];
+  onClick?: () => void;
 }
 
-export function AircraftRankingChart({ data }: AircraftRankingChartProps) {
+export function AircraftRankingChart({ data, onClick }: AircraftRankingChartProps) {
   return (
-    <Card className="h-full">
+    <Card 
+      className={cn(
+        "h-full transition-all",
+        onClick && "cursor-pointer hover:shadow-lg hover:border-primary/50"
+      )}
+      onClick={onClick}
+    >
       <CardHeader className="pb-2">
-        <CardTitle className="text-base font-semibold">
-          Ranking de Modelos de Aeronaves
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-base font-semibold">
+            Ranking de Modelos de Aeronaves
+          </CardTitle>
+          {onClick && (
+            <Maximize2 className="w-4 h-4 text-muted-foreground" />
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         <div className="h-[280px]">

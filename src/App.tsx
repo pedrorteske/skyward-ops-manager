@@ -12,6 +12,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Landing from "./pages/Landing";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
+import ChartDetail from "./pages/ChartDetail";
 import Flights from "./pages/Flights";
 import Clients from "./pages/Clients";
 import Quotations from "./pages/Quotations";
@@ -50,6 +51,14 @@ const App = () => (
                       element={
                         <ProtectedRoute>
                           <Dashboard />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/dashboard/chart/:chartType"
+                      element={
+                        <ProtectedRoute>
+                          <ChartDetail />
                         </ProtectedRoute>
                       }
                     />

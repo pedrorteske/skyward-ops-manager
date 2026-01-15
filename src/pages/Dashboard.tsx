@@ -20,7 +20,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { format, parseISO, isWithinInterval, startOfMonth, endOfMonth } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -43,6 +43,7 @@ const flightTypeColors: Record<string, string> = {
 
 export default function Dashboard() {
   const { flights } = useFlights();
+  const navigate = useNavigate();
 
   // Filter state
   const [filters, setFilters] = useState<DashboardFiltersState>({
@@ -310,10 +311,22 @@ export default function Dashboard() {
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <OperationsColumnChart data={monthlyData} />
-        <BaseDistributionChart data={baseData} />
-        <FlightTypePieChart data={flightTypeData} />
-        <AircraftRankingChart data={aircraftData} />
+        <OperationsColumnChart 
+          data={monthlyData} 
+          onClick={() => navigate('/dashboard/chart/operations-month')}
+        />
+        <BaseDistributionChart 
+          data={baseData}
+          onClick={() => navigate('/dashboard/chart/operations-base')}
+        />
+        <FlightTypePieChart 
+          data={flightTypeData}
+          onClick={() => navigate('/dashboard/chart/flight-type')}
+        />
+        <AircraftRankingChart 
+          data={aircraftData}
+          onClick={() => navigate('/dashboard/chart/aircraft-ranking')}
+        />
       </div>
 
       {/* Rankings Tables */}
