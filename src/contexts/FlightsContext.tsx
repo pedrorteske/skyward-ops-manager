@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useCompanyId } from '@/hooks/useCompanyId';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
+import { getUserFriendlyError } from '@/lib/errorHandler';
 
 interface FlightsContextType {
   flights: Flight[];
@@ -61,7 +62,7 @@ export const FlightsProvider: React.FC<{ children: ReactNode }> = ({ children })
         logger.error('Error fetching flights:', error);
         toast({
           title: 'Erro ao carregar voos',
-          description: error.message,
+          description: getUserFriendlyError(error),
           variant: 'destructive',
         });
         return;
@@ -115,7 +116,7 @@ export const FlightsProvider: React.FC<{ children: ReactNode }> = ({ children })
       logger.error('Error adding flight:', error);
       toast({
         title: 'Erro ao adicionar voo',
-        description: error.message,
+        description: getUserFriendlyError(error),
         variant: 'destructive',
       });
       return;
@@ -154,7 +155,7 @@ export const FlightsProvider: React.FC<{ children: ReactNode }> = ({ children })
       logger.error('Error updating flight:', error);
       toast({
         title: 'Erro ao atualizar voo',
-        description: error.message,
+        description: getUserFriendlyError(error),
         variant: 'destructive',
       });
       return;
@@ -179,7 +180,7 @@ export const FlightsProvider: React.FC<{ children: ReactNode }> = ({ children })
       logger.error('Error deleting flight:', error);
       toast({
         title: 'Erro ao excluir voo',
-        description: error.message,
+        description: getUserFriendlyError(error),
         variant: 'destructive',
       });
       return;

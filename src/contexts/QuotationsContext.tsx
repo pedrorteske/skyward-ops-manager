@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useCompanyId } from '@/hooks/useCompanyId';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
+import { getUserFriendlyError } from '@/lib/errorHandler';
 
 interface QuotationsContextType {
   quotations: Quotation[];
@@ -61,7 +62,7 @@ export const QuotationsProvider: React.FC<{ children: ReactNode }> = ({ children
         logger.error('Error fetching quotations:', error);
         toast({
           title: 'Erro ao carregar cotações',
-          description: error.message,
+          description: getUserFriendlyError(error),
           variant: 'destructive',
         });
         return;
@@ -119,7 +120,7 @@ export const QuotationsProvider: React.FC<{ children: ReactNode }> = ({ children
       logger.error('Error adding quotation:', error);
       toast({
         title: 'Erro ao adicionar cotação',
-        description: error.message,
+        description: getUserFriendlyError(error),
         variant: 'destructive',
       });
       return;
@@ -156,7 +157,7 @@ export const QuotationsProvider: React.FC<{ children: ReactNode }> = ({ children
       logger.error('Error updating quotation:', error);
       toast({
         title: 'Erro ao atualizar cotação',
-        description: error.message,
+        description: getUserFriendlyError(error),
         variant: 'destructive',
       });
       return;
@@ -181,7 +182,7 @@ export const QuotationsProvider: React.FC<{ children: ReactNode }> = ({ children
       logger.error('Error deleting quotation:', error);
       toast({
         title: 'Erro ao excluir cotação',
-        description: error.message,
+        description: getUserFriendlyError(error),
         variant: 'destructive',
       });
       return;

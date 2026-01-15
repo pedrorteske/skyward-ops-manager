@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useCompanyId } from '@/hooks/useCompanyId';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
+import { getUserFriendlyError } from '@/lib/errorHandler';
 
 interface FinancialContextType {
   documents: FinancialDocument[];
@@ -89,7 +90,7 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
         logger.error('Error fetching financial documents:', error);
         toast({
           title: 'Erro ao carregar documentos',
-          description: error.message,
+          description: getUserFriendlyError(error),
           variant: 'destructive',
         });
         return;
@@ -151,7 +152,7 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
       logger.error('Error adding financial document:', error);
       toast({
         title: 'Erro ao adicionar documento',
-        description: error.message,
+        description: getUserFriendlyError(error),
         variant: 'destructive',
       });
       return;
@@ -188,7 +189,7 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
       logger.error('Error updating financial document:', error);
       toast({
         title: 'Erro ao atualizar documento',
-        description: error.message,
+        description: getUserFriendlyError(error),
         variant: 'destructive',
       });
       return;
@@ -213,7 +214,7 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
       logger.error('Error deleting financial document:', error);
       toast({
         title: 'Erro ao excluir documento',
-        description: error.message,
+        description: getUserFriendlyError(error),
         variant: 'destructive',
       });
       return;
@@ -238,7 +239,7 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
       logger.error('Error updating document status:', error);
       toast({
         title: 'Erro ao atualizar status',
-        description: error.message,
+        description: getUserFriendlyError(error),
         variant: 'destructive',
       });
       return;
