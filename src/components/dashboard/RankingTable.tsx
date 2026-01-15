@@ -7,7 +7,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Trophy, Plane, MapPin } from 'lucide-react';
+import { Trophy, Plane, MapPin, Maximize2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface AircraftRanking {
   position: number;
@@ -25,9 +26,10 @@ interface RankingTableProps {
   type: 'aircraft' | 'base';
   aircraftData?: AircraftRanking[];
   baseData?: BaseRanking[];
+  onClick?: () => void;
 }
 
-export function RankingTable({ type, aircraftData, baseData }: RankingTableProps) {
+export function RankingTable({ type, aircraftData, baseData, onClick }: RankingTableProps) {
   const getMedalColor = (position: number) => {
     switch (position) {
       case 1:
@@ -43,11 +45,20 @@ export function RankingTable({ type, aircraftData, baseData }: RankingTableProps
 
   if (type === 'aircraft' && aircraftData) {
     return (
-      <Card>
+      <Card 
+        className={cn(
+          "transition-all",
+          onClick && "cursor-pointer hover:shadow-lg hover:border-primary/50"
+        )}
+        onClick={onClick}
+      >
         <CardHeader className="pb-3">
-          <CardTitle className="text-base font-semibold flex items-center gap-2">
-            <Plane className="w-5 h-5 text-primary" />
-            Top Modelos de Aeronaves
+          <CardTitle className="text-base font-semibold flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Plane className="w-5 h-5 text-primary" />
+              Top Modelos de Aeronaves
+            </div>
+            {onClick && <Maximize2 className="w-4 h-4 text-muted-foreground" />}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
@@ -95,11 +106,20 @@ export function RankingTable({ type, aircraftData, baseData }: RankingTableProps
 
   if (type === 'base' && baseData) {
     return (
-      <Card>
+      <Card 
+        className={cn(
+          "transition-all",
+          onClick && "cursor-pointer hover:shadow-lg hover:border-primary/50"
+        )}
+        onClick={onClick}
+      >
         <CardHeader className="pb-3">
-          <CardTitle className="text-base font-semibold flex items-center gap-2">
-            <MapPin className="w-5 h-5 text-info" />
-            Top Bases/Aeroportos
+          <CardTitle className="text-base font-semibold flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <MapPin className="w-5 h-5 text-info" />
+              Top Bases/Aeroportos
+            </div>
+            {onClick && <Maximize2 className="w-4 h-4 text-muted-foreground" />}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">

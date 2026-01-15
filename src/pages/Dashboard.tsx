@@ -331,8 +331,16 @@ export default function Dashboard() {
 
       {/* Rankings Tables */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <RankingTable type="aircraft" aircraftData={aircraftRanking} />
-        <RankingTable type="base" baseData={baseRanking} />
+        <RankingTable 
+          type="aircraft" 
+          aircraftData={aircraftRanking}
+          onClick={() => navigate('/dashboard/chart/aircraft-list')}
+        />
+        <RankingTable 
+          type="base" 
+          baseData={baseRanking}
+          onClick={() => navigate('/dashboard/chart/base-list')}
+        />
       </div>
     </MainLayout>
   );
