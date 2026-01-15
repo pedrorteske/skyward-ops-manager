@@ -3,6 +3,7 @@ import type { FinancialDocument, FinancialDocumentStatus, FinancialDocumentType,
 import { supabase } from '@/integrations/supabase/client';
 import { useCompanyId } from '@/hooks/useCompanyId';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 
 interface FinancialContextType {
   documents: FinancialDocument[];
@@ -85,7 +86,7 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching financial documents:', error);
+        logger.error('Error fetching financial documents:', error);
         toast({
           title: 'Erro ao carregar documentos',
           description: error.message,
@@ -96,7 +97,7 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
 
       setDocuments(data?.map(mapDbToDocument) || []);
     } catch (err) {
-      console.error('Error in fetchDocuments:', err);
+      logger.error('Error in fetchDocuments:', err);
     } finally {
       setIsLoading(false);
     }
@@ -147,7 +148,7 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
       .single();
 
     if (error) {
-      console.error('Error adding financial document:', error);
+      logger.error('Error adding financial document:', error);
       toast({
         title: 'Erro ao adicionar documento',
         description: error.message,
@@ -184,7 +185,7 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
       .single();
 
     if (error) {
-      console.error('Error updating financial document:', error);
+      logger.error('Error updating financial document:', error);
       toast({
         title: 'Erro ao atualizar documento',
         description: error.message,
@@ -209,7 +210,7 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
       .eq('id', id);
 
     if (error) {
-      console.error('Error deleting financial document:', error);
+      logger.error('Error deleting financial document:', error);
       toast({
         title: 'Erro ao excluir documento',
         description: error.message,
@@ -234,7 +235,7 @@ export const FinancialProvider: React.FC<{ children: ReactNode }> = ({ children 
       .single();
 
     if (error) {
-      console.error('Error updating document status:', error);
+      logger.error('Error updating document status:', error);
       toast({
         title: 'Erro ao atualizar status',
         description: error.message,

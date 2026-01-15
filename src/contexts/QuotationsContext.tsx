@@ -3,6 +3,7 @@ import { Quotation, QuotationStatus, QuotationItem, Currency } from '@/types/avi
 import { supabase } from '@/integrations/supabase/client';
 import { useCompanyId } from '@/hooks/useCompanyId';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 
 interface QuotationsContextType {
   quotations: Quotation[];
@@ -57,7 +58,7 @@ export const QuotationsProvider: React.FC<{ children: ReactNode }> = ({ children
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching quotations:', error);
+        logger.error('Error fetching quotations:', error);
         toast({
           title: 'Erro ao carregar cotações',
           description: error.message,
@@ -68,7 +69,7 @@ export const QuotationsProvider: React.FC<{ children: ReactNode }> = ({ children
 
       setQuotations(data?.map(mapDbToQuotation) || []);
     } catch (err) {
-      console.error('Error in fetchQuotations:', err);
+      logger.error('Error in fetchQuotations:', err);
     } finally {
       setIsLoading(false);
     }
@@ -115,7 +116,7 @@ export const QuotationsProvider: React.FC<{ children: ReactNode }> = ({ children
       .single();
 
     if (error) {
-      console.error('Error adding quotation:', error);
+      logger.error('Error adding quotation:', error);
       toast({
         title: 'Erro ao adicionar cotação',
         description: error.message,
@@ -152,7 +153,7 @@ export const QuotationsProvider: React.FC<{ children: ReactNode }> = ({ children
       .single();
 
     if (error) {
-      console.error('Error updating quotation:', error);
+      logger.error('Error updating quotation:', error);
       toast({
         title: 'Erro ao atualizar cotação',
         description: error.message,
@@ -177,7 +178,7 @@ export const QuotationsProvider: React.FC<{ children: ReactNode }> = ({ children
       .eq('id', id);
 
     if (error) {
-      console.error('Error deleting quotation:', error);
+      logger.error('Error deleting quotation:', error);
       toast({
         title: 'Erro ao excluir cotação',
         description: error.message,

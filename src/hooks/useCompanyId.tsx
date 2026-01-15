@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { logger } from '@/lib/logger';
 
 export const useCompanyId = () => {
   const { user } = useAuth();
@@ -23,13 +24,13 @@ export const useCompanyId = () => {
           .maybeSingle();
 
         if (error) {
-          console.error('Error fetching company ID:', error);
+          logger.error('Error fetching company ID:', error);
           setCompanyId(null);
         } else {
           setCompanyId(data?.company_id || null);
         }
       } catch (err) {
-        console.error('Error in useCompanyId:', err);
+        logger.error('Error in useCompanyId:', err);
         setCompanyId(null);
       } finally {
         setIsLoading(false);

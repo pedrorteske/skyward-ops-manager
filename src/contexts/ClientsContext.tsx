@@ -3,6 +3,7 @@ import { Client, ClientPF, ClientPJ, ClientINT, ClientType } from '@/types/aviat
 import { supabase } from '@/integrations/supabase/client';
 import { useCompanyId } from '@/hooks/useCompanyId';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 
 interface ClientsContextType {
   clients: Client[];
@@ -82,7 +83,7 @@ export const ClientsProvider: React.FC<{ children: ReactNode }> = ({ children })
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching clients:', error);
+        logger.error('Error fetching clients:', error);
         toast({
           title: 'Erro ao carregar clientes',
           description: error.message,
@@ -93,7 +94,7 @@ export const ClientsProvider: React.FC<{ children: ReactNode }> = ({ children })
 
       setClients(data?.map(mapDbToClient) || []);
     } catch (err) {
-      console.error('Error in fetchClients:', err);
+      logger.error('Error in fetchClients:', err);
     } finally {
       setIsLoading(false);
     }
@@ -150,7 +151,7 @@ export const ClientsProvider: React.FC<{ children: ReactNode }> = ({ children })
       .single();
 
     if (error) {
-      console.error('Error adding client:', error);
+      logger.error('Error adding client:', error);
       toast({
         title: 'Erro ao adicionar cliente',
         description: error.message,
@@ -212,7 +213,7 @@ export const ClientsProvider: React.FC<{ children: ReactNode }> = ({ children })
       .single();
 
     if (error) {
-      console.error('Error updating client:', error);
+      logger.error('Error updating client:', error);
       toast({
         title: 'Erro ao atualizar cliente',
         description: error.message,
@@ -237,7 +238,7 @@ export const ClientsProvider: React.FC<{ children: ReactNode }> = ({ children })
       .eq('id', id);
 
     if (error) {
-      console.error('Error deleting client:', error);
+      logger.error('Error deleting client:', error);
       toast({
         title: 'Erro ao excluir cliente',
         description: error.message,
