@@ -17,6 +17,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { toast } from 'sonner';
 import { ClientsDashboard } from '@/components/clients/ClientsDashboard';
 import { PhoneInput } from '@/components/ui/phone-input';
+import { CountrySelect } from '@/components/ui/country-select';
 
 export default function Clients() {
   const { clients, isLoading, addClient, updateClient, deleteClient } = useClients();
@@ -458,10 +459,11 @@ export default function Clients() {
                   </div>
                   <div className="space-y-2">
                   <Label htmlFor="country">País *</Label>
-                  <Input
+                  <CountrySelect
                     id="country"
                     value={formDataINT.country}
-                    onChange={(e) => setFormDataINT({...formDataINT, country: e.target.value})}
+                    onChange={(country) => setFormDataINT({...formDataINT, country})}
+                    placeholder="Selecione o país"
                   />
                   </div>
                   <div className="space-y-2">
@@ -817,10 +819,11 @@ export default function Clients() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-country">País *</Label>
-                  <Input
+                  <CountrySelect
                     id="edit-country"
                     value={editFormDataINT.country}
-                    onChange={(e) => setEditFormDataINT({...editFormDataINT, country: e.target.value})}
+                    onChange={(country) => setEditFormDataINT({...editFormDataINT, country})}
+                    placeholder="Selecione o país"
                   />
                 </div>
                 <div className="space-y-2">
