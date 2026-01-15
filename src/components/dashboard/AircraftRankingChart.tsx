@@ -19,9 +19,10 @@ interface AircraftData {
 interface AircraftRankingChartProps {
   data: AircraftData[];
   onClick?: () => void;
+  title?: string;
 }
 
-export function AircraftRankingChart({ data, onClick }: AircraftRankingChartProps) {
+export function AircraftRankingChart({ data, onClick, title = "Ranking de Modelos de Aeronaves" }: AircraftRankingChartProps) {
   return (
     <Card 
       className={cn(
@@ -33,7 +34,7 @@ export function AircraftRankingChart({ data, onClick }: AircraftRankingChartProp
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base font-semibold">
-            Ranking de Modelos de Aeronaves
+            {title}
           </CardTitle>
           {onClick && (
             <Maximize2 className="w-4 h-4 text-muted-foreground" />

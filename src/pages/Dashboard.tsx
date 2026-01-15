@@ -1,13 +1,11 @@
 import { useState, useMemo } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { DashboardKPICard } from '@/components/dashboard/DashboardKPICard';
+import { CircularOutlineKPI } from '@/components/dashboard/CircularOutlineKPI';
 import { DashboardFilters, DashboardFiltersState } from '@/components/dashboard/DashboardFilters';
 import { OperationsColumnChart } from '@/components/dashboard/OperationsColumnChart';
-import { BaseDistributionChart } from '@/components/dashboard/BaseDistributionChart';
 import { FlightTypePieChart } from '@/components/dashboard/FlightTypePieChart';
 import { AircraftRankingChart } from '@/components/dashboard/AircraftRankingChart';
-import { RankingTable } from '@/components/dashboard/RankingTable';
 import { useFlights } from '@/contexts/FlightsContext';
 import { Flight, FlightType, flightTypeLabels } from '@/types/aviation';
 import {
@@ -17,11 +15,9 @@ import {
   XCircle,
   Building2,
   PlaneTakeoff,
-  ArrowRight,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Link, useNavigate } from 'react-router-dom';
-import { format, parseISO, isWithinInterval, startOfMonth, endOfMonth } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
+import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 // Extended flight types for ANAC classification - Cores saturadas
@@ -176,22 +172,6 @@ export default function Dashboard() {
     }));
   }, [filteredFlights]);
 
-  // Base distribution data (using base field only)
-  const baseData = useMemo(() => {
-    const baseMap = new Map<string, number>();
-
-    filteredFlights.forEach((flight) => {
-      if (flight.base) {
-        baseMap.set(flight.base, (baseMap.get(flight.base) || 0) + 1);
-      }
-    });
-
-    return Array.from(baseMap.entries())
-      .map(([base, operations]) => ({ base, operations }))
-      .sort((a, b) => b.operations - a.operations)
-      .slice(0, 8);
-  }, [filteredFlights]);
-
   // Flight type distribution (ANAC classification)
   const flightTypeData = useMemo(() => {
     const typeMap = new Map<FlightType, number>();
@@ -228,28 +208,10 @@ export default function Dashboard() {
       .slice(0, 8);
   }, [filteredFlights]);
 
-  // Aircraft ranking for table (grouped by model)
-  const aircraftRanking = useMemo(() => {
-    return aircraftData.slice(0, 10).map((item, index) => ({
-      position: index + 1,
-      model: item.model,
-      operations: item.operations,
-    }));
-  }, [aircraftData]);
-
-  // Base ranking for table
-  const baseRanking = useMemo(() => {
-    return baseData.slice(0, 10).map((item, index) => ({
-      position: index + 1,
-      icao: item.base,
-      operations: item.operations,
-    }));
-  }, [baseData]);
-
   return (
     <MainLayout>
       <PageHeader
-        title="Dashboard Operacional"
+        title="Dashboard Analítico"
         description="Visão consolidada das operações aéreas"
       />
 
@@ -263,44 +225,44 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* KPI Cards */}
+      {/* Circular KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-        <DashboardKPICard
+        <CircularOutlineKPI
           title="Total de Operações"
           value={kpis.total}
           icon={Plane}
           description="No período"
           variant="primary"
         />
-        <DashboardKPICard
+        <CircularOutlineKPI
           title="Concluídas"
           value={kpis.completed}
           icon={CheckCircle2}
           description="Chegaram ou partiram"
           variant="success"
         />
-        <DashboardKPICard
+        <CircularOutlineKPI
           title="Em Andamento"
           value={kpis.inProgress}
           icon={Clock}
           description="Programadas"
           variant="info"
         />
-        <DashboardKPICard
+        <CircularOutlineKPI
           title="Canceladas"
           value={kpis.cancelled}
           icon={XCircle}
           description="No período"
           variant="danger"
         />
-        <DashboardKPICard
+        <CircularOutlineKPI
           title="Bases Ativas"
           value={kpis.activeBases}
           icon={Building2}
           description="Aeroportos"
           variant="warning"
         />
-        <DashboardKPICard
+        <CircularOutlineKPI
           title="Aeronaves Ativas"
           value={kpis.activeAircraft}
           icon={PlaneTakeoff}
@@ -309,38 +271,23 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      {/* Charts Grid - Clean layout with only essential charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <OperationsColumnChart 
           data={monthlyData} 
           onClick={() => navigate('/dashboard/chart/operations-month')}
-        />
-        <BaseDistributionChart 
-          data={baseData}
-          onClick={() => navigate('/dashboard/chart/operations-base')}
         />
         <FlightTypePieChart 
           data={flightTypeData}
           onClick={() => navigate('/dashboard/chart/flight-type')}
         />
-        <AircraftRankingChart 
-          data={aircraftData}
-          onClick={() => navigate('/dashboard/chart/aircraft-ranking')}
-        />
-      </div>
-
-      {/* Rankings Tables */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <RankingTable 
-          type="aircraft" 
-          aircraftData={aircraftRanking}
-          onClick={() => navigate('/dashboard/chart/aircraft-list')}
-        />
-        <RankingTable 
-          type="base" 
-          baseData={baseRanking}
-          onClick={() => navigate('/dashboard/chart/base-list')}
-        />
+        <div className="lg:col-span-2">
+          <AircraftRankingChart 
+            data={aircraftData}
+            onClick={() => navigate('/dashboard/chart/aircraft-ranking')}
+            title="Modelos de Aeronaves Atendidas"
+          />
+        </div>
       </div>
     </MainLayout>
   );
