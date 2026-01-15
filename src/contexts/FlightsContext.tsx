@@ -3,6 +3,7 @@ import { Flight, FlightType, FlightStatus } from '@/types/aviation';
 import { supabase } from '@/integrations/supabase/client';
 import { useCompanyId } from '@/hooks/useCompanyId';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 
 interface FlightsContextType {
   flights: Flight[];
@@ -57,7 +58,7 @@ export const FlightsProvider: React.FC<{ children: ReactNode }> = ({ children })
         .order('arrival_date', { ascending: false });
 
       if (error) {
-        console.error('Error fetching flights:', error);
+        logger.error('Error fetching flights:', error);
         toast({
           title: 'Erro ao carregar voos',
           description: error.message,
@@ -68,7 +69,7 @@ export const FlightsProvider: React.FC<{ children: ReactNode }> = ({ children })
 
       setFlights(data?.map(mapDbToFlight) || []);
     } catch (err) {
-      console.error('Error in fetchFlights:', err);
+      logger.error('Error in fetchFlights:', err);
     } finally {
       setIsLoading(false);
     }
@@ -111,7 +112,7 @@ export const FlightsProvider: React.FC<{ children: ReactNode }> = ({ children })
       .single();
 
     if (error) {
-      console.error('Error adding flight:', error);
+      logger.error('Error adding flight:', error);
       toast({
         title: 'Erro ao adicionar voo',
         description: error.message,
@@ -150,7 +151,7 @@ export const FlightsProvider: React.FC<{ children: ReactNode }> = ({ children })
       .single();
 
     if (error) {
-      console.error('Error updating flight:', error);
+      logger.error('Error updating flight:', error);
       toast({
         title: 'Erro ao atualizar voo',
         description: error.message,
@@ -175,7 +176,7 @@ export const FlightsProvider: React.FC<{ children: ReactNode }> = ({ children })
       .eq('id', id);
 
     if (error) {
-      console.error('Error deleting flight:', error);
+      logger.error('Error deleting flight:', error);
       toast({
         title: 'Erro ao excluir voo',
         description: error.message,
