@@ -98,10 +98,10 @@ export default function Auth() {
       return;
     }
 
-    if (signupPassword.length < 6) {
+    if (signupPassword.length < 10) {
       toast({
         title: "Erro",
-        description: "A senha deve ter no mínimo 6 caracteres",
+        description: "A senha deve ter no mínimo 10 caracteres",
         variant: "destructive",
       });
       return;
@@ -288,7 +288,7 @@ export default function Auth() {
                       <Input
                         id="signup-password"
                         type="password"
-                        placeholder="Mínimo 6 caracteres"
+                        placeholder="Mínimo 10 caracteres"
                         className="pl-10"
                         value={signupPassword}
                         onChange={(e) => setSignupPassword(e.target.value)}
