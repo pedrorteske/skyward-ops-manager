@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Search, User, Building2, Globe, Pencil, Mail, Phone, MoreHorizontal, Trash2 } from 'lucide-react';
+import { Plus, Search, User, Building2, Globe, Pencil } from 'lucide-react';
 import { ClientExpandableRow } from '@/components/clients/ClientExpandableRow';
 import { cn } from '@/lib/utils';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
