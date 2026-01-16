@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { format, isToday, isTomorrow, parseISO, startOfDay, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Plane, Clock, Plus } from 'lucide-react';
+import { Plane, Clock, Plus, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { CircularOutlineKPI } from '@/components/dashboard/CircularOutlineKPI';
@@ -59,12 +59,20 @@ export default function Home() {
           </h1>
           <p className="text-muted-foreground capitalize">{todayFormatted}</p>
         </div>
-        <Button asChild size="lg" className="bg-emerald-600 hover:bg-emerald-700">
-          <Link to="/flights">
-            <Plus className="w-5 h-5 mr-2" />
-            Novo Voo
-          </Link>
-        </Button>
+        <div className="flex gap-3">
+          <Button asChild size="lg" className="bg-primary hover:bg-primary/90">
+            <Link to="/flights">
+              <Plus className="w-5 h-5 mr-2" />
+              Novo Voo
+            </Link>
+          </Button>
+          <Button asChild size="lg" className="bg-primary hover:bg-primary/90">
+            <Link to="/clients">
+              <Users className="w-5 h-5 mr-2" />
+              Novo Cliente
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Flight Timeline */}
