@@ -43,6 +43,7 @@ const chartTitles: Record<string, string> = {
   'flight-type': 'Distribuição por Tipo de Voo',
   'aircraft-ranking': 'Ranking de Modelos de Aeronaves',
   'aircraft-list': 'Lista Completa - Modelos de Aeronaves',
+  'base-ranking': 'Atendimentos por Base',
   'base-list': 'Lista Completa - Bases/Aeroportos',
 };
 
@@ -373,6 +374,48 @@ export default function ChartDetail() {
               )}
             </TableBody>
           </Table>
+        );
+
+      case 'base-ranking':
+        return (
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={baseData}
+              layout="vertical"
+              margin={{ top: 20, right: 30, left: 120, bottom: 20 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" />
+              <XAxis
+                type="number"
+                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                tickLine={false}
+                axisLine={{ stroke: 'hsl(var(--border))' }}
+              />
+              <YAxis
+                type="category"
+                dataKey="base"
+                width={110}
+                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                tickLine={false}
+                axisLine={{ stroke: 'hsl(var(--border))' }}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: 'hsl(var(--card))',
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: '8px',
+                  color: 'hsl(var(--foreground))',
+                }}
+                labelStyle={{ color: 'hsl(var(--foreground))' }}
+              />
+              <Bar
+                dataKey="operations"
+                fill="hsl(var(--chart-3))"
+                radius={[0, 4, 4, 0]}
+                name="Atendimentos"
+              />
+            </BarChart>
+          </ResponsiveContainer>
         );
 
       case 'base-list':
