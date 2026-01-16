@@ -36,6 +36,7 @@ const mapDbToClient = (row: any): Client => {
       cpf: row.cpf || '',
       email: row.email || '',
       phone: row.phone || '',
+      address: row.address || '',
       observations: row.observations,
     } as ClientPF;
   } else if (row.type === 'PJ') {
@@ -47,6 +48,7 @@ const mapDbToClient = (row: any): Client => {
       commercialEmail: row.commercial_email || '',
       phone: row.phone || '',
       contactPerson: row.contact_person || '',
+      address: row.address || '',
       observations: row.observations,
     } as ClientPJ;
   } else {
@@ -57,6 +59,7 @@ const mapDbToClient = (row: any): Client => {
       country: row.country || '',
       email: row.email || '',
       phone: row.phone || '',
+      address: row.address || '',
       observations: row.observations,
     } as ClientINT;
   }
@@ -130,6 +133,7 @@ export const ClientsProvider: React.FC<{ children: ReactNode }> = ({ children })
       dbClient.cpf = pf.cpf;
       dbClient.email = pf.email;
       dbClient.phone = pf.phone;
+      dbClient.address = pf.address;
     } else if (client.type === 'PJ') {
       const pj = client as Omit<ClientPJ, 'id' | 'companyId' | 'createdAt' | 'updatedAt'>;
       dbClient.operator = pj.operator;
@@ -137,12 +141,14 @@ export const ClientsProvider: React.FC<{ children: ReactNode }> = ({ children })
       dbClient.commercial_email = pj.commercialEmail;
       dbClient.phone = pj.phone;
       dbClient.contact_person = pj.contactPerson;
+      dbClient.address = pj.address;
     } else {
       const int = client as Omit<ClientINT, 'id' | 'companyId' | 'createdAt' | 'updatedAt'>;
       dbClient.operator = int.operator;
       dbClient.country = int.country;
       dbClient.email = int.email;
       dbClient.phone = int.phone;
+      dbClient.address = int.address;
     }
 
     const { data, error } = await supabase
@@ -183,6 +189,7 @@ export const ClientsProvider: React.FC<{ children: ReactNode }> = ({ children })
       country: null,
       email: null,
       phone: null,
+      address: null,
     };
 
     if (client.type === 'PF') {
@@ -191,6 +198,7 @@ export const ClientsProvider: React.FC<{ children: ReactNode }> = ({ children })
       dbClient.cpf = pf.cpf;
       dbClient.email = pf.email;
       dbClient.phone = pf.phone;
+      dbClient.address = pf.address;
     } else if (client.type === 'PJ') {
       const pj = client as Omit<ClientPJ, 'id' | 'companyId' | 'createdAt' | 'updatedAt'>;
       dbClient.operator = pj.operator;
@@ -198,12 +206,14 @@ export const ClientsProvider: React.FC<{ children: ReactNode }> = ({ children })
       dbClient.commercial_email = pj.commercialEmail;
       dbClient.phone = pj.phone;
       dbClient.contact_person = pj.contactPerson;
+      dbClient.address = pj.address;
     } else {
       const int = client as Omit<ClientINT, 'id' | 'companyId' | 'createdAt' | 'updatedAt'>;
       dbClient.operator = int.operator;
       dbClient.country = int.country;
       dbClient.email = int.email;
       dbClient.phone = int.phone;
+      dbClient.address = int.address;
     }
 
     const { data, error } = await supabase

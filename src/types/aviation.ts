@@ -49,6 +49,7 @@ export interface ClientPF {
   cpf: string;
   email: string;
   phone: string;
+  address?: string;
   observations?: string;
   status: 'active' | 'inactive';
   companyId: string;
@@ -64,6 +65,7 @@ export interface ClientPJ {
   commercialEmail: string;
   phone: string;
   contactPerson: string;
+  address?: string;
   observations?: string;
   status: 'active' | 'inactive';
   companyId: string;
@@ -78,6 +80,7 @@ export interface ClientINT {
   country: string;
   email: string;
   phone: string;
+  address?: string;
   observations?: string;
   status: 'active' | 'inactive';
   companyId: string;
