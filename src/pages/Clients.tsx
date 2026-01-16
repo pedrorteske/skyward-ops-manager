@@ -10,7 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Search, User, Building2, Mail, Phone, MoreHorizontal, Pencil, Trash2, Globe } from 'lucide-react';
+import { Plus, Search, User, Building2, Globe, Pencil, Mail, Phone, MoreHorizontal, Trash2 } from 'lucide-react';
+import { ClientExpandableRow } from '@/components/clients/ClientExpandableRow';
 import { cn } from '@/lib/utils';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -37,6 +38,7 @@ export default function Clients() {
     cpf: '',
     email: '',
     phone: '',
+    address: '',
     observations: '',
     status: 'active' as 'active' | 'inactive',
   });
@@ -46,6 +48,7 @@ export default function Clients() {
     commercialEmail: '',
     phone: '',
     contactPerson: '',
+    address: '',
     observations: '',
     status: 'active' as 'active' | 'inactive',
   });
@@ -54,6 +57,7 @@ export default function Clients() {
     country: '',
     email: '',
     phone: '',
+    address: '',
     observations: '',
     status: 'active' as 'active' | 'inactive',
   });
@@ -63,6 +67,7 @@ export default function Clients() {
     cpf: '',
     email: '',
     phone: '',
+    address: '',
     observations: '',
     status: 'active' as 'active' | 'inactive',
   });
@@ -72,6 +77,7 @@ export default function Clients() {
     commercialEmail: '',
     phone: '',
     contactPerson: '',
+    address: '',
     observations: '',
     status: 'active' as 'active' | 'inactive',
   });
@@ -80,6 +86,7 @@ export default function Clients() {
     country: '',
     email: '',
     phone: '',
+    address: '',
     observations: '',
     status: 'active' as 'active' | 'inactive',
   });
@@ -134,6 +141,7 @@ export default function Clients() {
       cpf: '',
       email: '',
       phone: '',
+      address: '',
       observations: '',
       status: 'active',
     });
@@ -143,6 +151,7 @@ export default function Clients() {
       commercialEmail: '',
       phone: '',
       contactPerson: '',
+      address: '',
       observations: '',
       status: 'active',
     });
@@ -151,6 +160,7 @@ export default function Clients() {
       country: '',
       email: '',
       phone: '',
+      address: '',
       observations: '',
       status: 'active',
     });
@@ -167,6 +177,7 @@ export default function Clients() {
         cpf: pfClient.cpf,
         email: pfClient.email,
         phone: pfClient.phone,
+        address: pfClient.address || '',
         observations: pfClient.observations || '',
         status: pfClient.status,
       });
@@ -178,6 +189,7 @@ export default function Clients() {
         commercialEmail: pjClient.commercialEmail,
         phone: pjClient.phone,
         contactPerson: pjClient.contactPerson,
+        address: pjClient.address || '',
         observations: pjClient.observations || '',
         status: pjClient.status,
       });
@@ -188,6 +200,7 @@ export default function Clients() {
         country: intClient.country,
         email: intClient.email,
         phone: intClient.phone,
+        address: intClient.address || '',
         observations: intClient.observations || '',
         status: intClient.status,
       });
@@ -352,6 +365,15 @@ export default function Clients() {
                   />
                   </div>
                   <div className="space-y-2">
+                  <Label htmlFor="addressPF">Endereço</Label>
+                  <Input
+                    id="addressPF"
+                    placeholder="Rua, número, bairro, cidade..."
+                    value={formDataPF.address}
+                    onChange={(e) => setFormDataPF({...formDataPF, address: e.target.value})}
+                  />
+                  </div>
+                  <div className="space-y-2">
                   <Label htmlFor="observationsPF">Observações</Label>
                   <Textarea
                     id="observationsPF"
@@ -422,6 +444,15 @@ export default function Clients() {
                   />
                   </div>
                   <div className="space-y-2">
+                  <Label htmlFor="addressPJ">Endereço</Label>
+                  <Input
+                    id="addressPJ"
+                    placeholder="Rua, número, bairro, cidade..."
+                    value={formDataPJ.address}
+                    onChange={(e) => setFormDataPJ({...formDataPJ, address: e.target.value})}
+                  />
+                  </div>
+                  <div className="space-y-2">
                   <Label htmlFor="observationsPJ">Observações</Label>
                   <Textarea
                     id="observationsPJ"
@@ -482,6 +513,15 @@ export default function Clients() {
                     value={formDataINT.phone}
                     onChange={(value) => setFormDataINT({...formDataINT, phone: value})}
                     defaultCountry="US"
+                  />
+                  </div>
+                  <div className="space-y-2">
+                  <Label htmlFor="addressINT">Endereço</Label>
+                  <Input
+                    id="addressINT"
+                    placeholder="Street, number, city, country..."
+                    value={formDataINT.address}
+                    onChange={(e) => setFormDataINT({...formDataINT, address: e.target.value})}
                   />
                   </div>
                   <div className="space-y-2">
@@ -574,83 +614,17 @@ export default function Clients() {
               <TableHead>CPF/CNPJ/País</TableHead>
               <TableHead>Contato</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="w-[50px]"></TableHead>
+              <TableHead className="w-[100px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredClients.map((client) => (
-              <TableRow key={client.id}>
-                <TableCell>
-                  <div className={cn(
-                    "w-8 h-8 rounded-lg flex items-center justify-center",
-                    getClientTypeColor(client.type)
-                  )}>
-                    {getClientTypeIcon(client.type)}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div>
-                    <p className="font-medium">{getClientName(client)}</p>
-                    {client.type === 'PJ' && (
-                      <p className="text-xs text-muted-foreground">
-                        {(client as ClientPJ).contactPerson}
-                      </p>
-                    )}
-                    {client.type === 'INT' && (
-                      <p className="text-xs text-muted-foreground">
-                        {(client as ClientINT).country}
-                      </p>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell className="font-mono text-sm">
-                  {getClientDocument(client)}
-                </TableCell>
-                <TableCell>
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-1 text-sm">
-                      <Mail className="w-3 h-3 text-muted-foreground" />
-                      {getClientEmail(client)}
-                    </div>
-                    <div className="flex items-center gap-1 text-sm">
-                      <Phone className="w-3 h-3 text-muted-foreground" />
-                      {client.phone}
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <span className={cn(
-                    "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border",
-                    client.status === 'active' 
-                      ? "bg-success/15 text-success border-success/30"
-                      : "bg-muted text-muted-foreground border-muted-foreground/30"
-                  )}>
-                    {client.status === 'active' ? 'Ativo' : 'Inativo'}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreHorizontal className="w-4 h-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleEditClick(client)}>
-                        <Pencil className="w-4 h-4 mr-2" />
-                        Editar
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        className="text-destructive"
-                        onClick={() => handleDeleteClick(client)}
-                      >
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Excluir
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
+              <ClientExpandableRow
+                key={client.id}
+                client={client}
+                onEditClick={handleEditClick}
+                onDeleteClick={handleDeleteClick}
+              />
             ))}
             {filteredClients.length === 0 && (
               <TableRow>
@@ -709,6 +683,15 @@ export default function Clients() {
                     value={editFormDataPF.phone}
                     onChange={(value) => setEditFormDataPF({...editFormDataPF, phone: value})}
                     defaultCountry="BR"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-addressPF">Endereço</Label>
+                  <Input
+                    id="edit-addressPF"
+                    placeholder="Rua, número, bairro, cidade..."
+                    value={editFormDataPF.address}
+                    onChange={(e) => setEditFormDataPF({...editFormDataPF, address: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">
@@ -782,6 +765,15 @@ export default function Clients() {
                   />
                 </div>
                 <div className="space-y-2">
+                  <Label htmlFor="edit-addressPJ">Endereço</Label>
+                  <Input
+                    id="edit-addressPJ"
+                    placeholder="Rua, número, bairro, cidade..."
+                    value={editFormDataPJ.address}
+                    onChange={(e) => setEditFormDataPJ({...editFormDataPJ, address: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="edit-observationsPJ">Observações</Label>
                   <Textarea
                     id="edit-observationsPJ"
@@ -842,6 +834,15 @@ export default function Clients() {
                     value={editFormDataINT.phone}
                     onChange={(value) => setEditFormDataINT({...editFormDataINT, phone: value})}
                     defaultCountry="US"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-addressINT">Endereço</Label>
+                  <Input
+                    id="edit-addressINT"
+                    placeholder="Street, number, city, country..."
+                    value={editFormDataINT.address}
+                    onChange={(e) => setEditFormDataINT({...editFormDataINT, address: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">

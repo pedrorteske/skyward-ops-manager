@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       clients: {
         Row: {
+          address: string | null
           cnpj: string | null
           commercial_email: string | null
           company_id: string
@@ -34,6 +35,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          address?: string | null
           cnpj?: string | null
           commercial_email?: string | null
           company_id: string
@@ -52,6 +54,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          address?: string | null
           cnpj?: string | null
           commercial_email?: string | null
           company_id?: string
