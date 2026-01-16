@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { useClients } from '@/contexts/ClientsContext';
@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Search, User, Building2, Globe, Pencil } from 'lucide-react';
+import { Plus, Search, User, Building2, Globe, Pencil, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ClientExpandableRow } from '@/components/clients/ClientExpandableRow';
 import { cn } from '@/lib/utils';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -29,6 +29,8 @@ export default function Clients() {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   
   const [clientType, setClientType] = useState<ClientType>('PJ');
   const [editClientType, setEditClientType] = useState<ClientType>('PJ');
@@ -91,27 +93,51 @@ export default function Clients() {
     status: 'active' as 'active' | 'inactive',
   });
 
-  const filteredClients = clients.filter(client => {
-    const searchLower = searchTerm.toLowerCase();
-    let matchesSearch = false;
-    
-    if (client.type === 'PF') {
-      matchesSearch = (client as ClientPF).fullName.toLowerCase().includes(searchLower) ||
-        (client as ClientPF).email.toLowerCase().includes(searchLower);
-    } else if (client.type === 'PJ') {
-      matchesSearch = (client as ClientPJ).operator.toLowerCase().includes(searchLower) ||
-        (client as ClientPJ).commercialEmail.toLowerCase().includes(searchLower);
-    } else if (client.type === 'INT') {
-      matchesSearch = (client as ClientINT).operator.toLowerCase().includes(searchLower) ||
-        (client as ClientINT).email.toLowerCase().includes(searchLower) ||
-        (client as ClientINT).country.toLowerCase().includes(searchLower);
-    }
-    
-    const matchesType = filterType === 'all' || client.type === filterType;
-    const matchesStatus = filterStatus === 'all' || client.status === filterStatus;
-    
-    return matchesSearch && matchesType && matchesStatus;
-  });
+  const filteredClients = useMemo(() => {
+    return clients.filter(client => {
+      const searchLower = searchTerm.toLowerCase();
+      let matchesSearch = false;
+      
+      if (client.type === 'PF') {
+        matchesSearch = (client as ClientPF).fullName.toLowerCase().includes(searchLower) ||
+          (client as ClientPF).email.toLowerCase().includes(searchLower);
+      } else if (client.type === 'PJ') {
+        matchesSearch = (client as ClientPJ).operator.toLowerCase().includes(searchLower) ||
+          (client as ClientPJ).commercialEmail.toLowerCase().includes(searchLower);
+      } else if (client.type === 'INT') {
+        matchesSearch = (client as ClientINT).operator.toLowerCase().includes(searchLower) ||
+          (client as ClientINT).email.toLowerCase().includes(searchLower) ||
+          (client as ClientINT).country.toLowerCase().includes(searchLower);
+      }
+      
+      const matchesType = filterType === 'all' || client.type === filterType;
+      const matchesStatus = filterStatus === 'all' || client.status === filterStatus;
+      
+      return matchesSearch && matchesType && matchesStatus;
+    });
+  }, [clients, searchTerm, filterType, filterStatus]);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredClients.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedClients = filteredClients.slice(startIndex, endIndex);
+
+  // Reset to first page when filters change
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+  };
+
+  const handleFilterTypeChange = (value: ClientType | 'all') => {
+    setFilterType(value);
+    setCurrentPage(1);
+  };
+
+  const handleFilterStatusChange = (value: 'active' | 'inactive' | 'all') => {
+    setFilterStatus(value);
+    setCurrentPage(1);
+  };
 
   const handleCreateClient = async () => {
     if (clientType === 'PF') {
@@ -573,13 +599,13 @@ export default function Clients() {
           <Input
             placeholder="Buscar por nome, operador, e-mail ou país..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             className="pl-10"
           />
         </div>
         
         <div className="flex gap-2">
-          <Select value={filterType} onValueChange={(v) => setFilterType(v as ClientType | 'all')}>
+          <Select value={filterType} onValueChange={handleFilterTypeChange}>
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Tipo" />
             </SelectTrigger>
@@ -591,7 +617,7 @@ export default function Clients() {
             </SelectContent>
           </Select>
 
-          <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as 'active' | 'inactive' | 'all')}>
+          <Select value={filterStatus} onValueChange={handleFilterStatusChange}>
             <SelectTrigger className="w-[120px]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
@@ -618,7 +644,7 @@ export default function Clients() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredClients.map((client) => (
+            {paginatedClients.map((client) => (
               <ClientExpandableRow
                 key={client.id}
                 client={client}
@@ -636,6 +662,58 @@ export default function Clients() {
             )}
           </TableBody>
         </Table>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between px-4 py-3 border-t border-border">
+            <p className="text-sm text-muted-foreground">
+              Mostrando {startIndex + 1} a {Math.min(endIndex, filteredClients.length)} de {filteredClients.length} clientes
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                  let pageNum: number;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={currentPage === pageNum ? "default" : "outline"}
+                      size="sm"
+                      className="w-8 h-8 p-0"
+                      onClick={() => setCurrentPage(pageNum)}
+                    >
+                      {pageNum}
+                    </Button>
+                  );
+                })}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Edit Client Dialog */}
