@@ -1,45 +1,26 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { 
-  Plane, 
-  FileText, 
-  Users, 
-  LayoutDashboard,
-  Wallet,
-  Zap
-} from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Plane, FileText, Users, LayoutDashboard, Wallet, Zap } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const quickActions = [
   {
-    label: 'Novo Voo',
+    label: "Novo Voo",
     icon: Plane,
-    href: '/flights',
-    variant: 'default' as const,
+    href: "/flights",
+    variant: "default" as const,
   },
   {
-    label: 'Nova Cotação',
-    icon: FileText,
-    href: '/quotations',
-    variant: 'default' as const,
-  },
-  {
-    label: 'Novo Cliente',
-    icon: Users,
-    href: '/clients',
-    variant: 'default' as const,
-  },
-  {
-    label: 'Dashboard',
+    label: "Dashboard",
     icon: LayoutDashboard,
-    href: '/dashboard',
-    variant: 'outline' as const,
+    href: "/dashboard",
+    variant: "outline" as const,
   },
   {
-    label: 'Financeiro',
+    label: "Financeiro",
     icon: Wallet,
-    href: '/financial',
-    variant: 'outline' as const,
+    href: "/financial",
+    variant: "outline" as const,
   },
 ];
 
@@ -54,12 +35,7 @@ export function QuickActionsCard() {
       </CardHeader>
       <CardContent className="space-y-2">
         {quickActions.map((action) => (
-          <Button
-            key={action.label}
-            variant={action.variant}
-            className="w-full justify-start"
-            asChild
-          >
+          <Button key={action.label} variant={action.variant} className="w-full justify-start" asChild>
             <Link to={action.href}>
               <action.icon className="w-4 h-4 mr-2" />
               {action.label}
