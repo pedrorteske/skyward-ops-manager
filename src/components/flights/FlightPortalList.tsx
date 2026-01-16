@@ -46,10 +46,11 @@ export function FlightPortalList({ flights, onFlightClick }: FlightPortalListPro
   return (
     <div className="bg-card rounded-xl border border-border overflow-hidden">
       {/* Header */}
-      <div className="grid grid-cols-12 gap-2 px-4 py-3 bg-muted/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+      <div className="grid grid-cols-13 gap-2 px-4 py-3 bg-muted/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
         <div className="col-span-1">Aeronave</div>
         <div className="col-span-2">Modelo</div>
         <div className="col-span-2">Rota</div>
+        <div className="col-span-1">Base</div>
         <div className="col-span-1">Data</div>
         <div className="col-span-1">Chegada</div>
         <div className="col-span-1">Data</div>
@@ -64,7 +65,7 @@ export function FlightPortalList({ flights, onFlightClick }: FlightPortalListPro
             key={flight.id}
             onClick={() => onFlightClick?.(flight)}
             className={cn(
-              "grid grid-cols-12 gap-2 px-4 py-3 items-center cursor-pointer transition-colors",
+              "grid grid-cols-13 gap-2 px-4 py-3 items-center cursor-pointer transition-colors",
               "hover:bg-muted/30"
             )}
           >
@@ -91,6 +92,13 @@ export function FlightPortalList({ flights, onFlightClick }: FlightPortalListPro
               <ArrowRight className="w-3 h-3 text-muted-foreground shrink-0" />
               <span className="text-sm font-mono font-bold text-foreground">
                 {flight.destination}
+              </span>
+            </div>
+
+            {/* Base */}
+            <div className="col-span-1">
+              <span className="text-sm font-mono font-semibold text-foreground">
+                {flight.base || '-'}
               </span>
             </div>
 

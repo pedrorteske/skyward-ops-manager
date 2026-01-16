@@ -1,5 +1,5 @@
 import { Users, User, Building2, Globe } from 'lucide-react';
-import { ClientKPICard } from './ClientKPICard';
+import { CircularOutlineKPI } from '@/components/dashboard/CircularOutlineKPI';
 import { Client } from '@/types/aviation';
 
 interface ClientsDashboardProps {
@@ -18,33 +18,33 @@ export function ClientsDashboard({ clients }: ClientsDashboardProps) {
   return (
     <div className="mb-8">
       <div className="flex flex-wrap items-center justify-center gap-6 md:gap-8 lg:gap-10">
-        <ClientKPICard
+        <CircularOutlineKPI
           title="Total de Clientes"
           value={totalClients}
           icon={Users}
           variant="default"
-          subtitle="Ativos"
+          description="Ativos"
         />
-        <ClientKPICard
+        <CircularOutlineKPI
           title="Pessoa Física"
           value={pfClients}
           icon={User}
           variant="info"
-          subtitle="PF"
+          description="PF"
         />
-        <ClientKPICard
+        <CircularOutlineKPI
           title="Pessoa Jurídica"
           value={pjClients}
           icon={Building2}
           variant="primary"
-          subtitle="PJ"
+          description="PJ"
         />
-        <ClientKPICard
+        <CircularOutlineKPI
           title="Internacional"
           value={intClients}
           icon={Globe}
           variant="success"
-          subtitle="INT"
+          description="INT"
         />
       </div>
     </div>
