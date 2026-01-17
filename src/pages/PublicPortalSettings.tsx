@@ -154,7 +154,7 @@ export default function PublicPortalSettings() {
               Informações da Empresa
             </CardTitle>
             <CardDescription>
-              Personalize como sua empresa será exibida no portal
+              Personalize como sua empresa será exibida no portal. Alterações não afetam o link público.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -334,6 +334,9 @@ export default function PublicPortalSettings() {
                     </a>
                   </Button>
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  Este link permanece estável mesmo após alterar o nome ou logotipo da empresa
+                </p>
               </div>
 
               <div className="space-y-2">
