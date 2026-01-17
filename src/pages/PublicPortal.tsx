@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { PublicFlight, PublicPortalData, STATUS_LABELS } from '@/types/portal';
+import { PublicTimeline } from '@/components/portal/PublicTimeline';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Plane, Calendar, Lock, AlertCircle, RefreshCw } from 'lucide-react';
+import { Plane, Lock, AlertCircle, RefreshCw } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -29,8 +29,11 @@ export default function PublicPortal() {
   const [portalData, setPortalData] = useState<PublicPortalData | null>(null);
   const [flights, setFlights] = useState<PublicFlight[]>([]);
   const [token, setToken] = useState(tokenFromUrl || '');
-  const [dateFilter, setDateFilter] = useState('');
   const [currentTime, setCurrentTime] = useState(new Date());
+  
+  // Timeline state
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [timeRange, setTimeRange] = useState({ start: 0, end: 24 });
 
   // Update clock every second
   useEffect(() => {
@@ -139,9 +142,39 @@ export default function PublicPortal() {
     }
   };
 
-  const filteredFlights = dateFilter
-    ? flights.filter(f => f.arrival_date === dateFilter || f.departure_date === dateFilter)
-    : flights;
+  // Handle time range change from timeline
+  const handleTimeRangeChange = useCallback((start: number, end: number) => {
+    setTimeRange({ start, end });
+  }, []);
+
+  // Filter flights based on selected date and time range
+  const filteredFlights = flights.filter(flight => {
+    // First filter by date
+    const matchesDate = flight.arrival_date === selectedDate || flight.departure_date === selectedDate;
+    if (!matchesDate) return false;
+
+    // Then filter by time range
+    const arrivalTime = flight.arrival_time?.split(':');
+    const departureTime = flight.departure_time?.split(':');
+    
+    let flightStartHour = 0;
+    let flightEndHour = 24;
+    
+    if (arrivalTime) {
+      flightStartHour = parseInt(arrivalTime[0]) + parseInt(arrivalTime[1]) / 60;
+    }
+    if (departureTime) {
+      flightEndHour = parseInt(departureTime[0]) + parseInt(departureTime[1]) / 60;
+    }
+    
+    // Normalize
+    if (flightEndHour <= flightStartHour) {
+      flightEndHour = flightStartHour + 1;
+    }
+
+    // Check if flight overlaps with visible time range
+    return flightStartHour < timeRange.end && flightEndHour > timeRange.start;
+  });
 
   const formatTime = (time: string) => time?.slice(0, 5) || '--:--';
   const formatDate = (date: string) => {
@@ -253,44 +286,30 @@ export default function PublicPortal() {
             </div>
           </div>
 
-          <div className="flex items-center gap-6">
-            {portalData?.date_filters_enabled && (
-              <div className="flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-cyan-400" />
-                <Input
-                  type="date"
-                  value={dateFilter}
-                  onChange={(e) => setDateFilter(e.target.value)}
-                  className="bg-[#1a1f2e] border-cyan-500/30 text-white w-40"
-                />
-                {dateFilter && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setDateFilter('')}
-                    className="text-cyan-400 hover:text-cyan-300"
-                  >
-                    Limpar
-                  </Button>
-                )}
-              </div>
-            )}
-
-            <div className="text-right">
-              <div className="text-3xl font-mono font-bold text-cyan-400">
-                {format(currentTime, 'HH:mm:ss')}
-              </div>
-              <div className="text-sm text-gray-400">
-                {format(currentTime, 'dd/MM/yyyy', { locale: ptBR })}
-              </div>
+          <div className="text-right">
+            <div className="text-3xl font-mono font-bold text-cyan-400">
+              {format(currentTime, 'HH:mm:ss')}
+            </div>
+            <div className="text-sm text-gray-400">
+              {format(currentTime, 'dd/MM/yyyy', { locale: ptBR })}
             </div>
           </div>
         </div>
       </header>
 
+      {/* Timeline */}
+      <div className="px-4 lg:px-8 pt-4">
+        <PublicTimeline
+          flights={flights}
+          onTimeRangeChange={handleTimeRangeChange}
+          selectedDate={selectedDate}
+          onDateChange={setSelectedDate}
+        />
+      </div>
+
       {/* Flight Board */}
-      <main className="p-4 lg:p-8">
-        <div className="overflow-x-auto">
+      <main className="p-4 lg:p-8 pt-4">
+        <div className="overflow-x-auto bg-[#0d1117] border border-cyan-500/20 rounded-lg">
           <table className="w-full">
             <thead>
               <tr className="bg-[#1a1f2e] text-cyan-400 text-sm uppercase tracking-wider">
@@ -328,10 +347,8 @@ export default function PublicPortal() {
                 <tr>
                   <td colSpan={9} className="px-4 py-12 text-center text-gray-400">
                     <Plane className="w-12 h-12 mx-auto mb-4 opacity-30" />
-                    <p className="text-lg">Nenhum voo encontrado</p>
-                    {dateFilter && (
-                      <p className="text-sm mt-2">Tente remover o filtro de data</p>
-                    )}
+                    <p className="text-lg">Nenhum voo no período selecionado</p>
+                    <p className="text-sm mt-2">Navegue pela linha do tempo para ver outros horários</p>
                   </td>
                 </tr>
               ) : (
