@@ -83,14 +83,14 @@ export function usePortalSettings() {
     try {
       const dbData: any = {
         company_id: companyId,
-        enabled: updates.enabled ?? settings?.enabled ?? false,
-        display_name: updates.displayName ?? settings?.displayName,
-        logo_url: updates.logoUrl ?? settings?.logoUrl,
-        visible_columns: updates.visibleColumns ?? settings?.visibleColumns ?? ['aircraft', 'route', 'status'],
-        date_filters_enabled: updates.dateFiltersEnabled ?? settings?.dateFiltersEnabled ?? true,
-        access_type: updates.accessType ?? settings?.accessType ?? 'public',
-        access_token: updates.accessToken ?? settings?.accessToken,
-        public_slug: updates.publicSlug ?? settings?.publicSlug ?? generateSlug(),
+        enabled: 'enabled' in updates ? updates.enabled : (settings?.enabled ?? false),
+        display_name: 'displayName' in updates ? updates.displayName : settings?.displayName,
+        logo_url: 'logoUrl' in updates ? updates.logoUrl : settings?.logoUrl,
+        visible_columns: 'visibleColumns' in updates ? updates.visibleColumns : (settings?.visibleColumns ?? ['aircraft', 'route', 'status']),
+        date_filters_enabled: 'dateFiltersEnabled' in updates ? updates.dateFiltersEnabled : (settings?.dateFiltersEnabled ?? true),
+        access_type: 'accessType' in updates ? updates.accessType : (settings?.accessType ?? 'public'),
+        access_token: 'accessToken' in updates ? updates.accessToken : settings?.accessToken,
+        public_slug: 'publicSlug' in updates ? updates.publicSlug : (settings?.publicSlug ?? generateSlug()),
       };
 
       if (settings?.id) {
