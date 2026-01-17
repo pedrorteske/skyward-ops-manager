@@ -11,7 +11,8 @@ import {
   X,
   Building2,
   Wallet,
-  Home
+  Home,
+  Globe
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -29,6 +30,7 @@ const navItems = [
   { href: '/clients', label: 'Clientes', icon: Users },
   { href: '/quotations', label: 'Cotações', icon: FileText },
   { href: '/financial', label: 'Financeiro', icon: Wallet },
+  { href: '/public-portal', label: 'Portal Público', icon: Globe },
   { href: '/settings', label: 'Configurações', icon: Settings },
 ];
 

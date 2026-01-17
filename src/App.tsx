@@ -18,6 +18,8 @@ import Clients from "./pages/Clients";
 import Quotations from "./pages/Quotations";
 import Financial from "./pages/Financial";
 import Settings from "./pages/Settings";
+import PublicPortalSettings from "./pages/PublicPortalSettings";
+import PublicPortal from "./pages/PublicPortal";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -38,6 +40,7 @@ const App = () => (
                   <Routes>
                     <Route path="/" element={<Landing />} />
                     <Route path="/auth" element={<Auth />} />
+                    <Route path="/portal/:slug" element={<PublicPortal />} />
                     <Route
                       path="/home"
                       element={
@@ -99,6 +102,14 @@ const App = () => (
                       element={
                         <ProtectedRoute>
                           <Settings />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/public-portal"
+                      element={
+                        <ProtectedRoute>
+                          <PublicPortalSettings />
                         </ProtectedRoute>
                       }
                     />
