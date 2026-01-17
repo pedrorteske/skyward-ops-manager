@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { PublicFlight, PublicPortalData, STATUS_LABELS } from '@/types/portal';
 import { PublicTimeline } from '@/components/portal/PublicTimeline';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Plane, Lock, AlertCircle, RefreshCw } from 'lucide-react';
+import { Plane, Lock, AlertCircle, RefreshCw, Maximize, Minimize } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -24,12 +24,14 @@ export default function PublicPortal() {
   const { slug } = useParams<{ slug: string }>();
   const [searchParams] = useSearchParams();
   const tokenFromUrl = searchParams.get('token');
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const [state, setState] = useState<PortalState>('loading');
   const [portalData, setPortalData] = useState<PublicPortalData | null>(null);
   const [flights, setFlights] = useState<PublicFlight[]>([]);
   const [token, setToken] = useState(tokenFromUrl || '');
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [isFullscreen, setIsFullscreen] = useState(false);
   
   // Timeline state
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
@@ -42,6 +44,24 @@ export default function PublicPortal() {
     }, 1000);
     return () => clearInterval(interval);
   }, []);
+
+  // Fullscreen change listener
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = async () => {
+    if (!document.fullscreenElement) {
+      await containerRef.current?.requestFullscreen();
+    } else {
+      await document.exitFullscreen();
+    }
+  };
 
   // Fetch portal data
   useEffect(() => {
@@ -262,7 +282,7 @@ export default function PublicPortal() {
 
   // Ready - FIDS Display
   return (
-    <div className="min-h-screen bg-[#0a0e14] text-white font-sans">
+    <div ref={containerRef} className="min-h-screen bg-[#0a0e14] text-white font-sans">
       {/* Header */}
       <header className="bg-[#0d1117] border-b border-cyan-500/20 px-4 lg:px-8 py-4">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
@@ -286,13 +306,28 @@ export default function PublicPortal() {
             </div>
           </div>
 
-          <div className="text-right">
-            <div className="text-3xl font-mono font-bold text-cyan-400">
-              {format(currentTime, 'HH:mm:ss')}
+          <div className="flex items-center gap-6">
+            <div className="text-right">
+              <div className="text-3xl font-mono font-bold text-cyan-400">
+                {format(currentTime, 'HH:mm:ss')}
+              </div>
+              <div className="text-sm text-gray-400">
+                {format(currentTime, 'dd/MM/yyyy', { locale: ptBR })}
+              </div>
             </div>
-            <div className="text-sm text-gray-400">
-              {format(currentTime, 'dd/MM/yyyy', { locale: ptBR })}
-            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleFullscreen}
+              className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+              title={isFullscreen ? 'Sair do Fullscreen' : 'Modo Fullscreen'}
+            >
+              {isFullscreen ? (
+                <Minimize className="w-6 h-6" />
+              ) : (
+                <Maximize className="w-6 h-6" />
+              )}
+            </Button>
           </div>
         </div>
       </header>
