@@ -268,6 +268,51 @@ export type Database = {
           },
         ]
       }
+      portal_settings: {
+        Row: {
+          access_token: string | null
+          access_type: string
+          company_id: string
+          created_at: string
+          date_filters_enabled: boolean
+          display_name: string | null
+          enabled: boolean
+          id: string
+          logo_url: string | null
+          public_slug: string | null
+          updated_at: string
+          visible_columns: Json
+        }
+        Insert: {
+          access_token?: string | null
+          access_type?: string
+          company_id: string
+          created_at?: string
+          date_filters_enabled?: boolean
+          display_name?: string | null
+          enabled?: boolean
+          id?: string
+          logo_url?: string | null
+          public_slug?: string | null
+          updated_at?: string
+          visible_columns?: Json
+        }
+        Update: {
+          access_token?: string | null
+          access_type?: string
+          company_id?: string
+          created_at?: string
+          date_filters_enabled?: boolean
+          display_name?: string | null
+          enabled?: boolean
+          id?: string
+          logo_url?: string | null
+          public_slug?: string | null
+          updated_at?: string
+          visible_columns?: Json
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           company_id: string | null
@@ -399,12 +444,43 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_public_flights: {
+        Args: { p_company_id: string }
+        Returns: {
+          aircraft_model: string
+          aircraft_prefix: string
+          arrival_date: string
+          arrival_time: string
+          base: string
+          departure_date: string
+          departure_time: string
+          destination: string
+          id: string
+          origin: string
+          status: Database["public"]["Enums"]["flight_status"]
+        }[]
+      }
+      get_public_portal_by_slug: {
+        Args: { p_slug: string }
+        Returns: {
+          access_type: string
+          company_id: string
+          date_filters_enabled: boolean
+          display_name: string
+          logo_url: string
+          visible_columns: Json
+        }[]
+      }
       get_user_company_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      validate_portal_token: {
+        Args: { p_slug: string; p_token: string }
         Returns: boolean
       }
     }
