@@ -229,106 +229,126 @@ export function PublicTimeline({
         </div>
       </div>
 
-      {/* Timeline */}
-      <div className="relative" ref={timelineRef}>
-        {/* Hours header */}
-        <div className="flex h-10 border-b border-cyan-500/20 relative">
-          {visibleHoursArray.map((hour) => (
-            <div
-              key={hour}
-              className="flex-1 border-r border-cyan-500/10 flex items-center justify-center"
-            >
-              <span className="text-xs text-cyan-400 font-mono font-semibold">
-                {hour.toString().padStart(2, '0')}:00
-              </span>
-            </div>
-          ))}
-          
-          {/* Current time indicator on header */}
-          {currentTimePos !== null && (
-            <div
-              className="absolute top-0 bottom-0 w-0.5 bg-green-500 z-10"
-              style={{ left: `${currentTimePos}%` }}
-            >
-              <div className="absolute -top-0 left-1/2 -translate-x-1/2 px-1.5 py-0.5 bg-green-500 rounded text-[10px] font-mono text-black font-bold">
-                {currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Flight bars visualization */}
-        <div className="relative min-h-[80px]">
-          {/* Hour grid lines */}
-          <div className="absolute inset-0 flex pointer-events-none">
-            {visibleHoursArray.map((hour, idx) => (
-              <div
-                key={hour}
-                className={cn(
-                  "flex-1 border-r",
-                  hour % 3 === 0 ? "border-cyan-500/20" : "border-cyan-500/10"
-                )}
-              />
-            ))}
+      {/* Timeline with fixed aircraft column */}
+      <div className="flex" ref={timelineRef}>
+        {/* Fixed aircraft column */}
+        <div className="w-24 flex-shrink-0 border-r border-cyan-500/30">
+          {/* Header - AERONAVE */}
+          <div className="h-10 border-b border-cyan-500/20 flex items-center justify-center bg-[#1a1f2e]/50">
+            <span className="text-xs text-cyan-400 font-semibold uppercase">Aeronave</span>
           </div>
-
-          {/* Current time indicator */}
-          {currentTimePos !== null && (
-            <div
-              className="absolute top-0 bottom-0 w-0.5 bg-green-500/50 z-10"
-              style={{ left: `${currentTimePos}%` }}
-            />
-          )}
-
-          {/* Flight bars grouped by aircraft */}
+          
+          {/* Aircraft prefixes */}
           {aircraftGroups.size > 0 ? (
-            Array.from(aircraftGroups.entries()).map(([prefix, groupFlights], rowIdx) => (
-              <div
-                key={prefix}
-                className="h-12 border-b border-cyan-500/10 relative flex items-center"
+            Array.from(aircraftGroups.keys()).map((prefix) => (
+              <div 
+                key={prefix} 
+                className="h-12 border-b border-cyan-500/10 flex flex-col items-center justify-center bg-[#0d1117]/50"
               >
-                {/* Aircraft label */}
-                <div className="absolute left-2 z-20 bg-[#0d1117]/90 px-2 py-0.5 rounded">
-                  <span className="text-xs font-mono font-bold text-cyan-300">{prefix}</span>
-                </div>
-                
-                {/* Flight bars */}
-                {groupFlights.map((flight) => {
-                  const position = getFlightPosition(flight);
-                  if (!position) return null;
-                  
-                  return (
-                    <div
-                      key={flight.id}
-                      className={cn(
-                        "absolute h-8 rounded-md border-l-4",
-                        "flex items-center px-2 text-white shadow-md",
-                        flight.status === 'arrived' && "bg-green-500/30 border-green-400",
-                        flight.status === 'departed' && "bg-purple-500/30 border-purple-400",
-                        flight.status === 'scheduled' && "bg-blue-500/30 border-blue-400",
-                        flight.status === 'cancelled' && "bg-red-500/30 border-red-400",
-                        flight.status === 'delayed' && "bg-amber-500/30 border-amber-400"
-                      )}
-                      style={{
-                        left: position.left,
-                        width: position.width,
-                        minWidth: '60px',
-                      }}
-                      title={`${flight.aircraft_prefix}: ${flight.origin} → ${flight.destination}`}
-                    >
-                      <span className="text-[10px] font-mono truncate">
-                        {flight.origin}→{flight.destination}
-                      </span>
-                    </div>
-                  );
-                })}
+                <span className="text-xs font-mono font-bold text-cyan-300">{prefix}</span>
               </div>
             ))
           ) : (
-            <div className="h-20 flex items-center justify-center text-sm text-gray-500">
-              Nenhum voo neste período
-            </div>
+            <div className="h-20" />
           )}
+        </div>
+
+        {/* Timeline area */}
+        <div className="flex-1 relative">
+          {/* Hours header */}
+          <div className="flex h-10 border-b border-cyan-500/20 relative">
+            {visibleHoursArray.map((hour) => (
+              <div
+                key={hour}
+                className="flex-1 border-r border-cyan-500/10 flex items-center justify-center"
+              >
+                <span className="text-xs text-cyan-400 font-mono font-semibold">
+                  {hour.toString().padStart(2, '0')}:00
+                </span>
+              </div>
+            ))}
+            
+            {/* Current time indicator on header */}
+            {currentTimePos !== null && (
+              <div
+                className="absolute top-0 bottom-0 w-0.5 bg-green-500 z-10"
+                style={{ left: `${currentTimePos}%` }}
+              >
+                <div className="absolute -top-0 left-1/2 -translate-x-1/2 px-1.5 py-0.5 bg-green-500 rounded text-[10px] font-mono text-black font-bold">
+                  {currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Flight bars visualization */}
+          <div className="relative min-h-[80px]">
+            {/* Hour grid lines */}
+            <div className="absolute inset-0 flex pointer-events-none">
+              {visibleHoursArray.map((hour) => (
+                <div
+                  key={hour}
+                  className={cn(
+                    "flex-1 border-r",
+                    hour % 3 === 0 ? "border-cyan-500/20" : "border-cyan-500/10"
+                  )}
+                />
+              ))}
+            </div>
+
+            {/* Current time indicator */}
+            {currentTimePos !== null && (
+              <div
+                className="absolute top-0 bottom-0 w-0.5 bg-green-500/50 z-10"
+                style={{ left: `${currentTimePos}%` }}
+              />
+            )}
+
+            {/* Flight bars grouped by aircraft */}
+            {aircraftGroups.size > 0 ? (
+              Array.from(aircraftGroups.entries()).map(([prefix, groupFlights]) => (
+                <div
+                  key={prefix}
+                  className="h-12 border-b border-cyan-500/10 relative flex items-center"
+                >
+                  {/* Flight bars */}
+                  {groupFlights.map((flight) => {
+                    const position = getFlightPosition(flight);
+                    if (!position) return null;
+                    
+                    return (
+                      <div
+                        key={flight.id}
+                        className={cn(
+                          "absolute h-8 rounded-md border-l-4",
+                          "flex items-center px-2 text-white shadow-md",
+                          flight.status === 'arrived' && "bg-green-500/30 border-green-400",
+                          flight.status === 'departed' && "bg-purple-500/30 border-purple-400",
+                          flight.status === 'scheduled' && "bg-blue-500/30 border-blue-400",
+                          flight.status === 'cancelled' && "bg-red-500/30 border-red-400",
+                          flight.status === 'delayed' && "bg-amber-500/30 border-amber-400"
+                        )}
+                        style={{
+                          left: position.left,
+                          width: position.width,
+                          minWidth: '60px',
+                        }}
+                        title={`${flight.aircraft_prefix}: ${flight.origin} → ${flight.destination}`}
+                      >
+                        <span className="text-[10px] font-mono truncate">
+                          {flight.origin}→{flight.destination}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              ))
+            ) : (
+              <div className="h-20 flex items-center justify-center text-sm text-gray-500">
+                Nenhum voo neste período
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
