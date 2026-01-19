@@ -38,7 +38,7 @@ export default function Landing() {
       <main>
         <Hero />
         <Features />
-        <Pricing />
+        {/* <Pricing /> */}
       </main>
       <Footer />
     </div>
