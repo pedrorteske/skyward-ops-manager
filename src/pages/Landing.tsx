@@ -1,11 +1,11 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { LandingHeader } from '@/components/landing/LandingHeader';
-import { Hero } from '@/components/landing/Hero';
-import { Features } from '@/components/landing/Features';
-import { Pricing } from '@/components/landing/Pricing';
-import { Footer } from '@/components/landing/Footer';
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { LandingHeader } from "@/components/landing/LandingHeader";
+import { Hero } from "@/components/landing/Hero";
+import { Features } from "@/components/landing/Features";
+import { Pricing } from "@/components/landing/Pricing";
+import { Footer } from "@/components/landing/Footer";
 
 export default function Landing() {
   const { user, isLoading } = useAuth();
@@ -14,7 +14,7 @@ export default function Landing() {
   // Redirect authenticated users to home
   useEffect(() => {
     if (!isLoading && user) {
-      navigate('/home', { replace: true });
+      navigate("/home", { replace: true });
     }
   }, [user, isLoading, navigate]);
 
