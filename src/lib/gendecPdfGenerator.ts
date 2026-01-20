@@ -73,44 +73,44 @@ export const generateGenDecPdf = async (gendec: GeneralDeclaration) => {
   drawLine(currentY);
   currentY += 5;
 
-  // === OPERATOR/AIRCRAFT INFO ===
+  // === OPERATOR/AIRCRAFT INFO (ICAO Standard 3-line format) ===
   doc.setFontSize(9);
   doc.setTextColor(0, 0, 0);
+  
+  // LINHA 1 - Owner or Operator
   doc.setFont('helvetica', 'bold');
-  doc.text('Operator:', margin, currentY);
+  doc.text('Owner or Operator:', margin, currentY);
   doc.setFont('helvetica', 'normal');
-  doc.text(gendec.operator, margin + 20, currentY);
-
-  doc.setFont('helvetica', 'bold');
-  doc.text('Marks of Registration:', pageWidth / 2 - 20, currentY);
-  doc.setFont('helvetica', 'normal');
-  doc.text(gendec.marksOfRegistration, pageWidth / 2 + 25, currentY);
-
-  currentY += 5;
-  doc.setFont('helvetica', 'bold');
-  doc.text('Aircraft Type:', margin, currentY);
-  doc.setFont('helvetica', 'normal');
-  doc.text(gendec.aircraftType, margin + 25, currentY);
-
-  doc.setFont('helvetica', 'bold');
-  doc.text('GenDec No.:', pageWidth / 2 - 20, currentY);
-  doc.setFont('helvetica', 'normal');
-  doc.text(gendec.number, pageWidth / 2 + 15, currentY);
-
+  doc.text(gendec.operator, margin + 35, currentY);
   currentY += 6;
-  drawLine(currentY);
-  currentY += 5;
 
-  // === FLIGHT INFO ===
+  // LINHA 2 - Marks of Nationality and Registration | Flight No. | Date
   doc.setFont('helvetica', 'bold');
-  doc.text('Departure:', margin, currentY);
+  doc.text('Marks of Nationality and Registration:', margin, currentY);
   doc.setFont('helvetica', 'normal');
-  doc.text(`${gendec.airportDeparture} - ${format(new Date(gendec.dateDeparture), 'dd/MM/yyyy')}`, margin + 22, currentY);
+  doc.text(gendec.marksOfRegistration, margin + 70, currentY);
 
   doc.setFont('helvetica', 'bold');
-  doc.text('Arrival:', pageWidth / 2 - 20, currentY);
+  doc.text('Flight No.:', pageWidth / 2 + 10, currentY);
   doc.setFont('helvetica', 'normal');
-  doc.text(`${gendec.airportArrival} - ${format(new Date(gendec.dateArrival), 'dd/MM/yyyy')}`, pageWidth / 2, currentY);
+  doc.text(gendec.number, pageWidth / 2 + 30, currentY);
+
+  doc.setFont('helvetica', 'bold');
+  doc.text('Date:', pageWidth - margin - 30, currentY);
+  doc.setFont('helvetica', 'normal');
+  doc.text(format(new Date(gendec.dateDeparture), 'dd/MM/yyyy'), pageWidth - margin - 15, currentY);
+  currentY += 6;
+
+  // LINHA 3 - Departure from | Arrival at
+  doc.setFont('helvetica', 'bold');
+  doc.text('Departure from:', margin, currentY);
+  doc.setFont('helvetica', 'normal');
+  doc.text(gendec.airportDeparture, margin + 30, currentY);
+
+  doc.setFont('helvetica', 'bold');
+  doc.text('Arrival at:', pageWidth / 2, currentY);
+  doc.setFont('helvetica', 'normal');
+  doc.text(gendec.airportArrival, pageWidth / 2 + 22, currentY);
 
   currentY += 6;
   drawLine(currentY);
@@ -218,22 +218,32 @@ export const generateGenDecPdf = async (gendec: GeneralDeclaration) => {
   doc.setTextColor(0, 0, 0);
   doc.setFontSize(7);
   
+  // Texto 1 - Persons with illness (texto completo ICAO)
+  const healthText1 = 'Persons on board known to be suffering from illness other than airsickness or the effects of accidents: as well as those cases of illness disembarked during the flight';
+  const splitHealth1 = doc.splitTextToSize(healthText1, contentWidth - 10);
   doc.setFont('helvetica', 'bold');
-  doc.text('Persons with illness:', margin, currentY);
+  doc.text(splitHealth1, margin, currentY);
+  currentY += splitHealth1.length * 3 + 2;
   doc.setFont('helvetica', 'normal');
-  doc.text(gendec.healthDeclaration.personsIllness || 'NIL', margin + 35, currentY);
+  doc.text(gendec.healthDeclaration.personsIllness || 'NIL', margin, currentY);
   currentY += 5;
 
+  // Texto 2 - Other conditions (texto completo ICAO)
   doc.setFont('helvetica', 'bold');
-  doc.text('Other conditions:', margin, currentY);
+  doc.text('Any other condition on board which may lead to the spread of disease:', margin, currentY);
+  currentY += 4;
   doc.setFont('helvetica', 'normal');
-  doc.text(gendec.healthDeclaration.otherConditions || 'NIL', margin + 30, currentY);
+  doc.text(gendec.healthDeclaration.otherConditions || 'NIL', margin, currentY);
   currentY += 5;
 
+  // Texto 3 - Disinsecting details (texto completo ICAO)
+  const healthText3 = 'Details of each disinsecting or sanitary treatment (place, date, time, method) during the flight. If no disinsecting has been carried out during the flight give details of most recent disinsecting:';
+  const splitHealth3 = doc.splitTextToSize(healthText3, contentWidth - 10);
   doc.setFont('helvetica', 'bold');
-  doc.text('Disinsecting details:', margin, currentY);
+  doc.text(splitHealth3, margin, currentY);
+  currentY += splitHealth3.length * 3 + 2;
   doc.setFont('helvetica', 'normal');
-  doc.text(gendec.healthDeclaration.disinsectingDetails || 'NIL', margin + 35, currentY);
+  doc.text(gendec.healthDeclaration.disinsectingDetails || 'NIL', margin, currentY);
   currentY += 7;
 
   // Signature line for health
