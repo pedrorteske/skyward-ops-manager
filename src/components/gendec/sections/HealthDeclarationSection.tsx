@@ -31,8 +31,8 @@ export const HealthDeclarationSection = ({ healthDeclaration, onChange }: Health
       {/* Persons with illness */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="personsIllness" className="text-sm font-medium">
-            Persons on board known to be suffering from illness other than airsickness or the effects of accidents, as well as those cases of illness disembarked during the flight
+        <Label htmlFor="personsIllness" className="text-sm font-medium">
+            Persons on board known to be suffering from illness other than airsickness or the effects of accidents: as well as those cases of illness disembarked during the flight
           </Label>
           <Button
             type="button"
@@ -56,8 +56,8 @@ export const HealthDeclarationSection = ({ healthDeclaration, onChange }: Health
       {/* Other conditions */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="otherConditions" className="text-sm font-medium">
-            Any other condition on board which may lead to the spread of disease
+        <Label htmlFor="otherConditions" className="text-sm font-medium">
+            Any other condition on board which may lead to the spread of disease:
           </Label>
           <Button
             type="button"
@@ -81,8 +81,8 @@ export const HealthDeclarationSection = ({ healthDeclaration, onChange }: Health
       {/* Disinsecting details */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="disinsectingDetails" className="text-sm font-medium">
-            Details of each disinsecting or sanitary treatment (place, date, time, method) during the flight. If no disinsecting has been carried out during the flight give details of most recent
+        <Label htmlFor="disinsectingDetails" className="text-sm font-medium">
+            Details of each disinsecting or sanitary treatment (place, date, time, method) during the flight. If no disinsecting has been carried out during the flight give details of most recent disinsecting:
           </Label>
           <Button
             type="button"
