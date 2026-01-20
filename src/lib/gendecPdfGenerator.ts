@@ -93,7 +93,7 @@ export const generateGenDecPdf = async (gendec: GeneralDeclaration) => {
   doc.setFont('helvetica', 'bold');
   doc.text('Flight No.:', pageWidth / 2 + 10, currentY);
   doc.setFont('helvetica', 'normal');
-  doc.text(gendec.number, pageWidth / 2 + 30, currentY);
+  doc.text(gendec.flightNumber || '', pageWidth / 2 + 30, currentY);
 
   doc.setFont('helvetica', 'bold');
   doc.text('Date:', pageWidth - margin - 30, currentY);

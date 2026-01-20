@@ -45,6 +45,7 @@ export interface GeneralDeclaration {
   dateDeparture: string;
   airportArrival: string;
   dateArrival: string;
+  flightNumber?: string;
   
   // Crew & Passengers (dynamic arrays)
   crewMembers: CrewMember[];

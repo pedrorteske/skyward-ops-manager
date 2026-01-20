@@ -32,6 +32,7 @@ const mapDbToGenDec = (row: any): GeneralDeclaration => ({
   dateDeparture: row.date_departure,
   airportArrival: row.airport_arrival,
   dateArrival: row.date_arrival,
+  flightNumber: row.flight_number,
   crewMembers: (row.crew_members || []) as CrewMember[],
   passengers: (row.passengers || []) as Passenger[],
   healthDeclaration: {
@@ -61,6 +62,7 @@ const mapGenDecToDb = (gendec: Partial<GeneralDeclaration>) => {
   if (gendec.dateDeparture !== undefined) result.date_departure = gendec.dateDeparture;
   if (gendec.airportArrival !== undefined) result.airport_arrival = gendec.airportArrival;
   if (gendec.dateArrival !== undefined) result.date_arrival = gendec.dateArrival;
+  if (gendec.flightNumber !== undefined) result.flight_number = gendec.flightNumber;
   if (gendec.crewMembers !== undefined) result.crew_members = gendec.crewMembers;
   if (gendec.passengers !== undefined) result.passengers = gendec.passengers;
   if (gendec.healthDeclaration !== undefined) {
