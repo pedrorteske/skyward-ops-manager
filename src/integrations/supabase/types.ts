@@ -280,6 +280,7 @@ export type Database = {
           date_departure: string
           declaration_type: string
           flight_id: string | null
+          flight_number: string | null
           health_disinsecting: string | null
           health_other_conditions: string | null
           health_persons_illness: string | null
@@ -305,6 +306,7 @@ export type Database = {
           date_departure: string
           declaration_type?: string
           flight_id?: string | null
+          flight_number?: string | null
           health_disinsecting?: string | null
           health_other_conditions?: string | null
           health_persons_illness?: string | null
@@ -330,6 +332,7 @@ export type Database = {
           date_departure?: string
           declaration_type?: string
           flight_id?: string | null
+          flight_number?: string | null
           health_disinsecting?: string | null
           health_other_conditions?: string | null
           health_persons_illness?: string | null

@@ -46,6 +46,7 @@ export const GenDecFormDialog = ({ open, onOpenChange, gendec, onSave }: GenDecF
   const [dateDeparture, setDateDeparture] = useState(gendec?.dateDeparture || '');
   const [airportArrival, setAirportArrival] = useState(gendec?.airportArrival || '');
   const [dateArrival, setDateArrival] = useState(gendec?.dateArrival || '');
+  const [flightNumber, setFlightNumber] = useState(gendec?.flightNumber || '');
   const [crewMembers, setCrewMembers] = useState<CrewMember[]>(gendec?.crewMembers || []);
   const [passengers, setPassengers] = useState<Passenger[]>(gendec?.passengers || []);
   const [healthDeclaration, setHealthDeclaration] = useState<HealthDeclaration>(gendec?.healthDeclaration || defaultHealthDeclaration);
@@ -100,6 +101,7 @@ export const GenDecFormDialog = ({ open, onOpenChange, gendec, onSave }: GenDecF
         dateDeparture,
         airportArrival,
         dateArrival,
+        flightNumber: flightNumber || undefined,
         crewMembers,
         passengers,
         healthDeclaration,
@@ -220,7 +222,16 @@ export const GenDecFormDialog = ({ open, onOpenChange, gendec, onSave }: GenDecF
                 <MapPin className="h-5 w-5" />
                 Flight Information
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2 md:col-span-3">
+                  <Label htmlFor="flightNumber">Flight Number</Label>
+                  <Input
+                    id="flightNumber"
+                    value={flightNumber}
+                    onChange={(e) => setFlightNumber(e.target.value)}
+                    placeholder="e.g., GLO1234, AD4521"
+                  />
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="airportDeparture">Airport of Departure *</Label>
                   <Input
