@@ -268,6 +268,92 @@ export type Database = {
           },
         ]
       }
+      general_declarations: {
+        Row: {
+          aircraft_type: string
+          airport_arrival: string
+          airport_departure: string
+          company_id: string
+          created_at: string
+          crew_members: Json
+          date_arrival: string
+          date_departure: string
+          declaration_type: string
+          flight_id: string | null
+          health_disinsecting: string | null
+          health_other_conditions: string | null
+          health_persons_illness: string | null
+          id: string
+          logo_url: string | null
+          marks_of_registration: string
+          number: string
+          observations: string | null
+          operator: string
+          passengers: Json
+          primary_color: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          aircraft_type: string
+          airport_arrival: string
+          airport_departure: string
+          company_id: string
+          created_at?: string
+          crew_members?: Json
+          date_arrival: string
+          date_departure: string
+          declaration_type?: string
+          flight_id?: string | null
+          health_disinsecting?: string | null
+          health_other_conditions?: string | null
+          health_persons_illness?: string | null
+          id?: string
+          logo_url?: string | null
+          marks_of_registration: string
+          number: string
+          observations?: string | null
+          operator: string
+          passengers?: Json
+          primary_color?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          aircraft_type?: string
+          airport_arrival?: string
+          airport_departure?: string
+          company_id?: string
+          created_at?: string
+          crew_members?: Json
+          date_arrival?: string
+          date_departure?: string
+          declaration_type?: string
+          flight_id?: string | null
+          health_disinsecting?: string | null
+          health_other_conditions?: string | null
+          health_persons_illness?: string | null
+          id?: string
+          logo_url?: string | null
+          marks_of_registration?: string
+          number?: string
+          observations?: string | null
+          operator?: string
+          passengers?: Json
+          primary_color?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "general_declarations_flight_id_fkey"
+            columns: ["flight_id"]
+            isOneToOne: false
+            referencedRelation: "flights"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       portal_settings: {
         Row: {
           access_token: string | null

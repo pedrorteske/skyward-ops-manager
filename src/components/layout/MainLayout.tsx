@@ -30,6 +30,7 @@ const navItems = [
   { href: '/clients', label: 'Clientes', icon: Users },
   { href: '/quotations', label: 'Cotações', icon: FileText },
   { href: '/financial', label: 'Financeiro', icon: Wallet },
+  { href: '/gendec', label: 'General Declaration', icon: FileText },
   { href: '/public-portal', label: 'Portal Público', icon: Globe },
   { href: '/settings', label: 'Configurações', icon: Settings },
 ];
