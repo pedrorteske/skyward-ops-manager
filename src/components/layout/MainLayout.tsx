@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -13,13 +13,10 @@ import {
   Settings, 
   Menu,
   LogOut,
-  Globe,
-  Clock
+  Globe
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 
 interface NavItem {
   href: string;
@@ -47,15 +44,6 @@ export function MainLayout({ children }: MainLayoutProps) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [currentTime, setCurrentTime] = useState(new Date());
-
-  // Update time every second
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   const handleLogout = async () => {
     await logout();
@@ -85,10 +73,6 @@ export function MainLayout({ children }: MainLayoutProps) {
       })}
     </>
   );
-
-  // Format times
-  const localTime = format(currentTime, 'HH:mm:ss', { locale: ptBR });
-  const utcTime = format(new Date(currentTime.toUTCString().slice(0, -4)), 'HH:mm:ss');
 
   return (
     <div className="min-h-screen bg-background">
@@ -170,22 +154,6 @@ export function MainLayout({ children }: MainLayoutProps) {
           {children}
         </div>
       </main>
-
-      {/* Clock Display - Fixed on top right */}
-      <div className="fixed top-4 right-4 z-50 hidden lg:flex items-center gap-4 bg-card/95 backdrop-blur border rounded-lg px-4 py-2 shadow-sm">
-        <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4 text-primary" />
-          <div className="text-right">
-            <p className="text-xs text-muted-foreground">Local</p>
-            <p className="font-mono text-sm font-semibold">{localTime}</p>
-          </div>
-        </div>
-        <div className="w-px h-8 bg-border" />
-        <div className="text-right">
-          <p className="text-xs text-muted-foreground">UTC</p>
-          <p className="font-mono text-sm font-semibold">{utcTime}</p>
-        </div>
-      </div>
     </div>
   );
 }

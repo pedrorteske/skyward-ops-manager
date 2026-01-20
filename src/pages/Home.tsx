@@ -1,11 +1,11 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { format, isToday, isTomorrow, parseISO, startOfDay, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Plane, Clock, Plus, Users } from 'lucide-react';
+import { Plane, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { CircularOutlineKPI } from '@/components/dashboard/CircularOutlineKPI';
-import { UpcomingFlightsCard } from '@/components/home/UpcomingFlightsCard';
+import { FlightPortalList } from '@/components/flights/FlightPortalList';
 import { ResourceTimeline } from '@/components/dashboard/ResourceTimeline';
 import { Button } from '@/components/ui/button';
 import { useFlights } from '@/contexts/FlightsContext';
@@ -14,6 +14,15 @@ import { useAuth } from '@/hooks/useAuth';
 export default function Home() {
   const { user } = useAuth();
   const { flights } = useFlights();
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Update time every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Calculate KPIs
   const kpis = useMemo(() => {
@@ -39,6 +48,18 @@ export default function Home() {
     };
   }, [flights]);
 
+  // Filter and sort upcoming flights
+  const upcomingFlights = useMemo(() => {
+    return flights
+      .filter((f) => f.status === 'scheduled' || f.status === 'delayed')
+      .sort((a, b) => {
+        const dateA = new Date(`${a.arrivalDate}T${a.arrivalTime}`);
+        const dateB = new Date(`${b.arrivalDate}T${b.arrivalTime}`);
+        return dateA.getTime() - dateB.getTime();
+      })
+      .slice(0, 10);
+  }, [flights]);
+
   // Format greeting based on time
   const greeting = useMemo(() => {
     const hour = new Date().getHours();
@@ -48,15 +69,35 @@ export default function Home() {
   }, []);
 
   const todayFormatted = format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR });
+  const localTime = format(currentTime, 'HH:mm:ss', { locale: ptBR });
+  const utcTime = format(new Date(currentTime.toUTCString().slice(0, -4)), 'HH:mm:ss');
 
   return (
     <MainLayout>
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-foreground">
-          {greeting}, {user?.name?.split(' ')[0] || 'Administrador'}!
-        </h1>
-        <p className="text-muted-foreground capitalize">{todayFormatted}</p>
+      {/* Header with Clock */}
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">
+            {greeting}, {user?.name?.split(' ')[0] || 'Administrador'}!
+          </h1>
+          <p className="text-muted-foreground capitalize">{todayFormatted}</p>
+        </div>
+        
+        {/* Clock Display */}
+        <div className="flex items-center gap-4 bg-card border rounded-lg px-4 py-2 shadow-sm">
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-primary" />
+            <div className="text-right">
+              <p className="text-xs text-muted-foreground">Local</p>
+              <p className="font-mono text-sm font-semibold">{localTime}</p>
+            </div>
+          </div>
+          <div className="w-px h-8 bg-border" />
+          <div className="text-right">
+            <p className="text-xs text-muted-foreground">UTC</p>
+            <p className="font-mono text-sm font-semibold">{utcTime}</p>
+          </div>
+        </div>
       </div>
 
       {/* Flight Timeline */}
@@ -84,7 +125,15 @@ export default function Home() {
 
       {/* Upcoming Flights - Full Width */}
       <div>
-        <UpcomingFlightsCard flights={flights} />
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-foreground">Próximos Voos</h2>
+          <Button variant="ghost" size="sm" asChild>
+            <Link to="/flights" className="text-primary hover:text-primary/80">
+              Ver todos →
+            </Link>
+          </Button>
+        </div>
+        <FlightPortalList flights={upcomingFlights} />
       </div>
     </MainLayout>
   );
