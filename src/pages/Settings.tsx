@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,6 +12,32 @@ import { Building2, User, Bell, Shield, Palette } from 'lucide-react';
 
 export default function Settings() {
   const { user } = useAuth();
+  const [isDarkMode, setIsDarkMode] = useState(true);
+
+  // Apply dark mode on mount and when toggled
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
+
+  // Initialize dark mode from localStorage or default to true
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+      setIsDarkMode(false);
+    } else {
+      setIsDarkMode(true);
+      document.documentElement.classList.add('dark');
+    }
+  }, []);
+
+  const handleDarkModeToggle = (checked: boolean) => {
+    setIsDarkMode(checked);
+    localStorage.setItem('theme', checked ? 'dark' : 'light');
+  };
 
   return (
     <MainLayout>
@@ -122,7 +149,7 @@ export default function Settings() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium">Notificações por E-mail</p>
-                <p className="text-sm text-muted-foreground">Receba atualizações sobre voos e cotações</p>
+                <p className="text-sm text-muted-foreground">Receba atualizações sobre voos</p>
               </div>
               <Switch defaultChecked />
             </div>
@@ -131,14 +158,6 @@ export default function Settings() {
               <div>
                 <p className="font-medium">Alertas de Chegada</p>
                 <p className="text-sm text-muted-foreground">Seja notificado quando um voo estiver chegando</p>
-              </div>
-              <Switch defaultChecked />
-            </div>
-            <Separator />
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Atualizações de Cotações</p>
-                <p className="text-sm text-muted-foreground">Notificações quando cotações são aprovadas/recusadas</p>
               </div>
               <Switch defaultChecked />
             </div>
@@ -162,7 +181,10 @@ export default function Settings() {
                 <p className="font-medium">Modo Escuro</p>
                 <p className="text-sm text-muted-foreground">Ative o tema escuro para reduzir cansaço visual</p>
               </div>
-              <Switch />
+              <Switch 
+                checked={isDarkMode}
+                onCheckedChange={handleDarkModeToggle}
+              />
             </div>
           </CardContent>
         </Card>

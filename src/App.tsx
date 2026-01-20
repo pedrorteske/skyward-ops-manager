@@ -6,7 +6,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { FlightsProvider } from "@/contexts/FlightsContext";
 import { ClientsProvider } from "@/contexts/ClientsContext";
-import { QuotationsProvider } from "@/contexts/QuotationsContext";
 import { FinancialProvider } from "@/contexts/FinancialContext";
 import { GenDecProvider } from "@/contexts/GenDecContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
@@ -16,7 +15,6 @@ import Dashboard from "./pages/Dashboard";
 import ChartDetail from "./pages/ChartDetail";
 import Flights from "./pages/Flights";
 import Clients from "./pages/Clients";
-import Quotations from "./pages/Quotations";
 import Financial from "./pages/Financial";
 import GenDec from "./pages/GenDec";
 import Settings from "./pages/Settings";
@@ -34,102 +32,92 @@ const App = () => (
       <AuthProvider>
         <FlightsProvider>
           <ClientsProvider>
-            <QuotationsProvider>
-              <FinancialProvider>
-                <GenDecProvider>
-                  <TooltipProvider>
-                    <Toaster />
-                    <Sonner />
-                    <Routes>
-                      <Route path="/" element={<Landing />} />
-                      <Route path="/auth" element={<Auth />} />
-                      <Route path="/portal/:slug" element={<PublicPortal />} />
-                      <Route
-                        path="/home"
-                        element={
-                          <ProtectedRoute>
-                            <Home />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/dashboard"
-                        element={
-                          <ProtectedRoute>
-                            <Dashboard />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/dashboard/chart/:chartType"
-                        element={
-                          <ProtectedRoute>
-                            <ChartDetail />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/flights"
-                        element={
-                          <ProtectedRoute>
-                            <Flights />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/clients"
-                        element={
-                          <ProtectedRoute>
-                            <Clients />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/quotations"
-                        element={
-                          <ProtectedRoute>
-                            <Quotations />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/financial"
-                        element={
-                          <ProtectedRoute>
-                            <Financial />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/gendec"
-                        element={
-                          <ProtectedRoute>
-                            <GenDec />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/settings"
-                        element={
-                          <ProtectedRoute>
-                            <Settings />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/public-portal"
-                        element={
-                          <ProtectedRoute>
-                            <PublicPortalSettings />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </TooltipProvider>
-                </GenDecProvider>
-              </FinancialProvider>
-            </QuotationsProvider>
+            <FinancialProvider>
+              <GenDecProvider>
+                <TooltipProvider>
+                  <Toaster />
+                  <Sonner />
+                  <Routes>
+                    <Route path="/" element={<Landing />} />
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/portal/:slug" element={<PublicPortal />} />
+                    <Route
+                      path="/home"
+                      element={
+                        <ProtectedRoute>
+                          <Home />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/dashboard"
+                      element={
+                        <ProtectedRoute>
+                          <Dashboard />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/dashboard/chart/:chartType"
+                      element={
+                        <ProtectedRoute>
+                          <ChartDetail />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/flights"
+                      element={
+                        <ProtectedRoute>
+                          <Flights />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/clients"
+                      element={
+                        <ProtectedRoute>
+                          <Clients />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/financial"
+                      element={
+                        <ProtectedRoute>
+                          <Financial />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/gendec"
+                      element={
+                        <ProtectedRoute>
+                          <GenDec />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/settings"
+                      element={
+                        <ProtectedRoute>
+                          <Settings />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/public-portal"
+                      element={
+                        <ProtectedRoute>
+                          <PublicPortalSettings />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </TooltipProvider>
+              </GenDecProvider>
+            </FinancialProvider>
           </ClientsProvider>
         </FlightsProvider>
       </AuthProvider>

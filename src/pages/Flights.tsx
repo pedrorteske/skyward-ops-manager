@@ -4,7 +4,6 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { FlightPortalList } from '@/components/flights/FlightPortalList';
 import { FlightCalendar } from '@/components/flights/FlightCalendar';
 import { FlightStatusBadge } from '@/components/flights/FlightStatusBadge';
-import { ResourceTimeline } from '@/components/dashboard/ResourceTimeline';
 import { useFlights } from '@/contexts/FlightsContext';
 import { Flight, FlightType, FlightStatus, flightTypeLabels, flightStatusLabels } from '@/types/aviation';
 import { Button } from '@/components/ui/button';
@@ -14,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Search, Calendar, List, Plane, ArrowRight, Clock, ArrowUpDown, Pencil, Trash2, LayoutGrid } from 'lucide-react';
+import { Plus, Search, Calendar, List, Plane, ArrowRight, Clock, ArrowUpDown, Pencil, Trash2 } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
 
@@ -345,9 +344,9 @@ export default function Flights() {
         </Dialog>
       </PageHeader>
 
-      {/* Tabs Navigation */}
+      {/* Tabs Navigation - Removed Timeline tab */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full max-w-lg grid-cols-3">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="portal" className="flex items-center gap-2">
             <List className="w-4 h-4" />
             Portal de Voos
@@ -355,10 +354,6 @@ export default function Flights() {
           <TabsTrigger value="calendar" className="flex items-center gap-2">
             <Calendar className="w-4 h-4" />
             Calendário
-          </TabsTrigger>
-          <TabsTrigger value="timeline" className="flex items-center gap-2">
-            <LayoutGrid className="w-4 h-4" />
-            Linha do Tempo
           </TabsTrigger>
         </TabsList>
 
@@ -427,14 +422,6 @@ export default function Flights() {
             onFlightClick={setSelectedFlight}
           />
         </TabsContent>
-
-        {/* Linha do Tempo Tab */}
-        <TabsContent value="timeline">
-          <ResourceTimeline 
-            flights={filteredFlights}
-            onFlightClick={setSelectedFlight}
-          />
-        </TabsContent>
       </Tabs>
 
       {/* Flight Detail Modal */}
@@ -457,35 +444,36 @@ export default function Flights() {
                   <p className="text-sm text-muted-foreground">Aeronave</p>
                   <p className="font-medium">{selectedFlight.aircraftModel}</p>
                 </div>
-
-                <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                
+                <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-lg">
                   <div className="text-center">
-                    <p className="text-icao text-xl">{selectedFlight.origin}</p>
                     <p className="text-xs text-muted-foreground">Origem</p>
+                    <p className="font-mono text-xl font-bold">{selectedFlight.origin}</p>
                   </div>
-                  <ArrowRight className="w-6 h-6 text-primary" />
+                  <ArrowRight className="w-6 h-6 text-muted-foreground" />
                   <div className="text-center">
-                    <p className="text-icao text-xl">{selectedFlight.destination}</p>
                     <p className="text-xs text-muted-foreground">Destino</p>
+                    <p className="font-mono text-xl font-bold">{selectedFlight.destination}</p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-3 border rounded-lg">
-                    <div className="flex items-center gap-2 text-success mb-1">
-                      <Clock className="w-4 h-4" />
-                      <span className="text-xs font-medium">Chegada</span>
-                    </div>
-                    <p className="text-sm">{selectedFlight.arrivalDate}</p>
-                    <p className="text-lg font-bold">{selectedFlight.arrivalTime}</p>
+                {selectedFlight.base && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Base de Atendimento</p>
+                    <p className="font-mono font-medium">{selectedFlight.base}</p>
                   </div>
-                  <div className="p-3 border rounded-lg">
-                    <div className="flex items-center gap-2 text-info mb-1">
-                      <Clock className="w-4 h-4" />
-                      <span className="text-xs font-medium">Saída</span>
-                    </div>
-                    <p className="text-sm">{selectedFlight.departureDate}</p>
-                    <p className="text-lg font-bold">{selectedFlight.departureTime}</p>
+                )}
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Chegada</p>
+                    <p className="font-medium">{formatFlightDate(selectedFlight.arrivalDate)}</p>
+                    <p className="font-mono">{selectedFlight.arrivalTime}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Saída</p>
+                    <p className="font-medium">{formatFlightDate(selectedFlight.departureDate)}</p>
+                    <p className="font-mono">{selectedFlight.departureTime}</p>
                   </div>
                 </div>
 
@@ -501,7 +489,7 @@ export default function Flights() {
                   </div>
                 )}
 
-                {/* Action Buttons */}
+                {/* Edit/Delete Actions */}
                 <div className="flex gap-2 pt-4 border-t">
                   <Button onClick={handleEditClick} className="flex-1 gap-2">
                     <Pencil className="w-4 h-4" />
@@ -526,35 +514,31 @@ export default function Flights() {
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   <Pencil className="w-5 h-5 text-primary" />
-                  Editar Voo
+                  Editar Voo - {selectedFlight.aircraftPrefix}
                 </DialogTitle>
               </DialogHeader>
-
+              
               <div className="grid gap-4 py-4">
-                {/* Aircraft Info */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="edit-prefix">Prefixo da Aeronave *</Label>
+                    <Label>Prefixo</Label>
                     <Input
-                      id="edit-prefix"
                       value={editFormData.aircraftPrefix}
                       onChange={(e) => setEditFormData({...editFormData, aircraftPrefix: e.target.value.toUpperCase()})}
                       className="font-mono uppercase"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="edit-model">Modelo da Aeronave *</Label>
+                    <Label>Modelo</Label>
                     <Input
-                      id="edit-model"
                       value={editFormData.aircraftModel}
                       onChange={(e) => setEditFormData({...editFormData, aircraftModel: e.target.value})}
                     />
                   </div>
                 </div>
 
-                {/* Flight Type */}
                 <div className="space-y-2">
-                  <Label>Tipo de Voo *</Label>
+                  <Label>Tipo de Voo</Label>
                   <Select 
                     value={editFormData.flightType} 
                     onValueChange={(v) => setEditFormData({...editFormData, flightType: v as FlightType})}
@@ -564,20 +548,16 @@ export default function Flights() {
                     </SelectTrigger>
                     <SelectContent>
                       {Object.entries(flightTypeLabels).map(([key, label]) => (
-                        <SelectItem key={key} value={key}>
-                          ({key}) {label}
-                        </SelectItem>
+                        <SelectItem key={key} value={key}>({key}) {label}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
 
-                {/* Route */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="edit-origin">Origem (ICAO) *</Label>
+                    <Label>Origem</Label>
                     <Input
-                      id="edit-origin"
                       maxLength={4}
                       value={editFormData.origin}
                       onChange={(e) => setEditFormData({...editFormData, origin: e.target.value.toUpperCase()})}
@@ -585,9 +565,8 @@ export default function Flights() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="edit-destination">Destino (ICAO) *</Label>
+                    <Label>Destino</Label>
                     <Input
-                      id="edit-destination"
                       maxLength={4}
                       value={editFormData.destination}
                       onChange={(e) => setEditFormData({...editFormData, destination: e.target.value.toUpperCase()})}
@@ -596,11 +575,9 @@ export default function Flights() {
                   </div>
                 </div>
 
-                {/* Base */}
                 <div className="space-y-2">
-                  <Label htmlFor="edit-base">Base de Atendimento (ICAO)</Label>
+                  <Label>Base de Atendimento</Label>
                   <Input
-                    id="edit-base"
                     maxLength={4}
                     value={editFormData.base}
                     onChange={(e) => setEditFormData({...editFormData, base: e.target.value.toUpperCase()})}
@@ -608,21 +585,18 @@ export default function Flights() {
                   />
                 </div>
 
-                {/* Arrival */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="edit-arrivalDate">Data de Chegada *</Label>
+                    <Label>Data de Chegada</Label>
                     <Input
-                      id="edit-arrivalDate"
                       type="date"
                       value={editFormData.arrivalDate}
                       onChange={(e) => setEditFormData({...editFormData, arrivalDate: e.target.value})}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="edit-arrivalTime">Hora de Chegada *</Label>
+                    <Label>Hora de Chegada</Label>
                     <Input
-                      id="edit-arrivalTime"
                       type="time"
                       value={editFormData.arrivalTime}
                       onChange={(e) => setEditFormData({...editFormData, arrivalTime: e.target.value})}
@@ -630,21 +604,18 @@ export default function Flights() {
                   </div>
                 </div>
 
-                {/* Departure */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="edit-departureDate">Data de Saída *</Label>
+                    <Label>Data de Saída</Label>
                     <Input
-                      id="edit-departureDate"
                       type="date"
                       value={editFormData.departureDate}
                       onChange={(e) => setEditFormData({...editFormData, departureDate: e.target.value})}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="edit-departureTime">Hora de Saída *</Label>
+                    <Label>Hora de Saída</Label>
                     <Input
-                      id="edit-departureTime"
                       type="time"
                       value={editFormData.departureTime}
                       onChange={(e) => setEditFormData({...editFormData, departureTime: e.target.value})}
@@ -652,9 +623,8 @@ export default function Flights() {
                   </div>
                 </div>
 
-                {/* Status */}
                 <div className="space-y-2">
-                  <Label>Status *</Label>
+                  <Label>Status</Label>
                   <Select 
                     value={editFormData.status} 
                     onValueChange={(v) => setEditFormData({...editFormData, status: v as FlightStatus})}
@@ -670,11 +640,9 @@ export default function Flights() {
                   </Select>
                 </div>
 
-                {/* Observations */}
                 <div className="space-y-2">
-                  <Label htmlFor="edit-observations">Observações Operacionais</Label>
+                  <Label>Observações</Label>
                   <Textarea
-                    id="edit-observations"
                     value={editFormData.observations}
                     onChange={(e) => setEditFormData({...editFormData, observations: e.target.value})}
                     rows={3}
