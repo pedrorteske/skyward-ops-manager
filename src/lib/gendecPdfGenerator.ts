@@ -206,70 +206,82 @@ export const generateGenDecPdf = async (gendec: GeneralDeclaration) => {
     currentY += 5;
   }
 
-  // === DECLARATION OF HEALTH ===
+  // === DECLARATION OF HEALTH + FOR OFFICIAL USE ONLY (Side by Side) ===
+  const leftColWidth = contentWidth * 0.58;
+  const rightColWidth = contentWidth * 0.40;
+  const gapBetween = contentWidth * 0.02;
+  const sectionStartY = currentY;
+  
+  // Left column: DECLARATION OF HEALTH header
   doc.setFillColor(...primaryColor);
-  doc.rect(margin, currentY, contentWidth, 6, 'F');
+  doc.rect(margin, currentY, leftColWidth, 6, 'F');
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8);
-  doc.text('DECLARATION OF HEALTH', pageWidth / 2, currentY + 4, { align: 'center' });
+  doc.text('DECLARATION OF HEALTH', margin + leftColWidth / 2, currentY + 4, { align: 'center' });
+  
+  // Right column: FOR OFFICIAL USE ONLY header
+  doc.setFillColor(...primaryColor);
+  doc.rect(margin + leftColWidth + gapBetween, currentY, rightColWidth, 6, 'F');
+  doc.text('FOR OFFICIAL USE ONLY', margin + leftColWidth + gapBetween + rightColWidth / 2, currentY + 4, { align: 'center' });
+  
   currentY += 8;
+  const healthStartY = currentY;
 
   doc.setTextColor(0, 0, 0);
-  doc.setFontSize(7);
-  
-  // Texto 1 - Persons with illness (texto completo ICAO)
-  const healthText1 = 'Persons on board known to be suffering from illness other than airsickness or the effects of accidents: as well as those cases of illness disembarked during the flight';
-  const splitHealth1 = doc.splitTextToSize(healthText1, contentWidth - 10);
-  doc.setFont('helvetica', 'bold');
-  doc.text(splitHealth1, margin, currentY);
-  currentY += splitHealth1.length * 3 + 2;
-  doc.setFont('helvetica', 'normal');
-  doc.text(gendec.healthDeclaration.personsIllness || 'NIL', margin, currentY);
-  currentY += 5;
-
-  // Texto 2 - Other conditions (texto completo ICAO)
-  doc.setFont('helvetica', 'bold');
-  doc.text('Any other condition on board which may lead to the spread of disease:', margin, currentY);
-  currentY += 4;
-  doc.setFont('helvetica', 'normal');
-  doc.text(gendec.healthDeclaration.otherConditions || 'NIL', margin, currentY);
-  currentY += 5;
-
-  // Texto 3 - Disinsecting details (texto completo ICAO)
-  const healthText3 = 'Details of each disinsecting or sanitary treatment (place, date, time, method) during the flight. If no disinsecting has been carried out during the flight give details of most recent disinsecting:';
-  const splitHealth3 = doc.splitTextToSize(healthText3, contentWidth - 10);
-  doc.setFont('helvetica', 'bold');
-  doc.text(splitHealth3, margin, currentY);
-  currentY += splitHealth3.length * 3 + 2;
-  doc.setFont('helvetica', 'normal');
-  doc.text(gendec.healthDeclaration.disinsectingDetails || 'NIL', margin, currentY);
-  currentY += 7;
-
-  // Signature line for health
-  doc.text('Signature: ____________________________', margin, currentY);
-  doc.text('Date: ______________', pageWidth - margin - 45, currentY);
-  currentY += 4;
   doc.setFontSize(6);
-  doc.text('(Crew Member Concerned)', margin + 20, currentY);
-
-  currentY += 6;
-  drawLine(currentY);
-  currentY += 5;
-
-  // === FOR OFFICIAL USE ONLY ===
-  doc.setFillColor(...primaryColor);
-  doc.rect(margin, currentY, contentWidth, 6, 'F');
-  doc.setTextColor(255, 255, 255);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8);
-  doc.text('FOR OFFICIAL USE ONLY', pageWidth / 2, currentY + 4, { align: 'center' });
-  currentY += 7;
-
-  // Empty box for officials
+  
+  // Health table box dimensions
+  const tableWidth = leftColWidth - 2;
+  const tableX = margin + 1;
+  
+  // Table 1 - Persons with illness
+  let tableY = currentY;
+  const healthText1 = 'Persons on board known to be suffering from illness other than airsickness or the effects of accidents: as well as those cases of illness disembarked during the flight';
+  const splitHealth1 = doc.splitTextToSize(healthText1, tableWidth - 4);
+  const table1Height = splitHealth1.length * 2.5 + 8;
+  
   doc.setDrawColor(...primaryColor);
-  doc.rect(margin, currentY, contentWidth, 25, 'S');
-  currentY += 28;
+  doc.rect(tableX, tableY, tableWidth, table1Height, 'S');
+  doc.setFont('helvetica', 'bold');
+  doc.text(splitHealth1, tableX + 2, tableY + 3);
+  doc.line(tableX, tableY + splitHealth1.length * 2.5 + 2, tableX + tableWidth, tableY + splitHealth1.length * 2.5 + 2);
+  doc.setFont('helvetica', 'normal');
+  doc.text(gendec.healthDeclaration.personsIllness || 'NIL', tableX + 2, tableY + splitHealth1.length * 2.5 + 5);
+  tableY += table1Height + 2;
+  
+  // Table 2 - Other conditions
+  const healthText2 = 'Any other condition on board which may lead to the spread of disease:';
+  const splitHealth2 = doc.splitTextToSize(healthText2, tableWidth - 4);
+  const table2Height = splitHealth2.length * 2.5 + 8;
+  
+  doc.rect(tableX, tableY, tableWidth, table2Height, 'S');
+  doc.setFont('helvetica', 'bold');
+  doc.text(splitHealth2, tableX + 2, tableY + 3);
+  doc.line(tableX, tableY + splitHealth2.length * 2.5 + 2, tableX + tableWidth, tableY + splitHealth2.length * 2.5 + 2);
+  doc.setFont('helvetica', 'normal');
+  doc.text(gendec.healthDeclaration.otherConditions || 'NIL', tableX + 2, tableY + splitHealth2.length * 2.5 + 5);
+  tableY += table2Height + 2;
+  
+  // Table 3 - Disinsecting details
+  const healthText3 = 'Details of each disinsecting or sanitary treatment (place, date, time, method) during the flight. If no disinsecting has been carried out during the flight give details of most recent disinsecting:';
+  const splitHealth3 = doc.splitTextToSize(healthText3, tableWidth - 4);
+  const table3Height = splitHealth3.length * 2.5 + 8;
+  
+  doc.rect(tableX, tableY, tableWidth, table3Height, 'S');
+  doc.setFont('helvetica', 'bold');
+  doc.text(splitHealth3, tableX + 2, tableY + 3);
+  doc.line(tableX, tableY + splitHealth3.length * 2.5 + 2, tableX + tableWidth, tableY + splitHealth3.length * 2.5 + 2);
+  doc.setFont('helvetica', 'normal');
+  doc.text(gendec.healthDeclaration.disinsectingDetails || 'NIL', tableX + 2, tableY + splitHealth3.length * 2.5 + 5);
+  tableY += table3Height;
+  
+  // Right column: Empty box for officials (matching health section height)
+  const officialBoxHeight = tableY - healthStartY;
+  doc.setDrawColor(...primaryColor);
+  doc.rect(margin + leftColWidth + gapBetween, healthStartY, rightColWidth, officialBoxHeight, 'S');
+  
+  currentY = tableY + 5;
 
   // === FINAL DECLARATION ===
   doc.setTextColor(0, 0, 0);

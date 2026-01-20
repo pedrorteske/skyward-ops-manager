@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { GeneralDeclaration, CrewMember, Passenger, HealthDeclaration, DeclarationType, GenDecStatus } from '@/types/gendec';
-import { useFlights } from '@/contexts/FlightsContext';
 import {
   Dialog,
   DialogContent,
@@ -18,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { CrewSection } from './sections/CrewSection';
 import { PassengerSection } from './sections/PassengerSection';
 import { HealthDeclarationSection } from './sections/HealthDeclarationSection';
-import { Plane, MapPin, Palette, FileCheck, Link2 } from 'lucide-react';
+import { Plane, MapPin, Palette, FileCheck } from 'lucide-react';
 
 interface GenDecFormDialogProps {
   open: boolean;
@@ -34,7 +33,6 @@ const defaultHealthDeclaration: HealthDeclaration = {
 };
 
 export const GenDecFormDialog = ({ open, onOpenChange, gendec, onSave }: GenDecFormDialogProps) => {
-  const { flights } = useFlights();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Form state
@@ -53,26 +51,7 @@ export const GenDecFormDialog = ({ open, onOpenChange, gendec, onSave }: GenDecF
   const [logoUrl, setLogoUrl] = useState(gendec?.logoUrl || '');
   const [primaryColor, setPrimaryColor] = useState(gendec?.primaryColor || '#1E3A5F');
   const [observations, setObservations] = useState(gendec?.observations || '');
-  const [selectedFlightId, setSelectedFlightId] = useState<string | undefined>(gendec?.flightId);
   const [status, setStatus] = useState<GenDecStatus>(gendec?.status || 'draft');
-
-  const handleFlightSelect = (flightId: string) => {
-    if (flightId === 'none') {
-      setSelectedFlightId(undefined);
-      return;
-    }
-    
-    const flight = flights.find(f => f.id === flightId);
-    if (flight) {
-      setSelectedFlightId(flightId);
-      setMarksOfRegistration(flight.aircraftPrefix);
-      setAircraftType(flight.aircraftModel);
-      setAirportDeparture(flight.origin);
-      setAirportArrival(flight.destination);
-      setDateDeparture(flight.departureDate);
-      setDateArrival(flight.arrivalDate);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,7 +71,6 @@ export const GenDecFormDialog = ({ open, onOpenChange, gendec, onSave }: GenDecF
     try {
       await onSave({
         companyId: gendec?.companyId || '',
-        flightId: selectedFlightId,
         declarationType,
         operator,
         marksOfRegistration,
@@ -122,57 +100,30 @@ export const GenDecFormDialog = ({ open, onOpenChange, gendec, onSave }: GenDecF
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] p-0">
         <DialogHeader className="px-6 pt-6 pb-4">
-          <DialogTitle className="flex items-center gap-2">
-            <FileCheck className="h-5 w-5" />
-            {isEditing ? 'Editar General Declaration' : 'Nova General Declaration'}
+          <DialogTitle className="flex flex-col gap-2">
+            <span className="flex items-center gap-2">
+              <FileCheck className="h-5 w-5" />
+              {isEditing ? 'Editar General Declaration' : 'Nova General Declaration'}
+            </span>
+            <RadioGroup
+              value={declarationType}
+              onValueChange={(value) => setDeclarationType(value as DeclarationType)}
+              className="flex gap-4 text-sm font-normal"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="outward" id="outward" />
+                <Label htmlFor="outward" className="font-normal cursor-pointer">Outward</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="inward" id="inward" />
+                <Label htmlFor="inward" className="font-normal cursor-pointer">Inward</Label>
+              </div>
+            </RadioGroup>
           </DialogTitle>
         </DialogHeader>
 
         <ScrollArea className="max-h-[calc(90vh-120px)]">
           <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-6">
-            {/* Declaration Type */}
-            <div className="space-y-3">
-              <Label className="text-base font-semibold">Declaration Type</Label>
-              <RadioGroup
-                value={declarationType}
-                onValueChange={(value) => setDeclarationType(value as DeclarationType)}
-                className="flex gap-4"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="outward" id="outward" />
-                  <Label htmlFor="outward" className="font-normal cursor-pointer">Outward</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="inward" id="inward" />
-                  <Label htmlFor="inward" className="font-normal cursor-pointer">Inward</Label>
-                </div>
-              </RadioGroup>
-            </div>
-
-            <Separator />
-
-            {/* Link to Flight */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Link2 className="h-4 w-4" />
-                <Label>Link to Existing Flight (Optional)</Label>
-              </div>
-              <Select value={selectedFlightId || 'none'} onValueChange={handleFlightSelect}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a flight to auto-fill data" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">No flight selected</SelectItem>
-                  {flights.map(flight => (
-                    <SelectItem key={flight.id} value={flight.id}>
-                      {flight.aircraftPrefix} - {flight.origin} → {flight.destination} ({flight.arrivalDate})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <Separator />
 
             {/* Aircraft/Operator Information */}
             <div className="space-y-4">
@@ -222,18 +173,18 @@ export const GenDecFormDialog = ({ open, onOpenChange, gendec, onSave }: GenDecF
                 <MapPin className="h-5 w-5" />
                 Flight Information
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2 md:col-span-3">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div className="space-y-2">
                   <Label htmlFor="flightNumber">Flight Number</Label>
                   <Input
                     id="flightNumber"
                     value={flightNumber}
                     onChange={(e) => setFlightNumber(e.target.value)}
-                    placeholder="e.g., GLO1234, AD4521"
+                    placeholder="e.g., GLO1234"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="airportDeparture">Airport of Departure *</Label>
+                  <Label htmlFor="airportDeparture">Airport Departure *</Label>
                   <Input
                     id="airportDeparture"
                     value={airportDeparture}
@@ -243,7 +194,7 @@ export const GenDecFormDialog = ({ open, onOpenChange, gendec, onSave }: GenDecF
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="dateDeparture">Date of Departure *</Label>
+                  <Label htmlFor="dateDeparture">Date Departure *</Label>
                   <Input
                     id="dateDeparture"
                     type="date"
@@ -253,7 +204,7 @@ export const GenDecFormDialog = ({ open, onOpenChange, gendec, onSave }: GenDecF
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="airportArrival">Airport of Arrival *</Label>
+                  <Label htmlFor="airportArrival">Airport Arrival *</Label>
                   <Input
                     id="airportArrival"
                     value={airportArrival}
@@ -263,7 +214,7 @@ export const GenDecFormDialog = ({ open, onOpenChange, gendec, onSave }: GenDecF
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="dateArrival">Date of Arrival *</Label>
+                  <Label htmlFor="dateArrival">Date Arrival *</Label>
                   <Input
                     id="dateArrival"
                     type="date"
