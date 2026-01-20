@@ -13,13 +13,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Combobox } from '@/components/ui/combobox';
-import { Plus, Trash2, FileText, Copy, Check, Plane, User, MapPin, DollarSign, CreditCard, ClipboardList, Calculator, Download } from 'lucide-react';
+import { Plus, Trash2, FileText, Copy, Check, Plane, User, MapPin, DollarSign, CreditCard, ClipboardList, Calculator, Download, Eye } from 'lucide-react';
 import { useClients } from '@/contexts/ClientsContext';
 import { useFinancial } from '@/contexts/FinancialContext';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { generateGroundHandlingPDF } from '@/lib/groundHandlingPdfGenerator';
+import { GroundHandlingPdfPreview } from '@/components/financial/GroundHandlingPdfPreview';
+import type { GroundHandlingPDFData } from '@/lib/groundHandlingPdfPreview';
 import {
   GroundHandlingClient,
   OperationInfo,
@@ -114,6 +116,8 @@ export function GroundHandlingQuotationForm({ open, onOpenChange }: GroundHandli
   const [generatedEmailText, setGeneratedEmailText] = useState('');
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState('client');
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewData, setPreviewData] = useState<GroundHandlingPDFData | null>(null);
 
   // Calculate totals
   const additionalServicesTotal = useMemo(() => 
@@ -986,6 +990,40 @@ ${companyInfo.responsibleEmail}`;
               <div className="space-y-2">
                 <h4 className="font-medium text-sm">Exportar:</h4>
                 <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    const quotationNumber = generateDocumentNumber('quotation');
+                    const pdfData: GroundHandlingPDFData = {
+                      quotationNumber,
+                      client: clientData,
+                      operation: operationData,
+                      serviceValue,
+                      currency,
+                      includedServices,
+                      additionalServices,
+                      applyAdminFee,
+                      adminFeePercentage,
+                      adminFeeText,
+                      taxObservation,
+                      payment: paymentData,
+                      summary: {
+                        serviceValue,
+                        additionalServicesTotal,
+                        adminFee: adminFeeAmount,
+                        grandTotal,
+                      },
+                      company: companyInfo,
+                      createdAt: new Date().toISOString(),
+                    };
+                    setPreviewData(pdfData);
+                    setIsPreviewOpen(true);
+                  }}
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  Visualizar PDF
+                </Button>
+                <Button
                   variant="secondary"
                   className="w-full"
                   onClick={() => {
@@ -1016,7 +1054,7 @@ ${companyInfo.responsibleEmail}`;
                   }}
                 >
                   <Download className="w-4 h-4 mr-2" />
-                  Gerar PDF
+                  Baixar PDF
                 </Button>
               </div>
 
@@ -1033,6 +1071,15 @@ ${companyInfo.responsibleEmail}`;
           </div>
         </div>
       </DialogContent>
+
+      {/* PDF Preview Modal */}
+      {previewData && (
+        <GroundHandlingPdfPreview
+          open={isPreviewOpen}
+          onOpenChange={setIsPreviewOpen}
+          data={previewData}
+        />
+      )}
     </Dialog>
   );
 }
