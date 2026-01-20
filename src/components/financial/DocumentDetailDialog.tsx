@@ -2,10 +2,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { FileText, Receipt, FileCheck, Plane, Download, Mail, Trash2 } from 'lucide-react';
+import { FileText, Receipt, FileCheck, Plane, Eye, Download, Mail, Trash2 } from 'lucide-react';
 import type { FinancialDocument, FinancialDocumentStatus } from '@/types/financial';
 import { documentTypeLabels, financialStatusLabels } from '@/types/financial';
 import { FinancialStatusBadge } from './FinancialStatusBadge';
+import { FinancialPdfPreview } from './FinancialPdfPreview';
 import { useClients } from '@/contexts/ClientsContext';
 import { useFlights } from '@/contexts/FlightsContext';
 import { useFinancial } from '@/contexts/FinancialContext';
@@ -38,6 +39,7 @@ export function DocumentDetailDialog({ document, open, onOpenChange }: DocumentD
   const { flights } = useFlights();
   const { updateDocumentStatus, deleteDocument } = useFinancial();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   if (!document) return null;
 
@@ -248,9 +250,13 @@ export function DocumentDetailDialog({ document, open, onOpenChange }: DocumentD
 
             {/* Actions */}
             <div className="flex flex-wrap gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => setIsPreviewOpen(true)}>
+                <Eye className="w-4 h-4 mr-2" />
+                Visualizar PDF
+              </Button>
               <Button variant="outline" onClick={handleGeneratePDF}>
                 <Download className="w-4 h-4 mr-2" />
-                Gerar PDF
+                Baixar PDF
               </Button>
               <Button variant="outline" onClick={handleSendEmail}>
                 <Mail className="w-4 h-4 mr-2" />
@@ -268,6 +274,37 @@ export function DocumentDetailDialog({ document, open, onOpenChange }: DocumentD
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* PDF Preview */}
+      <FinancialPdfPreview
+        open={isPreviewOpen}
+        onOpenChange={setIsPreviewOpen}
+        document={document}
+        clientInfo={{
+          name: getClientName(),
+          email: getClientEmail(),
+          document: client?.type === 'PF' 
+            ? (client as ClientPF).cpf 
+            : client?.type === 'PJ' 
+              ? (client as ClientPJ).cnpj 
+              : client?.type === 'INT'
+                ? (client as ClientINT).country
+                : undefined,
+        }}
+        flightInfo={flight ? {
+          prefix: flight.aircraftPrefix,
+          route: `${flight.origin} → ${flight.destination}`,
+          date: flight.arrivalDate 
+            ? new Date(flight.arrivalDate).toLocaleDateString('pt-BR')
+            : flight.departureDate 
+              ? new Date(flight.departureDate).toLocaleDateString('pt-BR')
+              : 'N/A',
+        } : document.flightInfo ? {
+          prefix: '-',
+          route: document.flightInfo,
+          date: '-',
+        } : undefined}
+      />
 
       {/* Delete Confirmation */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
