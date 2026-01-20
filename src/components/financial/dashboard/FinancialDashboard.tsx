@@ -3,18 +3,11 @@ import { useFinancial } from '@/contexts/FinancialContext';
 import { useClients } from '@/contexts/ClientsContext';
 import { FinancialKPICard } from './FinancialKPICard';
 import { RevenueLineChart } from './RevenueLineChart';
-import { ConversionRateChart } from './ConversionRateChart';
 import { ClientRankingTable } from './ClientRankingTable';
-import { PendingByClientChart } from './PendingByClientChart';
 import { 
   DollarSign, 
-  TrendingUp, 
   Clock, 
-  FileText,
   CheckCircle,
-  XCircle,
-  ArrowUpRight,
-  ArrowDownRight
 } from 'lucide-react';
 import { ClientPF, ClientPJ, ClientINT } from '@/types/aviation';
 import { format, subMonths, startOfMonth, endOfMonth, isWithinInterval, parseISO } from 'date-fns';
@@ -83,19 +76,6 @@ export function FinancialDashboard() {
       .filter(d => d.status === 'sent' || d.status === 'approved')
       .reduce((acc, d) => acc + d.total, 0);
 
-    // Total Quotations
-    const totalQuotations = documents.filter(d => d.type === 'quotation').length;
-    const currentMonthQuotations = currentMonthDocs.filter(d => d.type === 'quotation').length;
-    const lastMonthQuotations = lastMonthDocs.filter(d => d.type === 'quotation').length;
-    const quotationsTrend = lastMonthQuotations > 0 
-      ? ((currentMonthQuotations - lastMonthQuotations) / lastMonthQuotations) * 100 
-      : currentMonthQuotations > 0 ? 100 : 0;
-
-    // Approved quotations
-    const approvedQuotations = documents.filter(d => d.type === 'quotation' && d.status === 'approved').length;
-    const paidQuotations = documents.filter(d => d.type === 'quotation' && d.status === 'paid').length;
-    const cancelledQuotations = documents.filter(d => d.type === 'quotation' && d.status === 'cancelled').length;
-
     // Invoices
     const totalInvoices = documents.filter(d => d.type === 'invoice').length;
     const paidInvoices = documents.filter(d => d.type === 'invoice' && d.status === 'paid').length;
@@ -105,11 +85,6 @@ export function FinancialDashboard() {
       currentMonthRevenue,
       revenueTrend,
       pendingAmount,
-      totalQuotations,
-      quotationsTrend,
-      approvedQuotations,
-      paidQuotations,
-      cancelledQuotations,
       totalInvoices,
       paidInvoices,
     };
@@ -183,35 +158,10 @@ export function FinancialDashboard() {
       }));
   }, [documents, clients]);
 
-  // Pending by Client Data
-  const pendingByClientData = useMemo(() => {
-    const clientPending: Record<string, { amount: number; count: number; name: string }> = {};
-
-    documents
-      .filter(d => d.status === 'sent' || d.status === 'approved')
-      .forEach(doc => {
-        const key = doc.clientId || doc.clientName || 'unknown';
-        const name = getClientName(doc.clientId, doc.clientName);
-        
-        if (!clientPending[key]) {
-          clientPending[key] = { amount: 0, count: 0, name };
-        }
-        clientPending[key].amount += doc.total;
-        clientPending[key].count += 1;
-      });
-
-    return Object.values(clientPending)
-      .map(client => ({
-        clientName: client.name,
-        pendingAmount: client.amount,
-        documentCount: client.count,
-      }));
-  }, [documents, clients]);
-
   return (
     <div className="space-y-6">
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* KPI Cards - Removed Total de Cotações */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <FinancialKPICard
           title="Receita Total"
           value={formatCurrency(kpis.totalRevenue)}
@@ -231,17 +181,6 @@ export function FinancialDashboard() {
           variant="warning"
         />
         <FinancialKPICard
-          title="Total de Cotações"
-          value={kpis.totalQuotations.toString()}
-          subtitle={`${kpis.paidQuotations} convertidas`}
-          icon={FileText}
-          variant="primary"
-          trend={kpis.quotationsTrend !== 0 ? {
-            value: Math.abs(Math.round(kpis.quotationsTrend)),
-            isPositive: kpis.quotationsTrend > 0,
-          } : undefined}
-        />
-        <FinancialKPICard
           title="Invoices Emitidas"
           value={kpis.totalInvoices.toString()}
           subtitle={`${kpis.paidInvoices} pagas`}
@@ -250,21 +189,14 @@ export function FinancialDashboard() {
         />
       </div>
 
-      {/* Charts Row 1 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Revenue Chart - Full Width */}
+      <div className="w-full">
         <RevenueLineChart data={revenueData} title="Receita Mensal (Últimos 6 Meses)" />
-        <ConversionRateChart
-          totalQuotations={kpis.totalQuotations}
-          approvedQuotations={kpis.approvedQuotations}
-          paidQuotations={kpis.paidQuotations}
-          cancelledQuotations={kpis.cancelledQuotations}
-        />
       </div>
 
-      {/* Charts Row 2 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ClientRankingTable data={clientRankingData} />
-        <PendingByClientChart data={pendingByClientData} />
+      {/* Client Ranking - Full Width - Renamed */}
+      <div className="w-full">
+        <ClientRankingTable data={clientRankingData} title="Classificação de Cliente por Faturamento" />
       </div>
     </div>
   );
