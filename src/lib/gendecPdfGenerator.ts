@@ -116,93 +116,96 @@ export const generateGenDecPdf = async (gendec: GeneralDeclaration) => {
   drawLine(currentY);
   currentY += 5;
 
+  // === TABLE HELPER FUNCTION ===
+  const drawTable = (
+    headers: string[],
+    colWidths: number[],
+    rows: string[][],
+    startY: number,
+    title: string
+  ): number => {
+    const rowHeight = 6;
+    const headerHeight = 5;
+    let y = startY;
+    
+    // Title bar
+    doc.setFillColor(...primaryColor);
+    doc.rect(margin, y, contentWidth, 6, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.text(title, pageWidth / 2, y + 4, { align: 'center' });
+    y += 6;
+    
+    // Header row with borders
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'bold');
+    doc.setDrawColor(...primaryColor);
+    
+    let x = margin;
+    headers.forEach((header, i) => {
+      doc.rect(x, y, colWidths[i], headerHeight, 'S');
+      doc.text(header, x + colWidths[i] / 2, y + 3.5, { align: 'center' });
+      x += colWidths[i];
+    });
+    y += headerHeight;
+    
+    // Data rows with borders
+    doc.setFont('helvetica', 'normal');
+    rows.forEach(row => {
+      x = margin;
+      row.forEach((cell, i) => {
+        doc.rect(x, y, colWidths[i], rowHeight, 'S');
+        doc.text(cell, x + colWidths[i] / 2, y + 4, { align: 'center' });
+        x += colWidths[i];
+      });
+      y += rowHeight;
+    });
+    
+    return y;
+  };
+
+  // Unified column widths for alignment between tables
+  const colWidths = [20, 50, 35, 25, 25, 25]; // Total: 180mm
+
   // === CREW MEMBERS TABLE ===
-  doc.setFillColor(...primaryColor);
-  doc.rect(margin, currentY, contentWidth, 6, 'F');
-  doc.setTextColor(255, 255, 255);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8);
-  doc.text('CREW MEMBERS', pageWidth / 2, currentY + 4, { align: 'center' });
-  currentY += 7;
+  const crewRows = gendec.crewMembers.map(crew => [
+    crew.crewType,
+    crew.crewName.substring(0, 25),
+    crew.passportOrId,
+    crew.documentExpiration ? format(new Date(crew.documentExpiration), 'dd/MM/yy') : '',
+    crew.dateOfBirth ? format(new Date(crew.dateOfBirth), 'dd/MM/yy') : '',
+    crew.nationality
+  ]);
 
-  // Table header
-  const crewColWidths = [20, 45, 30, 25, 25, 25];
-  const crewHeaders = ['Type', 'Name', 'Passport/ID', 'Exp. Date', 'D.O.B.', 'Nationality'];
-  
-  doc.setTextColor(0, 0, 0);
-  doc.setFontSize(7);
-  doc.setFont('helvetica', 'bold');
-  let colX = margin;
-  crewHeaders.forEach((header, i) => {
-    doc.text(header, colX + 1, currentY + 3);
-    colX += crewColWidths[i];
-  });
-  currentY += 5;
-  drawLine(currentY, [200, 200, 200]);
-  
-  // Crew rows
-  doc.setFont('helvetica', 'normal');
-  gendec.crewMembers.forEach(crew => {
-    colX = margin;
-    doc.text(crew.crewType, colX + 1, currentY + 4);
-    colX += crewColWidths[0];
-    doc.text(crew.crewName.substring(0, 25), colX + 1, currentY + 4);
-    colX += crewColWidths[1];
-    doc.text(crew.passportOrId, colX + 1, currentY + 4);
-    colX += crewColWidths[2];
-    doc.text(crew.documentExpiration ? format(new Date(crew.documentExpiration), 'dd/MM/yy') : '', colX + 1, currentY + 4);
-    colX += crewColWidths[3];
-    doc.text(crew.dateOfBirth ? format(new Date(crew.dateOfBirth), 'dd/MM/yy') : '', colX + 1, currentY + 4);
-    colX += crewColWidths[4];
-    doc.text(crew.nationality, colX + 1, currentY + 4);
-    currentY += 5;
-  });
-
-  currentY += 3;
-  drawLine(currentY);
+  currentY = drawTable(
+    ['Type', 'Name', 'Passport/ID', 'Exp. Date', 'D.O.B.', 'Nationality'],
+    colWidths,
+    crewRows,
+    currentY,
+    'CREW MEMBERS'
+  );
   currentY += 5;
 
   // === PASSENGERS TABLE ===
   if (gendec.passengers.length > 0) {
-    doc.setFillColor(...primaryColor);
-    doc.rect(margin, currentY, contentWidth, 6, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8);
-    doc.text('PASSENGERS', pageWidth / 2, currentY + 4, { align: 'center' });
-    currentY += 7;
+    const paxRows = gendec.passengers.map(pax => [
+      '', // Empty first column to align with Crew Type column
+      pax.passengerName.substring(0, 25),
+      pax.passportOrId,
+      pax.documentExpiration ? format(new Date(pax.documentExpiration), 'dd/MM/yy') : '',
+      pax.dateOfBirth ? format(new Date(pax.dateOfBirth), 'dd/MM/yy') : '',
+      pax.nationality
+    ]);
 
-    const paxColWidths = [50, 35, 30, 30, 25];
-    const paxHeaders = ['Name', 'Passport/ID', 'Exp. Date', 'D.O.B.', 'Nationality'];
-
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(7);
-    doc.setFont('helvetica', 'bold');
-    colX = margin;
-    paxHeaders.forEach((header, i) => {
-      doc.text(header, colX + 1, currentY + 3);
-      colX += paxColWidths[i];
-    });
-    currentY += 5;
-    drawLine(currentY, [200, 200, 200]);
-
-    doc.setFont('helvetica', 'normal');
-    gendec.passengers.forEach(pax => {
-      colX = margin;
-      doc.text(pax.passengerName.substring(0, 30), colX + 1, currentY + 4);
-      colX += paxColWidths[0];
-      doc.text(pax.passportOrId, colX + 1, currentY + 4);
-      colX += paxColWidths[1];
-      doc.text(pax.documentExpiration ? format(new Date(pax.documentExpiration), 'dd/MM/yy') : '', colX + 1, currentY + 4);
-      colX += paxColWidths[2];
-      doc.text(pax.dateOfBirth ? format(new Date(pax.dateOfBirth), 'dd/MM/yy') : '', colX + 1, currentY + 4);
-      colX += paxColWidths[3];
-      doc.text(pax.nationality, colX + 1, currentY + 4);
-      currentY += 5;
-    });
-
-    currentY += 3;
-    drawLine(currentY);
+    currentY = drawTable(
+      ['', 'Name', 'Passport/ID', 'Exp. Date', 'D.O.B.', 'Nationality'],
+      colWidths,
+      paxRows,
+      currentY,
+      'PASSENGERS'
+    );
     currentY += 5;
   }
 
