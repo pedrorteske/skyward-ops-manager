@@ -2,6 +2,7 @@ import { useState } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { QuotationStatusBadge } from "@/components/quotations/QuotationStatusBadge";
+import { QuotationPdfPreview } from "@/components/quotations/QuotationPdfPreview";
 import { useQuotations } from "@/contexts/QuotationsContext";
 import { useClients } from "@/contexts/ClientsContext";
 import { useFlights } from "@/contexts/FlightsContext";
@@ -14,11 +15,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, FileText, Trash2, Mail, Download, Clock, Plane, Pencil } from "lucide-react";
+import { Plus, Search, FileText, Trash2, Mail, Download, Clock, Plane, Pencil, Eye } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { generateQuotationPDF } from "@/lib/quotationPdfGenerator";
+import { downloadQuotationPdf } from "@/lib/quotationPdfPreview";
 
 const serviceOptions = [
   "Handling de chegada",
@@ -45,6 +46,8 @@ export default function Quotations() {
   const [selectedQuotation, setSelectedQuotation] = useState<Quotation | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewQuotation, setPreviewQuotation] = useState<Quotation | null>(null);
 
   const [formData, setFormData] = useState({
     clientId: "",
@@ -241,12 +244,17 @@ export default function Quotations() {
     const flight = quotation.flightId ? flights.find(f => f.id === quotation.flightId) : undefined;
     
     try {
-      generateQuotationPDF({ quotation, client, flight });
+      downloadQuotationPdf({ quotation, client, flight });
       toast.success("PDF gerado com sucesso!");
     } catch (error) {
       console.error('Error generating PDF:', error);
       toast.error("Erro ao gerar PDF");
     }
+  };
+
+  const handlePreviewPDF = (quotation: Quotation) => {
+    setPreviewQuotation(quotation);
+    setIsPreviewOpen(true);
   };
 
   const formatCurrency = (value: number, currency: Currency) => {
@@ -523,10 +531,10 @@ export default function Quotations() {
                   className="flex-1"
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleDownloadPDF(quotation);
+                    handlePreviewPDF(quotation);
                   }}
                 >
-                  <Download className="w-4 h-4 mr-1" /> PDF
+                  <Eye className="w-4 h-4 mr-1" /> Visualizar
                 </Button>
                 <Button
                   variant="outline"
@@ -626,9 +634,15 @@ export default function Quotations() {
                 </div>
 
                 <div className="flex gap-2 pt-4 border-t">
-                  <Button variant="outline" className="flex-1" onClick={() => handleDownloadPDF(selectedQuotation)}>
-                    <Download className="w-4 h-4 mr-2" /> PDF
+                  <Button variant="outline" className="flex-1" onClick={() => handlePreviewPDF(selectedQuotation)}>
+                    <Eye className="w-4 h-4 mr-2" /> Visualizar PDF
                   </Button>
+                  <Button variant="outline" className="flex-1" onClick={() => handleDownloadPDF(selectedQuotation)}>
+                    <Download className="w-4 h-4 mr-2" /> Baixar PDF
+                  </Button>
+                </div>
+
+                <div className="flex gap-2 pt-2 border-t">
                   <Button
                     variant="outline"
                     className="flex-1"
@@ -858,6 +872,17 @@ export default function Quotations() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* PDF Preview Modal */}
+      {previewQuotation && (
+        <QuotationPdfPreview
+          open={isPreviewOpen}
+          onOpenChange={setIsPreviewOpen}
+          quotation={previewQuotation}
+          client={getClientById(previewQuotation.clientId)}
+          flight={previewQuotation.flightId ? flights.find(f => f.id === previewQuotation.flightId) : undefined}
+        />
+      )}
     </MainLayout>
   );
 }
