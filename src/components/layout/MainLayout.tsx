@@ -120,7 +120,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                   <Button
                     variant="ghost"
                     className="w-full justify-start gap-2 text-muted-foreground"
-                    onClick={handleSignOut}
+                    onClick={handleLogout}
                   >
                     <LogOut className="w-4 h-4" />
                     Sair
@@ -156,7 +156,7 @@ export function MainLayout({ children }: MainLayoutProps) {
           <Button
             variant="ghost"
             className="w-full justify-start gap-2 text-muted-foreground"
-            onClick={handleSignOut}
+            onClick={handleLogout}
           >
             <LogOut className="w-4 h-4" />
             Sair
