@@ -1,20 +1,23 @@
 import { useMemo, useState, useEffect } from 'react';
-import { format, isToday, isTomorrow, parseISO, startOfDay, addDays } from 'date-fns';
+import { format, parseISO, startOfDay, isToday, isTomorrow, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Plane, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { CircularOutlineKPI } from '@/components/dashboard/CircularOutlineKPI';
 import { FlightPortalList } from '@/components/flights/FlightPortalList';
+import { FlightDetailDialog } from '@/components/flights/FlightDetailDialog';
 import { ResourceTimeline } from '@/components/dashboard/ResourceTimeline';
 import { Button } from '@/components/ui/button';
 import { useFlights } from '@/contexts/FlightsContext';
 import { useAuth } from '@/hooks/useAuth';
+import { Flight } from '@/types/aviation';
 
 export default function Home() {
   const { user } = useAuth();
   const { flights } = useFlights();
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
 
   // Update time every second
   useEffect(() => {
@@ -48,10 +51,19 @@ export default function Home() {
     };
   }, [flights]);
 
-  // Filter and sort upcoming flights
+  // Filter and sort upcoming flights (only from today onwards)
   const upcomingFlights = useMemo(() => {
+    const today = startOfDay(new Date());
+    
     return flights
-      .filter((f) => f.status === 'scheduled' || f.status === 'delayed')
+      .filter((f) => {
+        // Only scheduled or delayed
+        if (f.status !== 'scheduled' && f.status !== 'delayed') return false;
+        
+        // Only flights from today onwards
+        const arrivalDate = parseISO(f.arrivalDate);
+        return arrivalDate >= today;
+      })
       .sort((a, b) => {
         const dateA = new Date(`${a.arrivalDate}T${a.arrivalTime}`);
         const dateB = new Date(`${b.arrivalDate}T${b.arrivalTime}`);
@@ -71,6 +83,16 @@ export default function Home() {
   const todayFormatted = format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR });
   const localTime = format(currentTime, 'HH:mm:ss', { locale: ptBR });
   const utcTime = format(new Date(currentTime.toUTCString().slice(0, -4)), 'HH:mm:ss');
+
+  const handleFlightClick = (flight: Flight) => {
+    setSelectedFlight(flight);
+  };
+
+  const handleCloseDetail = (open: boolean) => {
+    if (!open) {
+      setSelectedFlight(null);
+    }
+  };
 
   return (
     <MainLayout>
@@ -133,8 +155,15 @@ export default function Home() {
             </Link>
           </Button>
         </div>
-        <FlightPortalList flights={upcomingFlights} />
+        <FlightPortalList flights={upcomingFlights} onFlightClick={handleFlightClick} />
       </div>
+
+      {/* Flight Detail Modal */}
+      <FlightDetailDialog 
+        flight={selectedFlight} 
+        open={!!selectedFlight} 
+        onOpenChange={handleCloseDetail} 
+      />
     </MainLayout>
   );
 }
