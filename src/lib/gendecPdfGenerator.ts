@@ -10,7 +10,8 @@ const hexToRgb = (hex: string): [number, number, number] => {
     : [30, 58, 95]; // Default navy blue
 };
 
-export const generateGenDecPdf = async (gendec: GeneralDeclaration) => {
+// Internal function to build the PDF document
+const buildGenDecPdf = async (gendec: GeneralDeclaration): Promise<jsPDF> => {
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
@@ -310,6 +311,20 @@ export const generateGenDecPdf = async (gendec: GeneralDeclaration) => {
   doc.text(`Generated: ${format(new Date(), 'dd/MM/yyyy HH:mm')}`, margin, currentY);
   doc.text('ICAO Standard Format', pageWidth - margin, currentY, { align: 'right' });
 
-  // Save PDF
+  return doc;
+};
+
+// Generate PDF and return as blob URL for preview
+export const generateGenDecPdfUrl = async (gendec: GeneralDeclaration): Promise<string> => {
+  const doc = await buildGenDecPdf(gendec);
+  return doc.output('bloburl').toString();
+};
+
+// Generate and download PDF directly
+export const downloadGenDecPdf = async (gendec: GeneralDeclaration): Promise<void> => {
+  const doc = await buildGenDecPdf(gendec);
   doc.save(`GenDec-${gendec.number}.pdf`);
 };
+
+// Legacy function for backwards compatibility
+export const generateGenDecPdf = downloadGenDecPdf;

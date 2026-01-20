@@ -3,7 +3,7 @@ import { GeneralDeclaration } from '@/types/gendec';
 import { useGenDec } from '@/contexts/GenDecContext';
 import { GenDecStatusBadge } from './GenDecStatusBadge';
 import { GenDecFormDialog } from './GenDecFormDialog';
-import { generateGenDecPdf } from '@/lib/gendecPdfGenerator';
+import { GenDecPdfPreview } from './GenDecPdfPreview';
 import {
   Table,
   TableBody,
@@ -30,7 +30,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { MoreHorizontal, Pencil, Trash2, FileDown, Search, Copy } from 'lucide-react';
+import { MoreHorizontal, Pencil, Trash2, Eye, Search, Copy } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface GenDecListProps {
@@ -42,6 +42,7 @@ export const GenDecList = ({ filter = 'all' }: GenDecListProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [editingGenDec, setEditingGenDec] = useState<GeneralDeclaration | null>(null);
   const [deletingGenDec, setDeletingGenDec] = useState<GeneralDeclaration | null>(null);
+  const [previewGenDec, setPreviewGenDec] = useState<GeneralDeclaration | null>(null);
 
   // Filter by status
   const filteredByStatus = filter === 'all' 
@@ -78,8 +79,8 @@ export const GenDecList = ({ filter = 'all' }: GenDecListProps) => {
     }
   };
 
-  const handleExportPdf = (gendec: GeneralDeclaration) => {
-    generateGenDecPdf(gendec);
+  const handlePreviewPdf = (gendec: GeneralDeclaration) => {
+    setPreviewGenDec(gendec);
   };
 
   const handleDuplicate = async (gendec: GeneralDeclaration) => {
@@ -162,9 +163,9 @@ export const GenDecList = ({ filter = 'all' }: GenDecListProps) => {
                           <Pencil className="h-4 w-4 mr-2" />
                           Editar
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleExportPdf(gendec)}>
-                          <FileDown className="h-4 w-4 mr-2" />
-                          Exportar PDF
+                        <DropdownMenuItem onClick={() => handlePreviewPdf(gendec)}>
+                          <Eye className="h-4 w-4 mr-2" />
+                          Visualizar PDF
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleDuplicate(gendec)}>
                           <Copy className="h-4 w-4 mr-2" />
@@ -197,7 +198,14 @@ export const GenDecList = ({ filter = 'all' }: GenDecListProps) => {
         />
       )}
 
-      {/* Delete Confirmation */}
+      {/* PDF Preview Dialog */}
+      {previewGenDec && (
+        <GenDecPdfPreview
+          open={!!previewGenDec}
+          onOpenChange={(open) => !open && setPreviewGenDec(null)}
+          gendec={previewGenDec}
+        />
+      )}
       <AlertDialog open={!!deletingGenDec} onOpenChange={(open) => !open && setDeletingGenDec(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
