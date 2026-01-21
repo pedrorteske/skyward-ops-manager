@@ -8,6 +8,7 @@ import { FlightsProvider } from "@/contexts/FlightsContext";
 import { ClientsProvider } from "@/contexts/ClientsContext";
 import { FinancialProvider } from "@/contexts/FinancialContext";
 import { GenDecProvider } from "@/contexts/GenDecContext";
+import { ServicesProvider } from "@/contexts/ServicesContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Landing from "./pages/Landing";
 import Home from "./pages/Home";
@@ -33,8 +34,9 @@ const App = () => (
         <FlightsProvider>
           <ClientsProvider>
             <FinancialProvider>
-              <GenDecProvider>
-                <TooltipProvider>
+              <ServicesProvider>
+                <GenDecProvider>
+                  <TooltipProvider>
                   <Toaster />
                   <Sonner />
                   <Routes>
@@ -115,8 +117,9 @@ const App = () => (
                     />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
-                </TooltipProvider>
-              </GenDecProvider>
+                  </TooltipProvider>
+                </GenDecProvider>
+              </ServicesProvider>
             </FinancialProvider>
           </ClientsProvider>
         </FlightsProvider>

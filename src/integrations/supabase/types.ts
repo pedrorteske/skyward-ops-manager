@@ -510,6 +510,45 @@ export type Database = {
           },
         ]
       }
+      services: {
+        Row: {
+          category: string | null
+          company_id: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          price_brl: number
+          price_usd: number
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          company_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          price_brl?: number
+          price_usd?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          price_brl?: number
+          price_usd?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
