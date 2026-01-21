@@ -14,6 +14,71 @@ export type Database = {
   }
   public: {
     Tables: {
+      aircraft: {
+        Row: {
+          category: Database["public"]["Enums"]["aircraft_category"]
+          company_id: string
+          created_at: string
+          has_avanac: boolean | null
+          has_avoem: boolean | null
+          has_fuel_release: boolean | null
+          has_gendec_template: boolean | null
+          has_tecat: boolean | null
+          id: string
+          model: string
+          observations: string | null
+          owner_operator: string
+          registration_country: string
+          registration_prefix: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["aircraft_category"]
+          company_id: string
+          created_at?: string
+          has_avanac?: boolean | null
+          has_avoem?: boolean | null
+          has_fuel_release?: boolean | null
+          has_gendec_template?: boolean | null
+          has_tecat?: boolean | null
+          id?: string
+          model: string
+          observations?: string | null
+          owner_operator: string
+          registration_country: string
+          registration_prefix: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["aircraft_category"]
+          company_id?: string
+          created_at?: string
+          has_avanac?: boolean | null
+          has_avoem?: boolean | null
+          has_fuel_release?: boolean | null
+          has_gendec_template?: boolean | null
+          has_tecat?: boolean | null
+          id?: string
+          model?: string
+          observations?: string | null
+          owner_operator?: string
+          registration_country?: string
+          registration_prefix?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aircraft_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           address: string | null
@@ -205,6 +270,7 @@ export type Database = {
       }
       flights: {
         Row: {
+          aircraft_id: string | null
           aircraft_model: string
           aircraft_prefix: string
           arrival_date: string
@@ -215,6 +281,11 @@ export type Database = {
           departure_date: string
           departure_time: string
           destination: string
+          doc_avanac: boolean | null
+          doc_avoem: boolean | null
+          doc_fuel_release: boolean | null
+          doc_gendec: boolean | null
+          doc_tecat: boolean | null
           flight_type: Database["public"]["Enums"]["flight_type"]
           id: string
           observations: string | null
@@ -223,6 +294,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          aircraft_id?: string | null
           aircraft_model: string
           aircraft_prefix: string
           arrival_date: string
@@ -233,6 +305,11 @@ export type Database = {
           departure_date: string
           departure_time: string
           destination: string
+          doc_avanac?: boolean | null
+          doc_avoem?: boolean | null
+          doc_fuel_release?: boolean | null
+          doc_gendec?: boolean | null
+          doc_tecat?: boolean | null
           flight_type?: Database["public"]["Enums"]["flight_type"]
           id?: string
           observations?: string | null
@@ -241,6 +318,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          aircraft_id?: string | null
           aircraft_model?: string
           aircraft_prefix?: string
           arrival_date?: string
@@ -251,6 +329,11 @@ export type Database = {
           departure_date?: string
           departure_time?: string
           destination?: string
+          doc_avanac?: boolean | null
+          doc_avoem?: boolean | null
+          doc_fuel_release?: boolean | null
+          doc_gendec?: boolean | null
+          doc_tecat?: boolean | null
           flight_type?: Database["public"]["Enums"]["flight_type"]
           id?: string
           observations?: string | null
@@ -259,6 +342,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "flights_aircraft_id_fkey"
+            columns: ["aircraft_id"]
+            isOneToOne: false
+            referencedRelation: "aircraft"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "flights_company_id_fkey"
             columns: ["company_id"]
@@ -613,6 +703,18 @@ export type Database = {
       }
     }
     Enums: {
+      aircraft_category:
+        | "fixed_wing"
+        | "helicopter"
+        | "glider"
+        | "motorglider"
+        | "balloon"
+        | "airship"
+        | "amphibious"
+        | "seaplane"
+        | "rpa_drone"
+        | "ultralight"
+        | "gyrocopter"
       app_role: "admin" | "operational" | "commercial"
       client_type: "PF" | "PJ" | "INT"
       currency: "BRL" | "USD"
@@ -759,6 +861,19 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      aircraft_category: [
+        "fixed_wing",
+        "helicopter",
+        "glider",
+        "motorglider",
+        "balloon",
+        "airship",
+        "amphibious",
+        "seaplane",
+        "rpa_drone",
+        "ultralight",
+        "gyrocopter",
+      ],
       app_role: ["admin", "operational", "commercial"],
       client_type: ["PF", "PJ", "INT"],
       currency: ["BRL", "USD"],

@@ -6,7 +6,8 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { 
   Home, 
   LayoutDashboard, 
-  Plane, 
+  Plane,
+  PlaneTakeoff,
   Users, 
   Wallet,
   FileText,
@@ -28,6 +29,7 @@ const navItems: NavItem[] = [
   { href: '/home', label: 'Home', icon: Home },
   { href: '/dashboard', label: 'Dashboard Analítico', icon: LayoutDashboard },
   { href: '/flights', label: 'Portal dos Voos', icon: Plane },
+  { href: '/aircraft', label: 'Aeronaves', icon: PlaneTakeoff },
   { href: '/clients', label: 'Clientes', icon: Users },
   { href: '/financial', label: 'Financeiro', icon: Wallet },
   { href: '/gendec', label: 'General Declaration', icon: FileText },
