@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,24 +11,10 @@ import { Plus, Trash2, FileText, Receipt, FileCheck } from 'lucide-react';
 import { useClients } from '@/contexts/ClientsContext';
 import { useFlights } from '@/contexts/FlightsContext';
 import { useFinancial } from '@/contexts/FinancialContext';
+import { useServices } from '@/contexts/ServicesContext';
 import { FinancialDocument, FinancialDocumentType, FinancialItem, Currency } from '@/types/financial';
 import { ClientPF, ClientPJ, ClientINT } from '@/types/aviation';
 import { toast } from 'sonner';
-
-const serviceOptions = [
-  "Handling de chegada",
-  "Handling de saída",
-  "Handling completo",
-  "Estacionamento (24h)",
-  "Hangaragem (por dia)",
-  "Abastecimento JET-A1 (litros)",
-  "Catering executivo",
-  "Transporte terrestre VIP",
-  "Despacho aduaneiro",
-  "GPU (Ground Power Unit)",
-  "Lavagem de aeronave",
-  "Serviço personalizado",
-];
 
 interface DocumentFormDialogProps {
   open: boolean;
@@ -64,6 +50,7 @@ export function DocumentFormDialog({
   const { clients } = useClients();
   const { flights } = useFlights();
   const { addDocument, generateDocumentNumber } = useFinancial();
+  const { services } = useServices();
 
   const [formData, setFormData] = useState({
     clientValue: '', // Can be clientId or free text
@@ -75,6 +62,7 @@ export function DocumentFormDialog({
   const [items, setItems] = useState<FinancialItem[]>([
     { id: '1', description: '', quantity: 1, unitPrice: 0, total: 0 },
   ]);
+  const prevCurrencyRef = useRef<Currency>(formData.currency);
   const config = documentTypeConfig[documentType];
   const IconComponent = config.icon;
 
@@ -99,6 +87,25 @@ export function DocumentFormDialog({
     }
   }, [sourceDocument, clients, flights]);
 
+  // Recalculate prices when currency changes
+  useEffect(() => {
+    if (prevCurrencyRef.current !== formData.currency) {
+      setItems(currentItems => currentItems.map(item => {
+        const service = services.find(s => s.name === item.description);
+        if (service) {
+          const newPrice = formData.currency === 'BRL' ? service.priceBrl : service.priceUsd;
+          return {
+            ...item,
+            unitPrice: newPrice,
+            total: item.quantity * newPrice,
+          };
+        }
+        return item;
+      }));
+      prevCurrencyRef.current = formData.currency;
+    }
+  }, [formData.currency, services]);
+
 
   const addItem = () => {
     setItems([
@@ -118,6 +125,19 @@ export function DocumentFormDialog({
       items.map(item => {
         if (item.id === id) {
           const updated = { ...item, [field]: value };
+          
+          // If selecting a registered service, auto-fill the price
+          if (field === 'description') {
+            const selectedService = services.find(s => s.name === value || s.id === value);
+            if (selectedService) {
+              updated.description = selectedService.name;
+              updated.unitPrice = formData.currency === 'BRL' 
+                ? selectedService.priceBrl 
+                : selectedService.priceUsd;
+              updated.total = updated.quantity * updated.unitPrice;
+            }
+          }
+          
           if (field === 'quantity' || field === 'unitPrice') {
             updated.total = updated.quantity * updated.unitPrice;
           }
@@ -223,11 +243,21 @@ export function DocumentFormDialog({
     label: `${flight.aircraftPrefix} - ${flight.origin}→${flight.destination}`,
   }));
 
-  // Build options for service combobox
-  const serviceComboboxOptions = serviceOptions.map(service => ({
-    value: service,
-    label: service,
-  }));
+  // Build options for service combobox from registered services
+  const serviceComboboxOptions = services
+    .filter(s => s.isActive)
+    .map(service => {
+      const price = formData.currency === 'BRL' ? service.priceBrl : service.priceUsd;
+      const formattedPrice = new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: formData.currency,
+      }).format(price);
+      
+      return {
+        value: service.name,
+        label: `${service.name}${service.category ? ` (${service.category})` : ''} - ${formattedPrice}`,
+      };
+    });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -326,8 +356,8 @@ export function DocumentFormDialog({
                           value={item.description}
                           onValueChange={(v) => updateItem(item.id, "description", v)}
                           placeholder="Selecione ou digite um serviço"
-                          searchPlaceholder="Buscar ou digitar serviço..."
-                          emptyText="Nenhum serviço encontrado."
+                          searchPlaceholder="Buscar serviço cadastrado..."
+                          emptyText="Nenhum serviço cadastrado. Adicione na aba 'Serviços'."
                           allowCustomValue={true}
                           className="h-9"
                         />
