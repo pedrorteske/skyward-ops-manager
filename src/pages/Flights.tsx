@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { FlightPortalList } from '@/components/flights/FlightPortalList';
 import { FlightCalendar } from '@/components/flights/FlightCalendar';
 import { FlightStatusBadge } from '@/components/flights/FlightStatusBadge';
 import { useFlights } from '@/contexts/FlightsContext';
+import { useAircraft } from '@/contexts/AircraftContext';
 import { Flight, FlightType, FlightStatus, flightTypeLabels, flightStatusLabels } from '@/types/aviation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,15 +13,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Search, Calendar, List, Plane, ArrowRight, Clock, ArrowUpDown, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Search, Calendar, List, Plane, ArrowRight, ArrowUpDown, Pencil, Trash2, Check, X, Info } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 type SortOrder = 'newest' | 'oldest';
 
 export default function Flights() {
   const { flights, isLoading, addFlight, updateFlight, deleteFlight } = useFlights();
+  const { getAircraftByPrefix } = useAircraft();
   const [activeTab, setActiveTab] = useState<string>('portal');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<FlightStatus | 'all'>('all');
@@ -43,7 +47,13 @@ export default function Flights() {
     departureTime: '',
     status: 'scheduled' as FlightStatus,
     observations: '',
+    docAvanac: false,
+    docAvoem: false,
+    docTecat: false,
+    docGendec: false,
+    docFuelRelease: false,
   });
+  const [linkedAircraft, setLinkedAircraft] = useState<string | null>(null);
 
   // Form state for new flight
   const [formData, setFormData] = useState({
@@ -59,7 +69,45 @@ export default function Flights() {
     departureTime: '',
     status: 'scheduled' as FlightStatus,
     observations: '',
+    docAvanac: false,
+    docAvoem: false,
+    docTecat: false,
+    docGendec: false,
+    docFuelRelease: false,
   });
+  const [newFlightLinkedAircraft, setNewFlightLinkedAircraft] = useState<string | null>(null);
+
+  // Auto-fill aircraft data when prefix changes
+  const handlePrefixChange = (prefix: string, isNewFlight: boolean) => {
+    const upperPrefix = prefix.toUpperCase();
+    const aircraft = getAircraftByPrefix(upperPrefix);
+    
+    if (isNewFlight) {
+      setFormData(prev => ({
+        ...prev,
+        aircraftPrefix: upperPrefix,
+        aircraftModel: aircraft?.model || prev.aircraftModel,
+        docAvanac: aircraft?.hasAvanac || false,
+        docAvoem: aircraft?.hasAvoem || false,
+        docTecat: aircraft?.hasTecat || false,
+        docGendec: aircraft?.hasGendecTemplate || false,
+        docFuelRelease: aircraft?.hasFuelRelease || false,
+      }));
+      setNewFlightLinkedAircraft(aircraft ? aircraft.registrationPrefix : null);
+    } else {
+      setEditFormData(prev => ({
+        ...prev,
+        aircraftPrefix: upperPrefix,
+        aircraftModel: aircraft?.model || prev.aircraftModel,
+        docAvanac: aircraft?.hasAvanac || prev.docAvanac,
+        docAvoem: aircraft?.hasAvoem || prev.docAvoem,
+        docTecat: aircraft?.hasTecat || prev.docTecat,
+        docGendec: aircraft?.hasGendecTemplate || prev.docGendec,
+        docFuelRelease: aircraft?.hasFuelRelease || prev.docFuelRelease,
+      }));
+      setLinkedAircraft(aircraft ? aircraft.registrationPrefix : null);
+    }
+  };
 
   const filteredFlights = flights.filter(flight => {
     const matchesSearch = 
@@ -98,7 +146,13 @@ export default function Flights() {
       departureTime: '',
       status: 'scheduled',
       observations: '',
+      docAvanac: false,
+      docAvoem: false,
+      docTecat: false,
+      docGendec: false,
+      docFuelRelease: false,
     });
+    setNewFlightLinkedAircraft(null);
   };
 
   const toggleSortOrder = () => {
@@ -120,7 +174,13 @@ export default function Flights() {
         departureTime: selectedFlight.departureTime,
         status: selectedFlight.status,
         observations: selectedFlight.observations || '',
+        docAvanac: selectedFlight.docAvanac || false,
+        docAvoem: selectedFlight.docAvoem || false,
+        docTecat: selectedFlight.docTecat || false,
+        docGendec: selectedFlight.docGendec || false,
+        docFuelRelease: selectedFlight.docFuelRelease || false,
       });
+      setLinkedAircraft(null);
       setIsEditMode(true);
     }
   };

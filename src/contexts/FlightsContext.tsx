@@ -35,6 +35,13 @@ const mapDbToFlight = (row: any): Flight => ({
   companyId: row.company_id,
   createdAt: row.created_at,
   updatedAt: row.updated_at,
+  // Documentos operacionais
+  docAvanac: row.doc_avanac,
+  docAvoem: row.doc_avoem,
+  docTecat: row.doc_tecat,
+  docGendec: row.doc_gendec,
+  docFuelRelease: row.doc_fuel_release,
+  aircraftId: row.aircraft_id,
 });
 
 export const FlightsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -108,6 +115,12 @@ export const FlightsProvider: React.FC<{ children: ReactNode }> = ({ children })
         departure_time: flight.departureTime,
         status: flight.status,
         observations: flight.observations,
+        doc_avanac: flight.docAvanac,
+        doc_avoem: flight.docAvoem,
+        doc_tecat: flight.docTecat,
+        doc_gendec: flight.docGendec,
+        doc_fuel_release: flight.docFuelRelease,
+        aircraft_id: flight.aircraftId,
       })
       .select()
       .single();
@@ -143,6 +156,12 @@ export const FlightsProvider: React.FC<{ children: ReactNode }> = ({ children })
     if (updates.departureTime !== undefined) dbUpdates.departure_time = updates.departureTime;
     if (updates.status !== undefined) dbUpdates.status = updates.status;
     if (updates.observations !== undefined) dbUpdates.observations = updates.observations;
+    if (updates.docAvanac !== undefined) dbUpdates.doc_avanac = updates.docAvanac;
+    if (updates.docAvoem !== undefined) dbUpdates.doc_avoem = updates.docAvoem;
+    if (updates.docTecat !== undefined) dbUpdates.doc_tecat = updates.docTecat;
+    if (updates.docGendec !== undefined) dbUpdates.doc_gendec = updates.docGendec;
+    if (updates.docFuelRelease !== undefined) dbUpdates.doc_fuel_release = updates.docFuelRelease;
+    if (updates.aircraftId !== undefined) dbUpdates.aircraft_id = updates.aircraftId;
 
     const { data, error } = await supabase
       .from('flights')

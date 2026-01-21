@@ -37,6 +37,13 @@ export interface Flight {
   companyId: string;
   createdAt: string;
   updatedAt: string;
+  // Documentos operacionais
+  docAvanac?: boolean;
+  docAvoem?: boolean;
+  docTecat?: boolean;
+  docGendec?: boolean;
+  docFuelRelease?: boolean;
+  aircraftId?: string;
 }
 
 // Client Types

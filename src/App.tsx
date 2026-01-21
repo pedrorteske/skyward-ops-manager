@@ -9,12 +9,14 @@ import { ClientsProvider } from "@/contexts/ClientsContext";
 import { FinancialProvider } from "@/contexts/FinancialContext";
 import { GenDecProvider } from "@/contexts/GenDecContext";
 import { ServicesProvider } from "@/contexts/ServicesContext";
+import { AircraftProvider } from "@/contexts/AircraftContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Landing from "./pages/Landing";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import ChartDetail from "./pages/ChartDetail";
 import Flights from "./pages/Flights";
+import Aircraft from "./pages/Aircraft";
 import Clients from "./pages/Clients";
 import Financial from "./pages/Financial";
 import GenDec from "./pages/GenDec";
@@ -31,12 +33,13 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
       <AuthProvider>
-        <FlightsProvider>
-          <ClientsProvider>
-            <FinancialProvider>
-              <ServicesProvider>
-                <GenDecProvider>
-                  <TooltipProvider>
+        <AircraftProvider>
+          <FlightsProvider>
+            <ClientsProvider>
+              <FinancialProvider>
+                <ServicesProvider>
+                  <GenDecProvider>
+                    <TooltipProvider>
                   <Toaster />
                   <Sonner />
                   <Routes>
@@ -67,14 +70,22 @@ const App = () => (
                         </ProtectedRoute>
                       }
                     />
-                    <Route
-                      path="/flights"
-                      element={
-                        <ProtectedRoute>
-                          <Flights />
-                        </ProtectedRoute>
-                      }
-                    />
+                      <Route
+                        path="/flights"
+                        element={
+                          <ProtectedRoute>
+                            <Flights />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/aircraft"
+                        element={
+                          <ProtectedRoute>
+                            <Aircraft />
+                          </ProtectedRoute>
+                        }
+                      />
                     <Route
                       path="/clients"
                       element={
@@ -115,14 +126,15 @@ const App = () => (
                         </ProtectedRoute>
                       }
                     />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                  </TooltipProvider>
-                </GenDecProvider>
-              </ServicesProvider>
-            </FinancialProvider>
-          </ClientsProvider>
-        </FlightsProvider>
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                    </TooltipProvider>
+                  </GenDecProvider>
+                </ServicesProvider>
+              </FinancialProvider>
+            </ClientsProvider>
+          </FlightsProvider>
+        </AircraftProvider>
       </AuthProvider>
     </BrowserRouter>
   </QueryClientProvider>
