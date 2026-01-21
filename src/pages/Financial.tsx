@@ -8,12 +8,13 @@ import { FinancialStatusBadge } from '@/components/financial/FinancialStatusBadg
 import { DocumentFormDialog } from '@/components/financial/DocumentFormDialog';
 import { DocumentDetailDialog } from '@/components/financial/DocumentDetailDialog';
 import { FinancialDashboard } from '@/components/financial/dashboard/FinancialDashboard';
+import { ServicesList } from '@/components/financial/services/ServicesList';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { FileText, Receipt, FileCheck, Search, DollarSign, TrendingUp, Clock, LayoutDashboard, FolderOpen } from 'lucide-react';
-import { FinancialDocument, FinancialDocumentType, FinancialDocumentStatus, documentTypeLabels } from '@/types/financial';
+import { FileText, Receipt, FileCheck, Search, LayoutDashboard, FolderOpen, Package } from 'lucide-react';
+import { FinancialDocument, FinancialDocumentType, FinancialDocumentStatus } from '@/types/financial';
 import { ClientPF, ClientPJ, ClientINT } from '@/types/aviation';
 import { cn } from '@/lib/utils';
 
@@ -23,7 +24,7 @@ export default function Financial() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<FinancialDocumentStatus | 'all'>('all');
   const [activeTab, setActiveTab] = useState<FinancialDocumentType | 'all'>('all');
-  const [mainView, setMainView] = useState<'dashboard' | 'documents'>('dashboard');
+  const [mainView, setMainView] = useState<'dashboard' | 'documents' | 'services'>('dashboard');
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
   const [formDocumentType, setFormDocumentType] = useState<FinancialDocumentType>('quotation');
   const [selectedDocument, setSelectedDocument] = useState<FinancialDocument | null>(null);
@@ -131,10 +132,25 @@ export default function Financial() {
           <FolderOpen className="w-4 h-4" />
           Documentos
         </button>
+        <button
+          onClick={() => setMainView('services')}
+          className={cn(
+            'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all',
+            mainView === 'services'
+              ? 'bg-primary text-primary-foreground shadow-md'
+              : 'bg-muted hover:bg-muted/80 text-muted-foreground'
+          )}
+        >
+          <Package className="w-4 h-4" />
+          Serviços
+        </button>
       </div>
 
       {/* Dashboard View */}
       {mainView === 'dashboard' && <FinancialDashboard />}
+
+      {/* Services View */}
+      {mainView === 'services' && <ServicesList />}
 
       {/* Documents View */}
       {mainView === 'documents' && (
