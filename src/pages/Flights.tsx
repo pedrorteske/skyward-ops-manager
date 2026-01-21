@@ -390,6 +390,114 @@ export default function Flights() {
                   rows={3}
                 />
               </div>
+
+              {/* Operational Documents Section */}
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center gap-2">
+                  <Label className="text-base font-semibold">Documentação Operacional</Label>
+                  {newFlightLinkedAircraft && (
+                    <Badge variant="secondary" className="text-xs">
+                      <Info className="w-3 h-3 mr-1" />
+                      Baseado em {newFlightLinkedAircraft}
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Marque os documentos já disponíveis para este voo
+                </p>
+                
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 p-4 bg-muted/50 rounded-lg">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="doc-avanac"
+                      checked={formData.docAvanac}
+                      onCheckedChange={(checked) => setFormData({...formData, docAvanac: checked === true})}
+                    />
+                    <Label 
+                      htmlFor="doc-avanac" 
+                      className={cn(
+                        "text-sm font-medium cursor-pointer",
+                        formData.docAvanac ? "text-success" : "text-muted-foreground"
+                      )}
+                    >
+                      {formData.docAvanac ? <Check className="w-3 h-3 inline mr-1" /> : <X className="w-3 h-3 inline mr-1 opacity-50" />}
+                      AVANAC
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="doc-avoem"
+                      checked={formData.docAvoem}
+                      onCheckedChange={(checked) => setFormData({...formData, docAvoem: checked === true})}
+                    />
+                    <Label 
+                      htmlFor="doc-avoem" 
+                      className={cn(
+                        "text-sm font-medium cursor-pointer",
+                        formData.docAvoem ? "text-success" : "text-muted-foreground"
+                      )}
+                    >
+                      {formData.docAvoem ? <Check className="w-3 h-3 inline mr-1" /> : <X className="w-3 h-3 inline mr-1 opacity-50" />}
+                      AVOEM
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="doc-tecat"
+                      checked={formData.docTecat}
+                      onCheckedChange={(checked) => setFormData({...formData, docTecat: checked === true})}
+                    />
+                    <Label 
+                      htmlFor="doc-tecat" 
+                      className={cn(
+                        "text-sm font-medium cursor-pointer",
+                        formData.docTecat ? "text-success" : "text-muted-foreground"
+                      )}
+                    >
+                      {formData.docTecat ? <Check className="w-3 h-3 inline mr-1" /> : <X className="w-3 h-3 inline mr-1 opacity-50" />}
+                      TECAT
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="doc-gendec"
+                      checked={formData.docGendec}
+                      onCheckedChange={(checked) => setFormData({...formData, docGendec: checked === true})}
+                    />
+                    <Label 
+                      htmlFor="doc-gendec" 
+                      className={cn(
+                        "text-sm font-medium cursor-pointer",
+                        formData.docGendec ? "text-success" : "text-muted-foreground"
+                      )}
+                    >
+                      {formData.docGendec ? <Check className="w-3 h-3 inline mr-1" /> : <X className="w-3 h-3 inline mr-1 opacity-50" />}
+                      GENDEC
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="doc-fuel"
+                      checked={formData.docFuelRelease}
+                      onCheckedChange={(checked) => setFormData({...formData, docFuelRelease: checked === true})}
+                    />
+                    <Label 
+                      htmlFor="doc-fuel" 
+                      className={cn(
+                        "text-sm font-medium cursor-pointer",
+                        formData.docFuelRelease ? "text-success" : "text-muted-foreground"
+                      )}
+                    >
+                      {formData.docFuelRelease ? <Check className="w-3 h-3 inline mr-1" /> : <X className="w-3 h-3 inline mr-1 opacity-50" />}
+                      FUEL RELEASE
+                    </Label>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="flex justify-end gap-2">
@@ -549,6 +657,58 @@ export default function Flights() {
                   </div>
                 )}
 
+                {/* Operational Documents Status */}
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground font-medium">Documentação Operacional</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    <div className={cn(
+                      "flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium",
+                      selectedFlight.docAvanac 
+                        ? "bg-success/10 text-success" 
+                        : "bg-muted text-muted-foreground"
+                    )}>
+                      {selectedFlight.docAvanac ? <Check className="w-4 h-4" /> : <X className="w-4 h-4 opacity-50" />}
+                      AVANAC
+                    </div>
+                    <div className={cn(
+                      "flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium",
+                      selectedFlight.docAvoem 
+                        ? "bg-success/10 text-success" 
+                        : "bg-muted text-muted-foreground"
+                    )}>
+                      {selectedFlight.docAvoem ? <Check className="w-4 h-4" /> : <X className="w-4 h-4 opacity-50" />}
+                      AVOEM
+                    </div>
+                    <div className={cn(
+                      "flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium",
+                      selectedFlight.docTecat 
+                        ? "bg-success/10 text-success" 
+                        : "bg-muted text-muted-foreground"
+                    )}>
+                      {selectedFlight.docTecat ? <Check className="w-4 h-4" /> : <X className="w-4 h-4 opacity-50" />}
+                      TECAT
+                    </div>
+                    <div className={cn(
+                      "flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium",
+                      selectedFlight.docGendec 
+                        ? "bg-success/10 text-success" 
+                        : "bg-muted text-muted-foreground"
+                    )}>
+                      {selectedFlight.docGendec ? <Check className="w-4 h-4" /> : <X className="w-4 h-4 opacity-50" />}
+                      GENDEC
+                    </div>
+                    <div className={cn(
+                      "flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium col-span-2 sm:col-span-1",
+                      selectedFlight.docFuelRelease 
+                        ? "bg-success/10 text-success" 
+                        : "bg-muted text-muted-foreground"
+                    )}>
+                      {selectedFlight.docFuelRelease ? <Check className="w-4 h-4" /> : <X className="w-4 h-4 opacity-50" />}
+                      FUEL RELEASE
+                    </div>
+                  </div>
+                </div>
+
                 {/* Edit/Delete Actions */}
                 <div className="flex gap-2 pt-4 border-t">
                   <Button onClick={handleEditClick} className="flex-1 gap-2">
@@ -707,6 +867,111 @@ export default function Flights() {
                     onChange={(e) => setEditFormData({...editFormData, observations: e.target.value})}
                     rows={3}
                   />
+                </div>
+
+                {/* Operational Documents Section */}
+                <div className="space-y-3 pt-2">
+                  <div className="flex items-center gap-2">
+                    <Label className="text-base font-semibold">Documentação Operacional</Label>
+                    {linkedAircraft && (
+                      <Badge variant="secondary" className="text-xs">
+                        <Info className="w-3 h-3 mr-1" />
+                        Baseado em {linkedAircraft}
+                      </Badge>
+                    )}
+                  </div>
+                  
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 p-4 bg-muted/50 rounded-lg">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="edit-doc-avanac"
+                        checked={editFormData.docAvanac}
+                        onCheckedChange={(checked) => setEditFormData({...editFormData, docAvanac: checked === true})}
+                      />
+                      <Label 
+                        htmlFor="edit-doc-avanac" 
+                        className={cn(
+                          "text-sm font-medium cursor-pointer",
+                          editFormData.docAvanac ? "text-success" : "text-muted-foreground"
+                        )}
+                      >
+                        {editFormData.docAvanac ? <Check className="w-3 h-3 inline mr-1" /> : <X className="w-3 h-3 inline mr-1 opacity-50" />}
+                        AVANAC
+                      </Label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="edit-doc-avoem"
+                        checked={editFormData.docAvoem}
+                        onCheckedChange={(checked) => setEditFormData({...editFormData, docAvoem: checked === true})}
+                      />
+                      <Label 
+                        htmlFor="edit-doc-avoem" 
+                        className={cn(
+                          "text-sm font-medium cursor-pointer",
+                          editFormData.docAvoem ? "text-success" : "text-muted-foreground"
+                        )}
+                      >
+                        {editFormData.docAvoem ? <Check className="w-3 h-3 inline mr-1" /> : <X className="w-3 h-3 inline mr-1 opacity-50" />}
+                        AVOEM
+                      </Label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="edit-doc-tecat"
+                        checked={editFormData.docTecat}
+                        onCheckedChange={(checked) => setEditFormData({...editFormData, docTecat: checked === true})}
+                      />
+                      <Label 
+                        htmlFor="edit-doc-tecat" 
+                        className={cn(
+                          "text-sm font-medium cursor-pointer",
+                          editFormData.docTecat ? "text-success" : "text-muted-foreground"
+                        )}
+                      >
+                        {editFormData.docTecat ? <Check className="w-3 h-3 inline mr-1" /> : <X className="w-3 h-3 inline mr-1 opacity-50" />}
+                        TECAT
+                      </Label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="edit-doc-gendec"
+                        checked={editFormData.docGendec}
+                        onCheckedChange={(checked) => setEditFormData({...editFormData, docGendec: checked === true})}
+                      />
+                      <Label 
+                        htmlFor="edit-doc-gendec" 
+                        className={cn(
+                          "text-sm font-medium cursor-pointer",
+                          editFormData.docGendec ? "text-success" : "text-muted-foreground"
+                        )}
+                      >
+                        {editFormData.docGendec ? <Check className="w-3 h-3 inline mr-1" /> : <X className="w-3 h-3 inline mr-1 opacity-50" />}
+                        GENDEC
+                      </Label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="edit-doc-fuel"
+                        checked={editFormData.docFuelRelease}
+                        onCheckedChange={(checked) => setEditFormData({...editFormData, docFuelRelease: checked === true})}
+                      />
+                      <Label 
+                        htmlFor="edit-doc-fuel" 
+                        className={cn(
+                          "text-sm font-medium cursor-pointer",
+                          editFormData.docFuelRelease ? "text-success" : "text-muted-foreground"
+                        )}
+                      >
+                        {editFormData.docFuelRelease ? <Check className="w-3 h-3 inline mr-1" /> : <X className="w-3 h-3 inline mr-1 opacity-50" />}
+                        FUEL RELEASE
+                      </Label>
+                    </div>
+                  </div>
                 </div>
               </div>
 
