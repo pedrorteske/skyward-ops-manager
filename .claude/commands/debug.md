@@ -47,17 +47,17 @@ I can investigate logs, system state, and recent changes to help identify the is
 
 You have access to these key tools:
 
-**Logs** (locations vary by project):
+**Logs** (for this project):
 
-- Application logs (check `logs/`, `tmp/`, or configured log paths)
-- Server logs (stdout/stderr from running processes)
-- Framework-specific logs (Rails logs, Node debug output, etc.)
+- Browser console (F12 → Console tab)
+- Vite dev server output in terminal running `pnpm dev`
+- Supabase logs at https://supabase.com/dashboard
 
-**Database** (if applicable):
+**Database** (Supabase PostgreSQL):
 
-- Check database connectivity
-- Query recent data for anomalies
-- Verify migrations are up to date
+- Check Supabase dashboard for query logs and errors
+- Verify RLS policies are configured correctly
+- Check migrations in `supabase/migrations/`
 
 **Git State**:
 
@@ -66,8 +66,8 @@ You have access to these key tools:
 
 **Process Status**:
 
-- Check if services are running: `ps aux | grep [service]`
-- Check ports: `lsof -i :[port]`
+- Check if dev server is running: `lsof -i :8080`
+- Verify Supabase connection in `.env` file
 
 ## Process Steps
 

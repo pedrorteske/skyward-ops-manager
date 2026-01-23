@@ -44,7 +44,7 @@ If you encounter a mismatch:
 
 After implementing a phase:
 
-- Run the success criteria checks (usually `make check test` covers everything)
+- Run the success criteria checks (`pnpm build && pnpm lint`)
 - Fix any issues before proceeding
 - Update your progress in both the plan and your todos
 - Check off completed items in the plan file itself using Edit

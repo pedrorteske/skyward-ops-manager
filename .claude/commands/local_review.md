@@ -93,8 +93,8 @@ git fetch USERNAME
 git worktree add -b BRANCH_NAME ~/wt/REPO/TICKET_NAME USERNAME/BRANCH_NAME
 
 # Configure environment
-cp .claude/settings.local.json WORKTREE/.claude/
-make -C WORKTREE setup
+cp .env WORKTREE/.env
+cd WORKTREE && pnpm install
 ```
 
 ### Review Phase

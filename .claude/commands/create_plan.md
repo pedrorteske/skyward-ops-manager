@@ -346,6 +346,29 @@ After structure approval:
    - Edge cases that are hard to automate
    - User acceptance criteria
 
+## Project-Specific Patterns
+
+### For New Pages:
+- Add route in `src/App.tsx`
+- Create page component in `src/pages/`
+- Add to `ProtectedRoute` wrapper if authentication required
+
+### For New Features:
+- Create components in `src/components/[feature]/`
+- Add context if state management needed in `src/contexts/`
+- Use existing UI components from `src/components/ui/`
+
+### For Database Changes:
+- Create migration in `supabase/migrations/`
+- Update types in `src/integrations/supabase/types.ts`
+- Add RLS policies for multi-tenancy (filter by company_id)
+
+### Verification Commands:
+```bash
+pnpm build           # Build the project
+pnpm lint            # Run ESLint
+```
+
 ## Sub-task Spawning Best Practices
 
 When spawning research sub-tasks:

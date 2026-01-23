@@ -22,7 +22,7 @@ When invoked:
    git diff HEAD~N..HEAD  # Where N covers implementation commits
 
    # Run comprehensive checks
-   cd $(git rev-parse --show-toplevel) && make check test
+   cd $(git rev-parse --show-toplevel) && pnpm build && pnpm lint
    ```
 
 ## Validation Process
@@ -93,9 +93,8 @@ Create comprehensive validation summary:
 
 ### Automated Verification Results
 
-✓ Build passes: `make build`
-✓ Tests pass: `make test`
-✗ Linting issues: `make lint` (3 warnings)
+✓ Build passes: `pnpm build`
+✗ Linting issues: `pnpm lint` (3 warnings)
 
 ### Code Review Findings
 

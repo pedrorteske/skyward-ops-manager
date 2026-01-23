@@ -24,8 +24,8 @@ git status
 git checkout main  # or develop
 git pull origin main
 
-# Verify tests pass on base branch (adjust command to your project)
-# npm test || echo "❌ Tests failing on base branch - fix before creating worktree"
+# Verify build passes on base branch
+pnpm build || echo "❌ Build failing on base branch - fix before creating worktree"
 ```
 
 **IMPORTANT:** If any of these checks fail, DO NOT proceed. Fix issues first.
@@ -67,14 +67,14 @@ After creating the worktree:
 ```bash
 cd "$WORKTREE_PATH"
 
-# Copy environment files (adjust paths to your project)
-cp ../original-project/.env .env
+# Copy environment files
+cp ../skyward-ops-manager/.env .env
 
-# Install dependencies (adjust to your package manager)
-npm install  # or pnpm install, yarn, etc.
+# Install dependencies
+pnpm install
 
 # Verify setup
-npm test  # or your project's verification command
+pnpm build && pnpm lint
 ```
 
 ### 5. Navigate to Worktree
